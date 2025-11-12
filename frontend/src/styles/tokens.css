@@ -1,0 +1,34 @@
+:root {
+  --color-primary: #D79AA0;
+  --color-primary-600: #B07E83;
+  --color-bg: #FFFDFD;
+  --color-surface: #FFFFFFE6;
+  --color-text: #2B2B2B;
+  --color-muted: #666666;
+  --color-border: #E6E6E6;
+  --color-success: #90C88F;
+  --color-danger: #E47A7A;
+  --focus-ring-color: #1B3C8C;
+  --radius-md: 8px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .1);
+  --fs-sm: .875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 2rem;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  margin: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}

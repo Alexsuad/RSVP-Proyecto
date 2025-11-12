@@ -1,0 +1,5 @@
+{
+  "name": "Romantic Wedding RSVP",
+  "description": "An elegant, modern, and accessible application for guests to RSVP to a wedding and for administrators to manage the guest list. Built with React, TypeScript, and Tailwind CSS.",
+  "requestFramePermissions": []
+}
