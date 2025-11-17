@@ -1,18 +1,280 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale-1.0" />
-    <title>Wedding RSVP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/src/styles/tokens.css">
-    <link rel="stylesheet" href="/src/styles/components.css">
+<!-- ────────────────────────────────────────────────────────────── -->
+<!-- File: public/app/login.html                                  -->
+<!-- Ruta relativa: public/app/login.html                          -->
+<!-- Propósito: Página de acceso para invitados al sistema RSVP.   -->
+<!-- Rol: Valida el código de invitación y el medio de contacto    -->
+<!--      antes de acceder al formulario principal de RSVP.        -->
+<!-- ────────────────────────────────────────────────────────────── -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>RSVP Boda – Acceso invitados</title>
+
+  <!-- --- Sección: Metadatos y hojas de estilo base --- -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/layout.css" />
+  <link rel="stylesheet" href="/assets/css/forms.css" />
+  <link rel="stylesheet" href="/assets/css/login.css" />
 </head>
-  <body>
-    <div id="root" data-page="login"></div>
-    <script type="module" src="/src/index.tsx"></script>
-  </body>
+<body>
+  <!-- --- Sección: Cabecera del sitio (hero header) --- -->
+  <header class="hero-header">
+    <div class="hero-header__content">
+      <h1 class="hero-header__title">Daniela & Cristian</h1>
+      <p class="hero-header__subtitle">Una fecha, un lugar, un amor eterno. Solo falta tu presencia.</p>
+    </div>
+    <!-- --- Sección: Selector de Idioma --- -->
+    <div class="lang-switcher">
+      <button class="lang-switcher__btn" data-lang="es" title="Español">🇪🇸</button>
+      <button class="lang-switcher__btn" data-lang="en" title="English">🇬🇧</button>
+      <button class="lang-switcher__btn" data-lang="ro" title="Română">🇷🇴</button>
+    </div>
+  </header>
+
+  <!-- --- Sección: Contenido principal (formulario de acceso) --- -->
+  <main class="site-main">
+    <div class="container">
+      <section class="auth-card">
+        <header class="auth-card__header">
+          <h2 class="auth-card__title">Confirmar asistencia</h2>
+          <p class="auth-card__subtitle">
+            Qué alegría que estés aquí. Ingresa los datos de tu invitación para continuar.
+          </p>
+        </header>
+
+        <!-- --- Sección: Área de mensajes generales del formulario --- -->
+        <div id="form-message" class="form-message" hidden></div>
+
+        <!-- --- Sección: Formulario de login de invitado --- -->
+        <form id="login-form" class="auth-card__form" novalidate>
+          <!-- Campo: Código de invitación -->
+          <div class="form-field">
+            <label for="guest_code" class="form-field__label">
+              Código de invitación
+            </label>
+            <input
+              id="guest_code"
+              name="guest_code"
+              type="text"
+              class="form-field__input"
+              autocomplete="off"
+              required
+              minlength="4"
+              maxlength="12"
+              pattern="[A-Za-z0-9]{4,12}"
+              placeholder="Ej: A1B2C3D4"
+            />
+            <small id="guest-code-error" class="field-error" hidden></small>
+          </div>
+
+          <!-- Campo: Email o teléfono -->
+          <div class="form-field">
+            <label for="contact" class="form-field__label">
+              Correo electrónico o teléfono
+            </label>
+            <input
+              id="contact"
+              name="contact"
+              type="text"
+              class="form-field__input"
+              autocomplete="email"
+              required
+              placeholder="Tu correo o tu teléfono"
+            />
+            <small id="contact-error" class="field-error" hidden></small>
+          </div>
+
+          <!-- Área de acciones del formulario -->
+          <div class="form-actions">
+            <button type="submit" id="login-submit" class="btn btn-primary">
+              Acceder
+            </button>
+          </div>
+        </form>
+
+        <!-- --- Sección: Enlaces secundarios (recuperar código / solicitar acceso) --- -->
+        <footer class="auth-card__footer">
+          <a href="/app/recover-code.html" class="auth-card__link">
+            ¿Olvidaste tu código?
+          </a>
+          <span class="auth-card__separator">|</span>
+          <a href="/app/request-access.html" class="auth-card__link">
+            Solicitar acceso por primera vez
+          </a>
+        </footer>
+      </section>
+    </div>
+  </main>
+
+  <!-- --- Sección: Pie de página del proyecto académico --- -->
+  <footer class="site-footer">
+    <div class="container">
+      <small class="site-footer__text">
+        Proyecto académico – Sistema RSVP para bodas
+      </small>
+    </div>
+  </footer>
+
+  <!-- --- Sección: Lógica de validación y envío del formulario de login --- -->
+  <script>
+    // ──────────────────────────────────────────────────────────────
+    // Sección: Referencias a elementos del DOM
+    // ──────────────────────────────────────────────────────────────
+    const loginForm = document.getElementById('login-form');
+    const guestCodeInput = document.getElementById('guest_code');
+    const contactInput = document.getElementById('contact');
+    const guestCodeError = document.getElementById('guest-code-error');
+    const contactError = document.getElementById('contact-error');
+    const formMessage = document.getElementById('form-message');
+    const submitButton = document.getElementById('login-submit');
+
+    // ──────────────────────────────────────────────────────────────
+    // Sección: Utilidades de mensajes y estado visual
+    // ──────────────────────────────────────────────────────────────
+    function clearErrors() {
+      formMessage.hidden = true;
+      formMessage.textContent = '';
+      guestCodeError.hidden = true;
+      guestCodeError.textContent = '';
+      guestCodeInput.classList.remove('form-field__input--error');
+      contactError.hidden = true;
+      contactError.textContent = '';
+      contactInput.classList.remove('form-field__input--error');
+    }
+
+    function showFormError(message) {
+      formMessage.textContent = message;
+      formMessage.classList.remove('form-message--success');
+      formMessage.classList.add('form-message--error');
+      formMessage.hidden = false;
+    }
+    
+    function setLoading(isLoading) {
+      if (isLoading) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Validando...';
+      } else {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Acceder';
+      }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Sección: Validación y normalización de datos
+    // ──────────────────────────────────────────────────────────────
+    function validateGuestCode(code) {
+      const trimmed = code.trim();
+      const pattern = /^[A-Z0-9]{4,12}$/;
+      if (!trimmed) return 'El código de invitación es obligatorio.';
+      if (!pattern.test(trimmed)) return 'El código debe tener entre 4 y 12 caracteres (solo letras mayúsculas y números).';
+      return null;
+    }
+
+    function validateContact(contact) {
+      const trimmed = contact.trim();
+      if (!trimmed) return 'El correo o teléfono es obligatorio.';
+      if (trimmed.includes('@')) {
+        const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+        if (!emailPattern.test(trimmed)) return 'Escribe un correo electrónico válido.';
+      } else {
+        const phonePattern = /^\+?[0-9\s-]{6,15}$/;
+        if (!phonePattern.test(trimmed)) return 'Escribe un número de teléfono válido.';
+      }
+      return null;
+    }
+
+    function sanitizeContact(rawContact) {
+      const trimmed = rawContact.trim();
+      if (trimmed.includes('@')) {
+        return { email: trimmed.toLowerCase(), phone: null };
+      } else {
+        return { email: null, phone: trimmed.replace(/[^0-9+]/g, '') };
+      }
+    }
+
+    function storeToken(token) {
+      try {
+        sessionStorage.setItem('rsvp_token', token);
+      } catch (e) {
+        console.warn('No se pudo guardar el token en sessionStorage:', e);
+      }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Sección: Envío del formulario y comunicación con la API
+    // ──────────────────────────────────────────────────────────────
+    loginForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearErrors();
+
+      const rawGuestCode = guestCodeInput.value.toUpperCase();
+      const rawContact = contactInput.value;
+
+      const guestCodeValidation = validateGuestCode(rawGuestCode);
+      const contactValidation = validateContact(rawContact);
+
+      let hasError = false;
+      if (guestCodeValidation) {
+        guestCodeError.textContent = guestCodeValidation;
+        guestCodeError.hidden = false;
+        guestCodeInput.classList.add('form-field__input--error');
+        hasError = true;
+      }
+      if (contactValidation) {
+        contactError.textContent = contactValidation;
+        contactError.hidden = false;
+        contactInput.classList.add('form-field__input--error');
+        hasError = true;
+      }
+      if (hasError) return;
+
+      const { email, phone } = sanitizeContact(rawContact);
+      const payload = {
+        guest_code: rawGuestCode.trim(),
+        ...(email && { email }),
+        ...(phone && { phone })
+      };
+
+      setLoading(true);
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.access_token) {
+            storeToken(data.access_token);
+          }
+          window.location.href = '/app/rsvp-form.html';
+          return;
+        }
+
+        if (response.status === 401) {
+          showFormError('No hemos encontrado un invitado con esos datos. Revisa el código y el contacto.');
+        } else if (response.status === 429) {
+          showFormError('Has realizado demasiados intentos en poco tiempo. Espera unos minutos e inténtalo de nuevo.');
+        } else {
+          showFormError('Ha ocurrido un error al validar tus datos. Inténtalo de nuevo más tarde.');
+        }
+
+      } catch (error) {
+        console.error(error);
+        showFormError('No se ha podido conectar con el servidor. Revisa tu conexión.');
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
 </html>

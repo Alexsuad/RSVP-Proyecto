@@ -1,0 +1,108 @@
+/* ────────────────────────────────────────────────────────────── */
+/* File: /assets/css/forms.css                                    */
+/* Propósito: Estilos comunes para formularios.                   */
+/* ────────────────────────────────────────────────────────────── */
+
+/* --- Contenedor de un campo de formulario --- */
+.form-field {
+  margin-bottom: 1.25rem;
+}
+
+.form-field__label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.form-field__input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field__input::placeholder {
+  color: var(--color-muted);
+}
+
+/* --- Estado de error en un campo --- */
+.form-field__input--error {
+  border-color: var(--color-error);
+  background-color: var(--color-error-bg);
+}
+
+.field-error {
+  display: block;
+  color: var(--color-error);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* --- Mensaje general del formulario --- */
+.form-message {
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.form-message--error {
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+}
+.form-message--success {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+/* --- Botones --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  transition: background-color 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.btn:disabled {
+  background-color: #E0E0E0;
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+/* --- Accesibilidad: Foco visible --- */
+.form-field__input:focus,
+.form-field__input:focus-visible,
+.btn:focus,
+.btn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+}

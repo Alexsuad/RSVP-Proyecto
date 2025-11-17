@@ -1,18 +1,19 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { AuthProvider } from './contexts/AuthContext';
-import { I18nProvider } from './contexts/I18nContext';
-import PrivateRoute from './components/PrivateRoute';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { I18nProvider } from '@/contexts/I18nContext';
+import PrivateRoute from '@/components/PrivateRoute';
 
 // Page Components
-import LoginPage from './pages/app/LoginPage';
-import RequestAccessPage from './pages/app/RequestAccessPage';
-import RecoverCodePage from './pages/app/RecoverCodePage';
-import RsvpFormPage from './pages/app/RsvpFormPage';
-import ConfirmedPage from './pages/app/ConfirmedPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import AdminEventPage from './pages/admin/AdminEventPage';
-import AdminGuestsPage from './pages/admin/AdminGuestsPage';
+import LoginPage from '@/pages/app/LoginPage';
+import RequestAccessPage from '@/pages/app/RequestAccessPage';
+import RecoverCodePage from '@/pages/app/RecoverCodePage';
+import RsvpFormPage from '@/pages/app/RsvpFormPage';
+import ConfirmedPage from '@/pages/app/ConfirmedPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminEventPage from '@/pages/admin/AdminEventPage';
+import AdminGuestsPage from '@/pages/admin/AdminGuestsPage';
 
 
 // Wrapper for global styles, extracted from the original App.tsx

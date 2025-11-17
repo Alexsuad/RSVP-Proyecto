@@ -1,0 +1,77 @@
+/* ────────────────────────────────────────────────────────────── */
+/* File: /assets/css/login.css                                    */
+/* Propósito: Estilos específicos para la tarjeta de login.       */
+/* ────────────────────────────────────────────────────────────── */
+
+/* --- Tarjeta de Autenticación --- */
+.auth-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem; /* 448px */
+  border: 1px solid var(--color-border);
+  margin: 0 auto; /* Centra la tarjeta si el contenedor es más ancho */
+}
+
+@media (min-width: 640px) {
+  .auth-card {
+    padding: 2.5rem;
+  }
+}
+
+/* --- Cabecera de la tarjeta --- */
+.auth-card__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-card__title {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+}
+
+.auth-card__subtitle {
+  margin-top: 0.5rem;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* --- Formulario dentro de la tarjeta --- */
+.auth-card__form {
+  margin: 0;
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+}
+
+/* --- Pie de página de la tarjeta (enlaces) --- */
+.auth-card__footer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.5;
+}
+
+.auth-card__link {
+  color: var(--color-text);
+  text-decoration: none;
+  text-align: center;
+}
+
+.auth-card__link:hover {
+  text-decoration: underline;
+}
+
+.auth-card__separator {
+  color: var(--color-border);
+}

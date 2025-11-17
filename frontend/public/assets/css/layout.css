@@ -1,0 +1,132 @@
+/* -------------------------------------------------------------------------
+File: public/assets/css/layout.css
+   Ruta relativa: public/assets/css/layout.css
+   Propósito: Definir la estructura general de las páginas públicas
+              (contenedor, cabecera tipo hero, contenido principal y pie).
+   Rol: Hoja de estilos compartida que maquetan las vistas del sistema
+        RSVP, incluyendo el hero de portada y el selector de idioma. 
+------------------------------------------------------------------------------*/
+
+/* --- Contenedor principal para centrar el contenido --- */
+.container {
+  width: 100%;                /* Ocupa todo el ancho disponible */
+  max-width: 1100px;          /* Limita el ancho máximo del contenido */
+  margin-left: auto;          /* Centra horizontalmente (izquierda) */
+  margin-right: auto;         /* Centra horizontalmente (derecha) */
+  padding-left: 1rem;         /* Espaciado interno a la izquierda */
+  padding-right: 1rem;        /* Espaciado interno a la derecha */
+}
+
+/* --- Estructura base del body para ocupar toda la altura visible --- */
+body {
+  display: flex;              /* Permite organizar el layout en columna */
+  flex-direction: column;     /* Ordena header, main y footer en columna */
+  min-height: 100vh;          /* Asegura que la página ocupe toda la ventana */
+}
+
+/* --- Hero Header: cabecera visual con imagen de fondo --- */
+.hero-header {
+  position: relative;         /* Referencia para el overlay ::before */
+  display: grid;              /* Permite centrar el contenido fácilmente */
+  place-items: center;        /* Centra el contenido (X e Y) en el hero */
+  text-align: center;         /* Centra el texto horizontalmente */
+  height: 35vh;               /* Altura proporcional a la ventana */
+  min-height: 300px;          /* Altura mínima para pantallas pequeñas */
+  color: #fff;                /* Texto en blanco sobre fondo oscuro */
+  background-image: url('https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2070&auto=format&fit=crop'); /* Imagen de portada */
+  background-size: cover;     /* La imagen cubre todo el área del hero */
+  background-position: center 45%; /* Ajusta el encuadre vertical de la imagen */
+}
+
+/* --- Superposición oscura para mejorar la legibilidad del texto --- */
+.hero-header::before {
+  content: '';                /* Elemento vacío para crear la capa superpuesta */
+  position: absolute;         /* Cubre toda la zona del hero */
+  top: 0;                     /* Alinea la capa al borde superior */
+  left: 0;                    /* Alinea la capa al borde izquierdo */
+  right: 0;                   /* Alinea la capa al borde derecho */
+  bottom: 0;                  /* Alinea la capa al borde inferior */
+  background-color: rgba(0, 0, 0, 0.45); /* Oscurece la imagen de fondo */
+}
+
+/* --- Contenedor del contenido textual del hero --- */
+.hero-header__content {
+  position: relative;         /* Se coloca por encima del overlay oscuro */
+  z-index: 1;                 /* Garantiza que el texto esté visible */
+  padding: 1rem;              /* Espaciado interno alrededor del texto */
+}
+
+/* --- Título principal del hero (nombres de la pareja) --- */
+.hero-header__title {
+  font-family: var(--font-serif);                 /* Tipografía principal elegante */
+  font-size: clamp(2.8rem, 8vw, 4.5rem);         /* Tamaño de fuente responsivo */
+  line-height: 1.1;                               /* Altura de línea compacta */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);   /* Sombra para mejorar legibilidad */
+  margin: 0;                                      /* Elimina márgenes por defecto */
+  color: #fff;                                    /* Asegura texto blanco en el hero */
+}
+
+/* --- Subtítulo del hero (frase del evento) --- */
+.hero-header__subtitle {
+  font-size: clamp(0.8rem, 2vw, 1rem);           /* Tamaño de texto responsivo */
+  margin-top: 1rem;                               /* Separación respecto al título */
+  text-transform: uppercase;                      /* Convierte el texto a mayúsculas */
+  letter-spacing: 2px;                            /* Espaciado entre letras */
+  font-weight: 400;                               /* Peso de fuente medio */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);   /* Sombra ligera para contraste */
+}
+
+/* --- Language Switcher: selector de idioma de la interfaz --- */
+.lang-switcher {
+  position: absolute;          /* Se posiciona sobre el hero */
+  top: 20rem;                  /* Separa verticalmente el selector del borde superior */
+  right: 1rem;                 /* Alinea el selector al borde derecho */
+  z-index: 2;                  /* Lo sitúa por encima de la imagen y el overlay */
+  display: flex;               /* Muestra los botones en una fila */
+  gap: 0.5rem;                 /* Espacio entre los botones de idioma */
+}
+
+/* --- Botón individual del selector de idioma --- */
+.lang-switcher__btn {
+  background: rgba(255, 255, 255, 0.1);          /* Fondo semitransparente sobre el hero */
+  border: 1px solid rgba(255, 255, 255, 0.2);    /* Borde suave para resaltar el botón */
+  border-radius: 50%;                            /* Forma circular para los botones */
+  width: 50px;                                   /* Ancho fijo del botón */
+  height: 50px;                                  /* Alto fijo del botón */
+  cursor: pointer;                               /* Indica que es interactivo */
+  font-size: 1.2rem;                             /* Tamaño del icono (emoji de bandera) */
+  transition: background-color 0.2s;            /* Suaviza el cambio de color al pasar el ratón */
+  padding: 0;                                    /* Elimina relleno interno */
+  display: grid;                                 /* Centra el contenido en el botón */
+  place-items: center;                           /* Centrado horizontal y vertical */
+  color: #fff;                                   /* Asegura visibilidad de la bandera sobre el fondo */
+}
+
+/* --- Estado hover del botón de idioma --- */
+.lang-switcher__btn:hover {
+  background: rgba(255, 255, 255, 0.2);          /* Aumenta la opacidad al pasar el ratón */
+}
+
+/* --- Estado activo del botón de idioma seleccionado --- */
+.lang-switcher__btn--active {
+  background: rgba(255, 255, 255, 0.25);         /* Fondo ligeramente más intenso */
+  border-color: rgba(255, 255, 255, 0.8);        /* Borde más visible para indicar selección */
+}
+
+/* --- Contenido principal de la página (zona de tarjeta/formulario) --- */
+.site-main {
+  flex-grow: 1;              /* Expande el contenido para ocupar el espacio disponible */
+  padding: 3rem 0;           /* Margen interno superior e inferior del main */
+}
+
+/* --- Pie de página general del sitio --- */
+.site-footer {
+  padding: 2rem 0;           /* Espaciado vertical del footer */
+  text-align: center;        /* Centra el texto del pie de página */
+}
+
+/* --- Texto del pie de página (nota académica del proyecto) --- */
+.site-footer__text {
+  font-size: 0.8rem;         /* Tamaño de texto reducido */
+  color: var(--color-muted); /* Color de texto atenuado (definido en base.css) */
+}

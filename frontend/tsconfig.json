@@ -1,27 +1,16 @@
 {
- "compilerOptions": {
-  "target": "ES2022",
-  "experimentalDecorators": true,
-  "useDefineForClassFields": false,
-  "module": "ESNext",
-  "lib": ["ES2022", "DOM", "DOM.Iterable"],
-  "skipLibCheck": true,
-  "types": ["node"],
-  "moduleResolution": "bundler",
-  "isolatedModules": true,
-  "moduleDetection": "force",
-  "allowJs": true,
-  "jsx": "react-jsx",
-
-  // ⬇️ LÍNEA NUEVA (añadir)
-  "baseUrl": ".",
-
-  // ⬇️ LÍNEA MODIFICADA (paths correcto hacia /src)
-  "paths": {
-    "@/*": ["src/*"]
-  }
-
-    "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["vite/client"]
+  },
+  "include": ["src", "public", "vite.config.*"]
 }

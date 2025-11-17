@@ -1,0 +1,52 @@
+/* ────────────────────────────────────────────────────────────── */
+/* File: public//assets/css/base.css                                     */
+/* Propósito: Reset básico, tipografías y variables de color.     */
+/* ────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Paleta de colores suaves */
+  --color-primary: #2c2c2c; /* Negro suave para texto y botones */
+  --color-primary-hover: #555555;
+  --color-bg: #FDFBF8; /* Beige muy claro para el fondo */
+  --color-surface: #FFFFFF; /* Blanco para la tarjeta */
+  --color-text: #454545;
+  --color-heading: #2c2c2c;
+  --color-muted: #888888;
+  --color-border: #E0E0E0;
+  --color-error: #b92538;
+  --color-error-bg: #fdeeee;
+  --color-success: #28a745;
+  --focus-ring-color: #BEA492;
+
+  /* Radios y Sombras */
+  --radius-md: 8px;
+  --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  /* Tipografía */
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* Reset Básico */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  color: var(--color-heading);
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
