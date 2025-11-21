@@ -1,18 +1,331 @@
+<!--
+  Archivo: public/app/rsvp-form.html
+  Descripción: Formulario principal de confirmación de asistencia (RSVP)
+               para invitados autenticados en el sistema de boda.
+  Notas:
+    - Mantiene la misma estructura visual que login, recover-code y request-access.
+    - La lógica de carga y envío de datos se implementa en assets/js/pages/rsvp-form.js.
+-->
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
+    <!--
+      Bloque: Metadatos y recursos globales
+      - Define codificación, viewport y título de la pestaña.
+      - Carga tipografías y hojas de estilo compartidas entre páginas.
+    -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wedding RSVP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/src/styles/tokens.css">
-    <link rel="stylesheet" href="/src/styles/components.css">
-</head>
-  <body>
-    <div id="root" data-page="rsvp-form"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <title>Confirmar asistencia • Boda Daniela & Cristian</title>
+
+    <!-- Tipografías compartidas (Playfair Display + Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      Hojas de estilo compartidas:
+      - base.css   → reset, tipografía y colores base.
+      - layout.css → estructura general de header, main y footer.
+      - forms.css  → estilos comunes de formularios y tarjetas.
+      - login.css  → estilos específicos reutilizados para tarjetas centradas.
+    -->
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/forms.css" />
+    <link rel="stylesheet" href="/assets/css/login.css" />
+
+    <!-- (Opcional) Ajustes específicos de esta página -->
+    <link rel="stylesheet" href="/assets/css/rsvp-form.css" />
+  </head>
+
+  <body class="site-body">
+    <!--
+      Bloque: Cabecera y héroe
+      - Muestra el nombre de la pareja y el subtítulo fijo del evento.
+      - Mantiene la foto de fondo y el selector de idioma, igual que en otras páginas.
+    -->
+    <!-- Se reutiliza el mismo hero-header que en login.html para mantener coherencia visual -->
+    <header class="hero-header">
+      <div class="hero-header__content">
+        <h1 class="hero-header__title">Daniela &amp; Cristian</h1>
+        <p class="hero-header__subtitle">
+          UNA FECHA, UN LUGAR, UN AMOR ETERNO. SOLO FALTA TU PRESENCIA.
+        </p>
+      </div>
+
+      <!-- Selector de idioma (componente visual; la lógica se aplica desde JS global si procede) -->
+      <div class="lang-switcher">
+        <button class="lang-switcher__btn" data-lang="es" title="Español">🇪🇸</button>
+        <button class="lang-switcher__btn" data-lang="en" title="English">🇬🇧</button>
+        <button class="lang-switcher__btn" data-lang="ro" title="Română">🇷🇴</button>
+      </div>
+    </header>
+
+    <!--
+      Bloque: Contenido principal
+      - Contenedor centrado que aloja la tarjeta del formulario.
+      - Sigue el mismo patrón de tarjeta que login / recover / request.
+    -->
+    <main class="site-main">
+      <section class="section section--rsvp">
+        <div class="section__inner">
+          <!-- Tarjeta principal del formulario RSVP -->
+          <article class="auth-card auth-card--rsvp">
+            <!--
+              Bloque: Cabecera de la tarjeta
+              - Presenta el título principal y un resumen breve del propósito del formulario.
+              - Los elementos con id (guest-greeting, invitation-summary, event-times) están
+                pensados para que rsvp-form.js pueda mostrar información personalizada
+                obtenida de la API (nombre del invitado, tipo de invitación, horarios, etc.).
+            -->
+            <header class="auth-card__header">
+              <h2 id="rsvp-title" class="auth-card__title">
+                Confirmar asistencia
+              </h2>
+              <p class="auth-card__subtitle">
+                Revisa los datos de tu invitación, dinos si podrás asistir y cuántas personas
+                vendrán contigo. También puedes indicarnos alergias o necesidades especiales.
+              </p>
+
+              <div class="auth-card__meta" aria-live="polite">
+                <p class="auth-card__meta-line">
+                  <span id="guest-greeting" class="auth-card__meta-strong">
+                    Hola, invitado. En esta página podrás confirmar tu asistencia.
+                  </span>
+                </p>
+                <p class="auth-card__meta-line">
+                  <span id="invitation-summary">
+                    Tus datos de invitación se cargarán automáticamente a partir de tu código.
+                  </span>
+                </p>
+                <p class="auth-card__meta-line">
+                  <span id="event-times">
+                    Cuando la configuración esté completa, aquí verás los horarios clave de la boda.
+                  </span>
+                </p>
+              </div>
+            </header>
+
+            <!--
+              Bloque: Formulario RSVP
+              - El formulario se completa con datos del invitado autenticado.
+              - El envío se maneja desde assets/js/pages/rsvp-form.js.
+            -->
+            <form id="rsvp-form" class="form" novalidate>
+              <!-- Mensajes globales de error/éxito del formulario -->
+              <div
+                id="form-feedback"
+                class="form-feedback"
+                role="alert"
+                aria-live="polite"
+              ></div>
+
+              <!--
+                Grupo: Selección de asistencia
+                - El invitado indica si asistirá o no al evento.
+                - La lógica interna (mostrar mensajes o simplificar el formulario)
+                  se gestiona en rsvp-form.js.
+              -->
+              <fieldset class="form-group form-group--attending">
+                <legend class="form-group__legend">
+                  ¿Podrás acompañarnos el día de la boda?
+                </legend>
+                <p class="form-group__description">
+                  Selecciona si asistirás o no. Si no puedes venir, igualmente podrás
+                  dejarnos un mensaje para los novios.
+                </p>
+
+                <div class="radio-group">
+                  <label class="radio-option">
+                    <input
+                      type="radio"
+                      name="attending"
+                      value="yes"
+                      required
+                    />
+                    <span> Sí, asistiré </span>
+                  </label>
+
+                  <label class="radio-option">
+                    <input
+                      type="radio"
+                      name="attending"
+                      value="no"
+                      required
+                    />
+                    <span> No podré asistir </span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <p class="form-field__hint">
+                Si eliges "No podré asistir", igualmente podrás dejarnos tus datos de contacto
+                y un mensaje para los novios en los campos de más abajo.
+              </p>
+
+              <!--
+                Grupo: Datos de contacto
+                - Permite revisar/actualizar correo y teléfono del invitado.
+                - Estos datos se envían junto con la respuesta de RSVP.
+              -->
+              <div class="form-field">
+                <label for="email" class="form-field__label">
+                  Correo electrónico
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  class="form-field__input"
+                  placeholder="tu-correo@ejemplo.com"
+                  autocomplete="email"
+                />
+                <p class="form-field__hint">
+                  Puedes dejar tu correo electrónico. Al menos uno de los dos datos de contacto
+                  (correo o teléfono) debe estar relleno para poder avisarte de cambios.
+                </p>
+              </div>
+
+              <div class="form-field">
+                <label for="phone" class="form-field__label">
+                  Teléfono de contacto
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  class="form-field__input"
+                  placeholder="+34 600 123 123"
+                  autocomplete="tel"
+                />
+                <p class="form-field__hint">
+                  Si lo prefieres, puedes dejar solo tu teléfono. Basta con completar
+                  cualquiera de los dos campos (correo o teléfono) para que podamos contactarte.
+                </p>
+              </div>
+
+              <!--
+                Grupo: Acompañantes
+                - El contenedor #companions-container se rellena dinámicamente desde JS,
+                  respetando el máximo de acompañantes permitido por la invitación.
+              -->
+              <section class="form-group form-group--companions">
+                <header class="form-group__header">
+                  <h3 class="form-group__title">Acompañantes</h3>
+                  <p class="form-group__subtitle">
+                    Indica las personas que vendrán contigo. En función de tu invitación,
+                    el sistema limitará el número máximo de acompañantes permitidos.
+                  </p>
+                  <p class="form-group__meta" id="companions-limit-text">
+                    Podrás añadir acompañantes hasta el máximo indicado para tu invitación.
+                  </p>
+                </header>
+
+                <div id="companions-container" class="companions-container">
+                  <!--
+                    Aquí se inyectan, desde rsvp-form.js, los campos de cada acompañante:
+                      - Nombre del acompañante
+                      - Adulto / Niño
+                      - Alergias
+                  -->
+                </div>
+
+                <button
+                  type="button"
+                  id="add-companion-btn"
+                  class="btn btn--ghost btn--full"
+                >
+                  + Añadir acompañante
+                </button>
+              </section>
+
+              <!--
+                Grupo: Alergias y notas
+                - Alergias del invitado principal.
+                - Mensaje abierto para detalles adicionales.
+              -->
+              <div class="form-field">
+                <label for="allergies" class="form-field__label">
+                  Alergias o restricciones alimentarias (titular)
+                </label>
+                <input
+                  id="allergies"
+                  name="allergies"
+                  type="text"
+                  class="form-field__input"
+                  placeholder="Ejemplo: frutos secos, marisco..."
+                />
+                <p class="form-field__hint">
+                  Si lo prefieres, puedes dejarlo vacío o completarlo más adelante.
+                </p>
+              </div>
+
+              <div class="form-field">
+                <label for="notes" class="form-field__label">
+                  Mensaje para los novios
+                </label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  rows="4"
+                  class="form-field__textarea"
+                  placeholder="¿Quieres dejarnos algún mensaje especial o detalle a tener en cuenta?"
+                ></textarea>
+                <p class="form-field__hint">
+                  Puedes escribir un mensaje breve. Por ejemplo, si algún invitado necesita
+                  un tipo de menú especial o si quieres compartir algo importante.
+                </p>
+              </div>
+
+              <!--
+                Grupo: Acciones
+                - Botón principal de envío.
+                - Enlace para volver a la pantalla de login (confirmación de código).
+              -->
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary btn--full">
+                  Enviar confirmación
+                </button>
+              </div>
+
+              <p class="form-secondary-link">
+                <a href="/app/login.html">
+                  Volver a confirmar código de invitación
+                </a>
+              </p>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!--
+      Bloque: Pie de página
+      - Mensaje de proyecto académico.
+    -->
+    <footer class="site-footer">
+      <p class="site-footer__text">
+        Proyecto académico – Sistema RSVP para bodas
+      </p>
+    </footer>
+
+    <!--
+      Bloque: Scripts
+      - Carga el módulo de JavaScript específico de esta página.
+      - En rsvp-form.js se implementan:
+        · Carga inicial de datos del invitado autenticado.
+        · Gestión dinámica de acompañantes.
+        · Envío del formulario a /api/guest/me/rsvp.
+    -->
+    <script type="module" src="/assets/js/pages/rsvp-form.js"></script>
   </body>
 </html>

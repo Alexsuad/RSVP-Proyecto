@@ -1,18 +1,394 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wedding RSVP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/src/styles/tokens.css">
-    <link rel="stylesheet" href="/src/styles/components.css">
+<!-- ────────────────────────────────────────────────────────────── -->
+<!-- File: public/app/request-access.html                          -->
+<!-- Ruta relativa: public/app/request-access.html                 -->
+<!-- Propósito: Página para que un invitado solicite acceso por    -->
+<!--            primera vez al sistema RSVP de la boda.            -->
+<!-- Rol: Recoge datos básicos de identificación y contacto, los   -->
+<!--      valida en el navegador y los envía a la API              -->
+<!--      /api/request-access para revisión manual.                -->
+<!-- ────────────────────────────────────────────────────────────── -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>RSVP Boda – Solicitar acceso</title>
+
+  <!-- --- Sección: Metadatos y hojas de estilo base --- -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/layout.css" />
+  <link rel="stylesheet" href="/assets/css/forms.css" />
+  <!-- Reutilizamos login.css para mantener el mismo estilo de tarjeta -->
+  <link rel="stylesheet" href="/assets/css/login.css" />
 </head>
-  <body>
-    <div id="root" data-page="request-access"></div>
-    <script type="module" src="/src/index.tsx"></script>
-  </body>
+<body>
+  <!-- --- Sección: Cabecera tipo hero con selector de idioma --- -->
+  <header class="hero-header">
+    <div class="hero-header__content">
+      <h1 class="hero-header__title">Daniela &amp; Cristian</h1>
+      <p class="hero-header__subtitle">
+        Una fecha, un lugar, un amor eterno. Solo falta tu presencia.
+      </p>
+    </div>
+    <!-- --- Sección: Selector de idioma (visual, sin lógica aún) --- -->
+    <div class="lang-switcher">
+      <button class="lang-switcher__btn" data-lang="es" title="Español">🇪🇸</button>
+      <button class="lang-switcher__btn" data-lang="en" title="English">🇬🇧</button>
+      <button class="lang-switcher__btn" data-lang="ro" title="Română">🇷🇴</button>
+    </div>
+  </header>
+
+  <!-- --- Sección: Contenido principal (tarjeta de solicitud) --- -->
+  <main class="site-main">
+    <div class="container">
+      <section class="auth-card">
+        <header class="auth-card__header">
+          <h2 class="auth-card__title">Solicitar acceso</h2>
+          <p class="auth-card__subtitle">
+            Si crees que deberías estar en la lista de invitados, envíanos tus datos
+            y revisaremos tu caso. Te responderemos por correo si todo está correcto.
+          </p>
+        </header>
+
+        <!-- --- Sección: Mensaje general (éxito / error) --- -->
+        <div id="request-message" class="form-message" hidden></div>
+
+        <!-- --- Sección: Formulario de solicitud de acceso --- -->
+        <form id="request-access-form" class="form" novalidate>
+          <!-- Campo: Nombre completo -->
+          <div class="form-field">
+            <label class="form-field__label" for="full_name">
+              Nombre completo
+            </label>
+            <input
+              id="full_name"
+              name="full_name"
+              type="text"
+              class="form-field__input"
+              autocomplete="name"
+              required
+              minlength="3"
+              maxlength="80"
+              placeholder="Escribe tu nombre y apellidos como en la invitación"
+            />
+            <small id="full-name-error" class="form-field__error" hidden></small>
+          </div>
+
+          <!-- Campo: Últimos 4 dígitos del teléfono -->
+          <div class="form-field">
+            <label class="form-field__label" for="phone_last4">
+              Últimos 4 dígitos de tu teléfono
+            </label>
+            <input
+              id="phone_last4"
+              name="phone_last4"
+              type="tel"
+              class="form-field__input"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              required
+              placeholder="Ejemplo: 1234"
+            />
+            <small id="phone-last4-error" class="form-field__error" hidden></small>
+          </div>
+
+          <!-- Campo: Correo electrónico -->
+          <div class="form-field">
+            <label class="form-field__label" for="email">
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              class="form-field__input"
+              autocomplete="email"
+              required
+              placeholder="tucorreo@ejemplo.com"
+            />
+            <small id="email-error" class="form-field__error" hidden></small>
+          </div>
+
+          <!-- Campo: Consentimiento de uso de datos -->
+          <div class="form-field">
+            <div class="checkbox-group">
+              <input
+                id="consent"
+                name="consent"
+                type="checkbox"
+                class="checkbox"
+              />
+              <label for="consent" class="checkbox-group__label">
+                Acepto que mis datos se utilicen para comprobar si estoy en la
+                lista de invitados y para contactarme sobre la boda.
+              </label>
+            </div>
+            <small id="consent-error" class="form-field__error" hidden></small>
+          </div>
+
+          <!-- Botón de envío -->
+          <div class="form-actions">
+            <button
+              id="request-submit"
+              type="submit"
+              class="btn btn--primary btn--full"
+            >
+              Enviar solicitud
+            </button>
+          </div>
+        </form>
+
+        <!-- --- Sección: Enlace de vuelta al login --- -->
+        <footer class="auth-card__footer">
+          <a href="/app/login.html" class="auth-card__link">
+            Volver a confirmar asistencia
+          </a>
+        </footer>
+      </section>
+    </div>
+  </main>
+
+  <!-- --- Sección: Pie de página del proyecto académico --- -->
+  <footer class="site-footer">
+    <div class="container">
+      <small class="site-footer__text">
+        Proyecto académico – Sistema RSVP para bodas
+      </small>
+    </div>
+  </footer>
+
+  <!-- --- Sección: Lógica de validación y envío de la solicitud --- -->
+  <script>
+    // ------------------------------------------------------------
+    // Sección: Configuración básica de la API
+    // Descripción: Define la URL base del backend para las llamadas
+    //              desde este formulario HTML estático.
+    // ------------------------------------------------------------
+    const API_BASE_URL = 'http://127.0.0.1:8000';
+
+    // ------------------------------------------------------------
+    // Sección: Referencias a elementos del DOM
+    // Descripción: Obtiene los nodos necesarios para gestionar el
+    //              formulario de solicitud de acceso.
+    // ------------------------------------------------------------
+    const requestForm = document.getElementById('request-access-form');
+    const fullNameInput = document.getElementById('full_name');
+    const phoneLast4Input = document.getElementById('phone_last4');
+    const emailInput = document.getElementById('email');
+    const consentInput = document.getElementById('consent');
+
+    const requestMessage = document.getElementById('request-message');
+    const fullNameError = document.getElementById('full-name-error');
+    const phoneLast4Error = document.getElementById('phone-last4-error');
+    const emailError = document.getElementById('email-error');
+    const consentError = document.getElementById('consent-error');
+
+    const submitButton = document.getElementById('request-submit');
+
+    // ------------------------------------------------------------
+    // Sección: Utilidades de estado visual y mensajes
+    // Descripción: Limpia errores, muestra mensajes de éxito o
+    //              error y gestiona el estado de carga del botón.
+    // ------------------------------------------------------------
+    function clearFieldError(errorElement, inputElement) {
+      if (!errorElement || !inputElement) return;
+      errorElement.hidden = true;
+      errorElement.textContent = '';
+      inputElement.classList.remove('form-field__input--error');
+    }
+
+    function setFieldError(errorElement, inputElement, message) {
+      if (!errorElement || !inputElement) return;
+      errorElement.textContent = message;
+      errorElement.hidden = false;
+      inputElement.classList.add('form-field__input--error');
+    }
+
+    function clearAllErrors() {
+      clearFieldError(fullNameError, fullNameInput);
+      clearFieldError(phoneLast4Error, phoneLast4Input);
+      clearFieldError(emailError, emailInput);
+      if (consentError) {
+        consentError.hidden = true;
+        consentError.textContent = '';
+      }
+      if (requestMessage) {
+        requestMessage.hidden = true;
+        requestMessage.textContent = '';
+        requestMessage.classList.remove('form-message--error', 'form-message--success');
+      }
+    }
+
+    function showFormError(message) {
+      if (!requestMessage) return;
+      requestMessage.textContent = message;
+      requestMessage.classList.remove('form-message--success');
+      requestMessage.classList.add('form-message--error');
+      requestMessage.hidden = false;
+    }
+
+    function showFormSuccess(message) {
+      if (!requestMessage) return;
+      requestMessage.textContent = message;
+      requestMessage.classList.remove('form-message--error');
+      requestMessage.classList.add('form-message--success');
+      requestMessage.hidden = false;
+    }
+
+    function setLoading(isLoading) {
+      if (!submitButton) return;
+      submitButton.disabled = isLoading;
+      submitButton.textContent = isLoading ? 'Enviando…' : 'Enviar solicitud';
+    }
+
+    // ------------------------------------------------------------
+    // Sección: Funciones de validación de campos
+    // Descripción: Replica en JS plano la lógica básica de
+    //              validación de nombre, teléfono y correo.
+    // ------------------------------------------------------------
+    function validateFullName(value) {
+      const trimmed = (value || '').trim();
+      if (!trimmed) {
+        return 'El nombre completo es obligatorio.';
+      }
+      if (trimmed.length < 3) {
+        return 'El nombre debe tener al menos 3 caracteres.';
+      }
+      if (trimmed.length > 80) {
+        return 'El nombre no puede superar los 80 caracteres.';
+      }
+      return null; // válido
+    }
+
+    function validatePhoneLast4(value) {
+      const trimmed = (value || '').trim();
+      const pattern = /^[0-9]{4}$/;
+      if (!trimmed) {
+        return 'Los últimos 4 dígitos del teléfono son obligatorios.';
+      }
+      if (!pattern.test(trimmed)) {
+        return 'Escribe exactamente los 4 últimos dígitos de tu teléfono.';
+      }
+      return null; // válido
+    }
+
+    function validateEmail(value) {
+      const trimmed = (value || '').trim();
+      if (!trimmed) {
+        return 'El correo electrónico es obligatorio.';
+      }
+      const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+      if (!emailPattern.test(trimmed)) {
+        return 'Escribe un correo electrónico válido.';
+      }
+      return null; // válido
+    }
+
+    function validateConsent(checked) {
+      if (!checked) {
+        return 'Debes aceptar el uso de tus datos para continuar.';
+      }
+      return null;
+    }
+
+    // ------------------------------------------------------------
+    // Sección: Envío del formulario y comunicación con la API
+    // Descripción: Valida los campos, construye el payload y
+    //              envía la solicitud a /api/request-access.
+    // ------------------------------------------------------------
+    if (requestForm) {
+      requestForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        clearAllErrors();
+
+        const fullNameValue = fullNameInput.value;
+        const phoneLast4Value = phoneLast4Input.value;
+        const emailValue = emailInput.value;
+        const consentChecked = consentInput.checked;
+
+        let hasError = false;
+
+        const fullNameValidation = validateFullName(fullNameValue);
+        if (fullNameValidation) {
+          setFieldError(fullNameError, fullNameInput, fullNameValidation);
+          hasError = true;
+        }
+
+        const phoneLast4Validation = validatePhoneLast4(phoneLast4Value);
+        if (phoneLast4Validation) {
+          setFieldError(phoneLast4Error, phoneLast4Input, phoneLast4Validation);
+          hasError = true;
+        }
+
+        const emailValidation = validateEmail(emailValue);
+        if (emailValidation) {
+          setFieldError(emailError, emailInput, emailValidation);
+          hasError = true;
+        }
+
+        const consentValidation = validateConsent(consentChecked);
+        if (consentValidation) {
+          if (consentError) {
+            consentError.textContent = consentValidation;
+            consentError.hidden = false;
+          }
+          hasError = true;
+        }
+
+        if (hasError) {
+          // Si hay errores de validación, no se llama a la API
+          return;
+        }
+
+        const payload = {
+          full_name: fullNameValue.trim(),
+          phone_last4: phoneLast4Value.trim(),
+          email: emailValue.trim(),
+          lang: 'es'
+        };
+
+        setLoading(true);
+
+        try {
+          const response = await fetch(API_BASE_URL + '/api/request-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            showFormSuccess(
+              'Hemos recibido tu solicitud. Revisaremos tus datos y te contactaremos si estás en la lista de invitados.'
+            );
+            // Opcional: ocultar el formulario tras el éxito
+            if (requestForm) {
+              requestForm.style.display = 'none';
+            }
+          } else if (response.status === 429) {
+            showFormError(
+              'Has enviado demasiadas solicitudes en poco tiempo. Espera unos minutos e inténtalo de nuevo.'
+            );
+          } else {
+            showFormError(
+              'Ha ocurrido un error al procesar tu solicitud. Inténtalo de nuevo más tarde.'
+            );
+          }
+        } catch (error) {
+          console.error(error);
+          showFormError(
+            'No se ha podido conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
+          );
+        } finally {
+          setLoading(false);
+        }
+      });
+    }
+  </script>
+</body>
 </html>

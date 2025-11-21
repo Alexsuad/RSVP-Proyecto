@@ -75,3 +75,29 @@
 .auth-card__separator {
   color: var(--color-border);
 }
+
+/* -------------------------------------------------------------------------
+   Bloque: Icono de confirmación (ok.html)
+   Descripción: Estilos específicos para el icono de check en la pantalla de
+                confirmación final. Se mantiene la línea visual del resto de
+                tarjetas de autenticación.
+--------------------------------------------------------------------------- */
+
+.ok-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0 2.5rem;
+}
+
+.ok-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--color-success, #27ae60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+}
