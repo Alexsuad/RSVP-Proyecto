@@ -1,2 +1,68 @@
+// frontend/src/types.ts
+// =================================================================================
+// 📦 DEFINICIÓN DE TIPOS (TypeScript Interfaces)
+// ---------------------------------------------------------------------------------
+// - Este archivo actúa como el "contrato" de datos entre el Frontend y el Backend.
+// - Define la forma exacta que deben tener los objetos JSON.
+// - Si el Backend cambia un nombre de campo, TypeScript nos avisará aquí.
+// =================================================================================
 
+// 1. Idiomas soportados por la aplicación (usado en i18n y API)
 export type Lang = 'es' | 'en' | 'ro';
+
+// 2. Estructura de un Acompañante
+// Se usa en dos momentos:
+// A) Al recibir los datos guardados (GET /me)
+// B) Al enviar el formulario (POST /rsvp)
+export interface Companion {
+  name: string;
+  is_child: boolean;       // true = Niño, false = Adulto
+  allergies: string | null; // Puede venir como string "gluten,nuts" o null
+}
+
+// 3. Datos del Invitado (Lo que recibimos con GET /api/guest/me)
+// Representa el estado actual del usuario en la base de datos.
+export interface GuestData {
+  guest_code: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  language: string;
+  max_accomp: number;      // Límite de acompañantes permitidos (Lógica de Negocio)
+  
+  // Estado de confirmación (null = no ha respondido aún)
+  confirmed: boolean | null;
+  
+  // Lógica de invitación (calculada en backend, define qué textos ve el usuario)
+  invited_to_ceremony: boolean;
+  
+  // Datos guardados previamente en la BD
+  allergies: string | null;
+  notes: string | null;
+  companions: Companion[];
+}
+
+// 4. Payload para enviar RSVP (Cuerpo de POST /api/guest/me/rsvp)
+// Es lo que el Frontend le manda al Backend para guardar.
+export interface RsvpPayload {
+  attending: boolean;      // Decisión crítica: Sí o No
+  email: string | null;    // Contacto actualizado
+  phone: string | null;    // Contacto actualizado
+  allergies: string | null;
+  notes: string | null;
+  companions: Companion[]; // Lista de acompañantes final
+}
+
+// 5. Estructura para el importador CSV (Panel de Admin)
+// Define las columnas esperadas al subir el Excel/CSV.
+export interface CsvGuest {
+  guest_code: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  language: string;
+  invited_to_ceremony: boolean;
+  max_accomp: number;
+  relationship: string;
+  side: 'bride' | 'groom';
+}

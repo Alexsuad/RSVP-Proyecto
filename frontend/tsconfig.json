@@ -1,16 +1,45 @@
+// frontend/tsconfig.json
+// =================================================================================
+// ⚙️ CONFIGURACIÓN DE TYPESCRIPT
+// ---------------------------------------------------------------------------------
+// - Este archivo es el "cerebro" que le dice a VS Code cómo entender tu código.
+// - CRÍTICO: Configura "paths" para que el símbolo "@" se traduzca a "src/".
+//   (Esto arregla los errores de "Cannot find module '@/...'").
+// - Define las reglas estrictas para asegurar la calidad del código (Strict Mode).
+// - Incluye los tipos necesarios para que React y Vite funcionen sin errores.
+// =================================================================================
+
 {
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "skipLibCheck": true,
+
+    /* Configuración del Empaquetador (Bundler) */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
     "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Reglas de Calidad (Linting) */
     "strict": true,
-    "skipLibCheck": true,
-    "types": ["vite/client"]
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* 🚨 MAPEO DE RUTAS (Arregla los errores rojos) 🚨 */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    
+    /* Tipos globales necesarios */
+    "types": ["vite/client", "node"]
   },
-  "include": ["src", "public", "vite.config.*"]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

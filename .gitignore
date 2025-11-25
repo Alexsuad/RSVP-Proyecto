@@ -1,0 +1,95 @@
+# ============================================================
+# 🧩 CONFIGURACIÓN MAESTRA DE IGNORADOS (MONOREPO)
+# ============================================================
+
+# ------------------------------------------------------------
+# 🛑 1. SEGURIDAD Y SECRETOS (¡CRÍTICO!)
+# ------------------------------------------------------------
+.env
+.env.*
+!.env.example
+env/
+.venv/
+venv/
+secrets.*
+*.pem
+*.key
+keys/
+.ssh/
+subir_git_embebido.sh
+
+# Configuración sensible de editores/herramientas
+.vscode/
+.idea/
+.streamlit/secrets.toml
+
+# ------------------------------------------------------------
+# ⚛️ 2. FRONTEND (React / Node.js)
+# ------------------------------------------------------------
+# ¡MUY IMPORTANTE! Nunca subir las dependencias instaladas
+node_modules/
+
+# Carpetas de compilación (lo que genera el build)
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# Logs de errores de instalación
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Cachés de herramientas de frontend
+.eslintcache
+.tsbuildinfo
+
+# ------------------------------------------------------------
+# 🐍 3. BACKEND (Python / FastAPI)
+# ------------------------------------------------------------
+# Bytecode compilado
+__pycache__/
+*.pyc
+
+# Bases de datos locales (SQLite)
+*.db
+*.sqlite3
+wedding.db
+wedding_academico.db
+
+# Cachés de pruebas (pytest)
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Migraciones (si usas versiones auto-generadas que no quieres subir)
+# migrations/versions/  <-- Descomenta solo si NO quieres versionar migraciones
+
+# ------------------------------------------------------------
+# 📂 4. DATOS Y TEMPORALES
+# ------------------------------------------------------------
+# Archivos de datos masivos o exportaciones
+*.csv
+*.zip
+*.tar
+*.gz
+*.bak
+*.sql
+/data/
+backups/
+
+# Logs del sistema
+logs/
+*.log
+tmp/
+temp/
+
+# ------------------------------------------------------------
+# 💻 5. SISTEMA OPERATIVO
+# ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
