@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { guestService } from '@/services/guestService';
 import { validateFullName, validatePhoneLast4, validateEmail } from '@/utils/validators';
-import { Card, Button, FormField, Alert, PageLayout } from '@/components/common';
+import { Card, Button, FormField, Alert } from '@/components/common';
+import PageLayout from '@/components/PageLayout';
 
 const RequestAccessPage: React.FC = () => {
   const [fullName, setFullName] = useState('');

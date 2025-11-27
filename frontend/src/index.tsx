@@ -1,3 +1,11 @@
+// src/index.tsx  // Punto de entrada principal
+//
+// =================================================================================
+// 🚀 ENRUTADOR CLIENT-SIDE SIMPLE (Basado en data-page)
+// ---------------------------------------------------------------------------------
+// Renderiza la página correcta según el atributo data-page del div#root.
+// Incluye Providers globales (Auth, I18n) y manejo de rutas protegidas.
+// =================================================================================
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -15,6 +23,26 @@ import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AdminEventPage from '@/pages/admin/AdminEventPage';
 import AdminGuestsPage from '@/pages/admin/AdminGuestsPage';
 
+
+// =================================================================================
+// 🛡️ Definiciones de Tipos
+// =================================================================================
+
+// Tipos permitidos para el atributo data-page del HTML
+type PageName =
+  | 'login'
+  | 'request-access'
+  | 'recover-code'
+  | 'rsvp-form'
+  | 'confirmed'
+  | 'admin-dashboard'
+  | 'admin-event'
+  | 'admin-guests';
+
+
+// =================================================================================
+// 🎨 Wrapper Visual y Lógica de Montaje
+// =================================================================================
 
 // Wrapper for global styles, extracted from the original App.tsx
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -34,10 +62,12 @@ if (!rootElement) {
     throw new Error("Could not find root element to mount to");
 }
 
-const pageName = rootElement.dataset.page;
+// Leemos data-page con tipado seguro
+const pageName = rootElement.dataset.page as PageName | undefined;
 let PageToRender: React.FC | null = null;
 let usePageWrapper = true;
 
+// Selección de componente según pageName
 switch (pageName) {
     case 'login':
         PageToRender = LoginPage;
@@ -67,10 +97,11 @@ switch (pageName) {
         usePageWrapper = false;
         break;
     default:
+        console.warn(`Unknown or missing data-page "${pageName}", redirecting to login.`);
         if (!window.location.pathname.endsWith('/app/login.html') && window.location.pathname !== '/') {
             window.location.href = '/app/login.html';
         } else {
-             PageToRender = LoginPage;
+            PageToRender = LoginPage;
         }
         break;
 }

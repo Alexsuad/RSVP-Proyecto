@@ -12,7 +12,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { guestService } from '@/services/guestService';
-import { Card, Button, FormField, Alert, PageLayout } from '@/components/common';
+import { Card, Button, FormField, Alert} from '@/components/common';
+import PageLayout from '@/components/PageLayout';
+
 
 // --- LÓGICA DE NEGOCIO (Sanitización) ---
 // Esta función replica lo que hace Python para asegurar que los datos

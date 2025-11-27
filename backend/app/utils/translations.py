@@ -170,6 +170,73 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "date.month.10": "octubre",
         "date.month.11": "noviembre",
         "date.month.12": "diciembre",
+        # --- Email / asuntos ---
+        "email.subject.reminder": "Recordatorio: Confirma tu asistencia a nuestra boda",
+        "email.subject.recovery": "Recuperación de código de invitado",
+        "email.subject.magic_link": "Tu enlace mágico para confirmar asistencia",
+        "email.subject.confirmation": "✅ Confirmación recibida • Boda Jenny & Cristian",
+        "email.magic_link.text_fallback": "Abre este enlace para confirmar tu asistencia: {url}",
+        # --- Emails: recordatorios, recuperación y confirmación (texto plano) ---
+        "email.reminder_both": (
+            "Hola {name},\n\n"
+            "Este es un amable recordatorio para que confirmes tu asistencia a nuestra ceremonia y recepción.\n"
+            "La fecha límite para confirmar es el {deadline}.\n\n"
+            "{cta}\n\n"
+            "¡Esperamos verte allí!\n\n"
+            "Un abrazo,\nJenny & Cristian"
+        ),
+        "email.reminder_reception": (
+            "Hola {name},\n\n"
+            "Este es un amable recordatorio para que confirmes tu asistencia a nuestra recepción.\n"
+            "La fecha límite para confirmar es el {deadline}.\n\n"
+            "{cta}\n\n"
+            "¡Nos encantaría celebrar contigo!\n\n"
+            "Un abrazo,\nJenny & Cristian"
+        ),
+        "email.recovery": (
+            "Hola {name},\n\n"
+            "Has solicitado recuperar tu código de invitado.\n"
+            "Tu código es: {guest_code}\n\n"
+            "Puedes usarlo junto con tu email o teléfono para iniciar sesión en el formulario.\n"
+            "{cta}\n\n"
+            "Si no solicitaste este mensaje, puedes ignorarlo.\n\n"
+            "Un abrazo,\nJenny & Cristian"
+        ),
+        "email.cta_rsvp": "👉 Confirma aquí: {url}",
+        "email.confirmation_plain": (
+            "Hola {name},\n\n"
+            "¡Gracias por confirmar tu asistencia!\n"
+            "Invitación: {invite_scope}\n"
+            "Asistencia: {attending}\n"
+            "{companions}\n"
+            "{allergies}\n"
+            "{notes}\n\n"
+            "Te iremos informando con más detalles conforme se acerque la fecha.\n\n"
+            "Un abrazo,\nJenny & Cristian"
+        ),
+        # --- Emails: código de invitación (guest code) ---
+        "email.subject.guest_code": "Tu código de invitación • Boda Jenny & Cristian",
+        "email.guest_code.greet": "Hola",
+        "email.guest_code.intro": "Tu código de invitación es: {guest_code}",
+        "email.guest_code.instruction": "Usa este código en la página de Iniciar sesión:",
+        "email.guest_code.button_label": "Iniciar sesión",
+        "email.guest_code.login_line": "Login: {url}",
+        # --- Emails: confirmación de RSVP (resumen) ---
+        "email.confirmation.greet": "Hola",
+        "email.confirmation.thanks": "¡Gracias por confirmar tu asistencia!",
+        "email.confirmation.scope.ceremony_reception": "Ceremonia + Recepción",
+        "email.confirmation.scope.reception_only": "Solo Recepción",
+        "email.confirmation.attending.yes": "Asistencia: Sí",
+        "email.confirmation.attending.no": "Asistencia: No",
+        "email.confirmation.attending.unknown": "Asistencia: —",
+        "email.confirmation.label.invitation": "Invitación",
+        "email.confirmation.label.event_date": "Fecha del evento",
+        "email.confirmation.label.guests": "Invitados",
+        "email.confirmation.label.menu": "Menú",
+        "email.confirmation.label.companions": "Acompañantes",
+        "email.confirmation.label.allergies": "Alergias",
+        "email.confirmation.label.notes": "Notas",
+        "email.confirmation.footer.more_details": "Te iremos informando con más detalles conforme se acerque la fecha.",
     },
     # ==================================================
     # Română — ton cald, clar, cu notă festivă
@@ -330,6 +397,73 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "date.month.10": "octombrie",
         "date.month.11": "noiembrie",
         "date.month.12": "decembrie",
+        # --- Email / subiecte ---
+        "email.subject.reminder": "Memento: Confirmă-ți prezența la nunta noastră",
+        "email.subject.recovery": "Recuperare cod invitat",
+        "email.subject.magic_link": "Linkul tău magic pentru confirmare",
+        "email.subject.confirmation": "✅ Confirmare înregistrată • Nunta Jenny & Cristian",
+        "email.magic_link.text_fallback": "Deschide acest link pentru a-ți confirma prezența: {url}",
+        # --- Emails: mementouri, recuperare și confirmare (text simplu) ---
+        "email.reminder_both": (
+            "Bună {name},\n\n"
+            "Acesta este un memento prietenos pentru a confirma participarea la ceremonia și recepție.\n"
+            "Data limită pentru confirmare este {deadline}.\n\n"
+            "{cta}\n\n"
+            "Sperăm să te vedem acolo!\n\n"
+            "Cu drag,\nJenny & Cristian"
+        ),
+        "email.reminder_reception": (
+            "Bună {name},\n\n"
+            "Acesta este un memento prietenos pentru a confirma participarea la recepția noastră.\n"
+            "Data limită pentru confirmare este {deadline}.\n\n"
+            "{cta}\n\n"
+            "Ne-ar plăcea să sărbătorim cu tine!\n\n"
+            "Cu drag,\nJenny & Cristian"
+        ),
+        "email.recovery": (
+            "Bună {name},\n\n"
+            "Ai solicitat recuperarea codului tău de invitat.\n"
+            "Codul tău este: {guest_code}\n\n"
+            "Îl poți folosi împreună cu emailul sau telefonul pentru autentificare în formular.\n"
+            "{cta}\n\n"
+            "Dacă nu ai solicitat acest mesaj, îl poți ignora.\n\n"
+            "Cu drag,\nJenny & Cristian"
+        ),
+        "email.cta_rsvp": "👉 Confirmă aici: {url}",
+        "email.confirmation_plain": (
+            "Bună {name},\n\n"
+            "Îți mulțumim că ai confirmat prezența!\n"
+            "Invitație: {invite_scope}\n"
+            "Participare: {attending}\n"
+            "{companions}\n"
+            "{allergies}\n"
+            "{notes}\n\n"
+            "Te vom ține la curent cu mai multe detalii pe măsură ce se apropie data.\n\n"
+            "Cu drag,\nJenny & Cristian"
+        ),
+        # --- Emails: cod de invitație (guest code) ---
+        "email.subject.guest_code": "Codul tău de invitație • Nunta Jenny & Cristian",
+        "email.guest_code.greet": "Bună",
+        "email.guest_code.intro": "Codul tău de invitație este: {guest_code}",
+        "email.guest_code.instruction": "Folosește acest cod pe pagina de autentificare:",
+        "email.guest_code.button_label": "Conectare",
+        "email.guest_code.login_line": "Autentificare: {url}",
+        # --- Emails: confirmare RSVP (rezumat) ---
+        "email.confirmation.greet": "Bună",
+        "email.confirmation.thanks": "Îți mulțumim că ai confirmat prezența!",
+        "email.confirmation.scope.ceremony_reception": "Ceremonie + Recepție",
+        "email.confirmation.scope.reception_only": "Doar Recepție",
+        "email.confirmation.attending.yes": "Participare: Da",
+        "email.confirmation.attending.no": "Participare: Nu",
+        "email.confirmation.attending.unknown": "Participare: —",
+        "email.confirmation.label.invitation": "Invitație",
+        "email.confirmation.label.event_date": "Data evenimentului",
+        "email.confirmation.label.guests": "Invitați",
+        "email.confirmation.label.menu": "Meniu",
+        "email.confirmation.label.companions": "Însoțitori",
+        "email.confirmation.label.allergies": "Alergii",
+        "email.confirmation.label.notes": "Note",
+        "email.confirmation.footer.more_details": "Te vom ține la curent cu mai multe detalii pe măsură ce se apropie data.",
     },
     # ==================================================
     # English — warm, clear, a touch celebratory
@@ -490,6 +624,73 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "date.month.10": "October",
         "date.month.11": "November",
         "date.month.12": "December",
+        # --- Email / subjects ---
+        "email.subject.reminder": "Reminder: Please RSVP for our wedding",
+        "email.subject.recovery": "Guest code recovery",
+        "email.subject.magic_link": "Your magic link to confirm attendance",
+        "email.subject.confirmation": "✅ RSVP received • Jenny & Cristian Wedding",
+        "email.magic_link.text_fallback": "Open this link to confirm your attendance: {url}",
+        # --- Emails: reminders, recovery and confirmation (plain text) ---
+        "email.reminder_both": (
+            "Hi {name},\n\n"
+            "This is a friendly reminder to confirm your attendance for our ceremony and reception.\n"
+            "The deadline to RSVP is {deadline}.\n\n"
+            "{cta}\n\n"
+            "We hope to see you there!\n\n"
+            "Best,\nJenny & Cristian"
+        ),
+        "email.reminder_reception": (
+            "Hi {name},\n\n"
+            "This is a friendly reminder to confirm your attendance for our reception.\n"
+            "The deadline to RSVP is {deadline}.\n\n"
+            "{cta}\n\n"
+            "We would love to celebrate with you!\n\n"
+            "Best,\nJenny & Cristian"
+        ),
+        "email.recovery": (
+            "Hi {name},\n\n"
+            "You requested to recover your guest code.\n"
+            "Your code is: {guest_code}\n\n"
+            "Use it along with your email or phone to log in to the form.\n"
+            "{cta}\n\n"
+            "If you did not request this, you can ignore this message.\n\n"
+            "Best,\nJenny & Cristian"
+        ),
+        "email.cta_rsvp": "👉 Confirm here: {url}",
+        "email.confirmation_plain": (
+            "Hi {name},\n\n"
+            "Thank you for confirming your attendance!\n"
+            "Invitation: {invite_scope}\n"
+            "Attendance: {attending}\n"
+            "{companions}\n"
+            "{allergies}\n"
+            "{notes}\n\n"
+            "We will keep you updated with more details as the date approaches.\n\n"
+            "Best,\nJenny & Cristian"
+        ),
+        # --- Emails: invitation code (guest code) ---
+        "email.subject.guest_code": "Your invitation code • Jenny & Cristian Wedding",
+        "email.guest_code.greet": "Hi",
+        "email.guest_code.intro": "Your invitation code is: {guest_code}",
+        "email.guest_code.instruction": "Use this code on the login page:",
+        "email.guest_code.button_label": "Log in",
+        "email.guest_code.login_line": "Login: {url}",
+        # --- Emails: RSVP confirmation (summary) ---
+        "email.confirmation.greet": "Hi",
+        "email.confirmation.thanks": "Thank you for confirming your attendance!",
+        "email.confirmation.scope.ceremony_reception": "Ceremony + Reception",
+        "email.confirmation.scope.reception_only": "Reception only",
+        "email.confirmation.attending.yes": "Attending: Yes",
+        "email.confirmation.attending.no": "Attending: No",
+        "email.confirmation.attending.unknown": "Attending: —",
+        "email.confirmation.label.invitation": "Invitation",
+        "email.confirmation.label.event_date": "Event date",
+        "email.confirmation.label.guests": "Guests",
+        "email.confirmation.label.menu": "Menu",
+        "email.confirmation.label.companions": "Companions",
+        "email.confirmation.label.allergies": "Allergies",
+        "email.confirmation.label.notes": "Notes",
+        "email.confirmation.footer.more_details": "We’ll keep you updated with more details as the date approaches.",
     },
 }
 

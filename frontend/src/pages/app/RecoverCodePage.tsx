@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { guestService } from '@/services/guestService';
-import { Card, Button, FormField, Alert, PageLayout } from '@/components/common';
+import { Card, Button, FormField, Alert } from '@/components/common';
+import PageLayout from '@/components/PageLayout';
 
 const RecoverCodePage: React.FC = () => {
   const [email, setEmail] = useState('');
