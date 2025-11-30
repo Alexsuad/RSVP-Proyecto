@@ -1,20 +1,19 @@
 // frontend/src/pages/app/RsvpFormPage.tsx
-// =================================================================================
-// 📝 PÁGINA DE FORMULARIO RSVP
-// ---------------------------------------------------------------------------------
-// - Es el corazón de la interacción del usuario.
-// - Funcionalidades clave:
-//   1. Carga paralela de datos del usuario (GET /me) y opciones (GET /options).
-//   2. Lógica condicional: Si "No asisto", se limpian acompañantes y alergias.
-//   3. Gestión dinámica de acompañantes (Añadir/Quitar) respetando límites.
-//   4. Conversión de datos para la API (String <-> Array).
-// =================================================================================
+// -----------------------------------------------------------------------------
+// Página de formulario RSVP.
+//
+// Este componente React muestra y gestiona el formulario principal de respuesta
+// a la invitación. Carga los datos del invitado y las opciones desde la API,
+// permite indicar asistencia, gestionar acompañantes, registrar alergias y
+// enviar la respuesta al backend respetando la lógica de negocio definida.
+// -----------------------------------------------------------------------------
 
 import React, { useState, useEffect } from 'react';
 import { guestService } from '@/services/guestService';
 import { useI18n } from '@/contexts/I18nContext';
 import { GuestData, RsvpPayload, Companion } from '@/types';
-import { Card, Button, FormField, Alert, PageLayout, Loader } from '@/components/common';
+import { Card, Button, FormField, Alert, Loader } from '@/components/common';
+import PageLayout from '@/components/PageLayout';
 import apiClient from '@/services/apiClient'; // Para llamar a meta/options
 
 // --- HELPERS DE VALIDACIÓN ---
@@ -42,7 +41,18 @@ const RsvpFormPage: React.FC = () => {
     const [notes, setNotes] = useState('');
     const [companions, setCompanions] = useState<Companion[]>([]); // Lista dinámica
 
-    const { t, lang } = useI18n(); // Traducciones
+    const { t } = useI18n(); // Traducciones
+
+    // --- MANEJADOR DE ASISTENCIA ---
+    const handle_attending_change = (value: boolean) => {
+        setAttending(value);
+
+        // Si marca "No asisto", limpiamos acompañantes y alergias
+        if (!value) {
+            setCompanions([]);
+            setAllergies([]);
+        }
+    };
 
     // --- 1. CARGA INICIAL DE DATOS ---
     useEffect(() => {
@@ -73,10 +83,31 @@ const RsvpFormPage: React.FC = () => {
                 setCompanions(guestData.companions || []);
 
             } catch (err: any) {
-                setError(t('form.load_error')); 
+               // Log técnico en consola para depuración (no visible para el usuario)
+                console.error('Error al enviar RSVP', err);
+
+                // Intentamos obtener una clave de mensaje coherente con el backend
+                const status = err?.response?.status ?? err?.status;
+                const messageKeyFromResponse = err?.response?.data?.message_key;
+
+                // Clave por defecto si no logramos identificar nada más específico
+                let key: string = 'form.generic_error';
+
+                if (typeof messageKeyFromResponse === 'string') {
+                    // Caso ideal: el backend envía una message_key ya pensada para i18n
+                    key = messageKeyFromResponse;
+                } else if (status === 409) {
+                    // Conflicto de datos: email o teléfono ya usados por otro invitado
+                    key = 'form.email_or_phone_conflict';
+                } else if (typeof err?.message === 'string' && err.message.includes('.')) {
+                    // Compatibilidad: si nos llega una clave directa (ej. form.error_unauthorized)
+                    key = err.message;
+                }
+
+                setError(t(key));
             } finally {
-                setLoading(false);
-            }
+                setSubmitting(false);
+                }
         };
 
         initData();
@@ -101,6 +132,35 @@ const RsvpFormPage: React.FC = () => {
         const newComps = [...companions];
         newComps[index] = { ...newComps[index], [field]: value };
         setCompanions(newComps);
+    };
+
+    // Helper: alternar alergias de un acompañante concreto
+    const toggle_companion_allergy = (index: number, code: string) => {
+        setCompanions(prev => {
+            const updated = [...prev];
+            const current = updated[index];
+
+            if (!current) {
+                return prev;
+            }
+
+            // Convertimos string "gluten,soy" -> ["gluten", "soy"]
+            const current_list = current.allergies
+                ? current.allergies.split(',').map(s => s.trim()).filter(Boolean)
+                : [];
+
+            const exists = current_list.includes(code);
+            const new_list = exists
+                ? current_list.filter(c => c !== code)
+                : [...current_list, code];
+
+            updated[index] = {
+                ...current,
+                allergies: new_list.length > 0 ? new_list.join(',') : null,
+            };
+
+            return updated;
+        });
     };
 
     // --- 3. GESTIÓN DE ALERGIAS (Checkbox Logic) ---
@@ -170,16 +230,63 @@ const RsvpFormPage: React.FC = () => {
             window.location.href = '/app/confirmed.html';
 
         } catch (err: any) {
-            const msgKey = err.message || 'form.generic_error';
-            setError(msgKey.includes('.') ? t(msgKey) : msgKey);
+            console.error('Error al enviar RSVP', err);
+
+            let key: string | null = null;
+
+            // 1) Si el servicio ya nos manda una clave i18n (ej: "form.contact_invalid_email")
+            if (err?.message && typeof err.message === 'string' && err.message.includes('.')) {
+                key = err.message;
+            }
+            // 2) Si tenemos status HTTP, mapeamos casos típicos
+            else if (err?.response?.status || err?.status) {
+                const status = err.response?.status ?? err.status;
+
+                if (status === 401) {
+                    key = 'form.error_unauthorized';
+                } else if (status === 429) {
+                    key = 'form.error_rate_limit';
+                } else if (status >= 500) {
+                    key = 'form.error_server';
+                }
+            }
+
+            // 3) Fallback genérico
+            if (!key) {
+                key = 'form.generic_error';
+            }
+
+            setError(t(key));
         } finally {
             setSubmitting(false);
         }
     };
 
     // --- RENDERIZADO ---
-    if (loading) return <PageLayout><div className="flex justify-center p-10"><Loader /></div></PageLayout>;
-    if (!guest) return null;
+    if (loading) {
+        return (
+            <PageLayout>
+                <div className="flex justify-center p-10">
+                    <Loader />
+                </div>
+            </PageLayout>
+        );
+    }
+
+    if (!guest) {
+        return (
+            <PageLayout>
+                <Card className="rsvp-card">
+                    <div className="p-6">
+                        <Alert
+                            message={error ?? t('form.generic_error')}
+                            variant="danger"
+                        />
+                    </div>
+                </Card>
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout>
@@ -199,13 +306,23 @@ const RsvpFormPage: React.FC = () => {
                         <legend className="fieldset-legend">{t('form.attending')}</legend>
                         <div className="grid grid-cols-2 gap-4 mt-2">
                             <label className={`radio-card__label ${attending === true ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : ''}`}>
-                                <input type="radio" name="attending" className="hidden" 
-                                    checked={attending === true} onChange={() => setAttending(true)} />
+                                <input 
+                                    type="radio" 
+                                    name="attending" 
+                                    className="hidden" 
+                                    checked={attending === true} 
+                                    onChange={() => handle_attending_change(true)} 
+                                />
                                 {t('form.yes')}
                             </label>
                             <label className={`radio-card__label ${attending === false ? 'bg-gray-600 text-white border-gray-600' : ''}`}>
-                                <input type="radio" name="attending" className="hidden" 
-                                    checked={attending === false} onChange={() => setAttending(false)} />
+                                <input 
+                                    type="radio" 
+                                    name="attending" 
+                                    className="hidden" 
+                                    checked={attending === false} 
+                                    onChange={() => handle_attending_change(false)} 
+                                />
                                 {t('form.no')}
                             </label>
                         </div>
@@ -227,12 +344,12 @@ const RsvpFormPage: React.FC = () => {
                             <FormField 
                                 id="email" label={t('form.field_email')} type="email"
                                 value={email} onChange={e => setEmail(e.target.value)}
-                                placeholder="nombre@email.com"
+                                placeholder={t('form.placeholder_email')}
                             />
                             <FormField 
                                 id="phone" label={t('form.field_phone')} type="tel"
                                 value={phone} onChange={e => setPhone(e.target.value)}
-                                placeholder="+34 600..."
+                                placeholder={t('form.placeholder_phone')}
                             />
                             <p className="text-xs text-gray-500 mt-1">{t('form.contact_caption')}</p>
                         </div>
@@ -274,37 +391,71 @@ const RsvpFormPage: React.FC = () => {
                                     </div>
                                     
                                     <div className="space-y-4 mb-4">
-                                        {companions.map((comp, idx) => (
-                                            <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative animate-fade-in">
-                                                <div className="flex justify-between mb-2">
-                                                    <span className="text-sm font-bold text-gray-500">#{idx + 1}</span>
-                                                    <button type="button" onClick={() => handleRemoveCompanion(idx)} 
-                                                        className="text-red-400 hover:text-red-600 text-sm">
-                                                        ✕ {t('form.cancel')}
-                                                    </button>
-                                                </div>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                    <FormField 
-                                                        id={`comp-name-${idx}`} 
-                                                        label={t('form.field_name')}
-                                                        value={comp.name}
-                                                        onChange={e => updateCompanion(idx, 'name', e.target.value)}
-                                                        placeholder={t('form.placeholder_fullname')}
-                                                    />
-                                                    <div className="form-field">
-                                                        <label className="form-field__label">{t('form.child_or_adult')}</label>
-                                                        <select 
-                                                            className="input w-full"
-                                                            value={comp.is_child ? 'child' : 'adult'}
-                                                            onChange={e => updateCompanion(idx, 'is_child', e.target.value === 'child')}
+                                        {companions.map((comp, idx) => {
+                                            const comp_allergies = comp.allergies
+                                                ? comp.allergies.split(',').map(s => s.trim()).filter(Boolean)
+                                                : [];
+
+                                            return (
+                                                <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative animate-fade-in">
+                                                    <div className="flex justify-between mb-2">
+                                                        <span className="text-sm font-bold text-gray-500">#{idx + 1}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveCompanion(idx)}
+                                                            className="text-red-400 hover:text-red-600 text-sm"
                                                         >
-                                                            <option value="adult">{t('form.adult')}</option>
-                                                            <option value="child">{t('form.child')}</option>
-                                                        </select>
+                                                            ✕ {t('form.cancel')}
+                                                        </button>
                                                     </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        <FormField
+                                                            id={`comp-name-${idx}`}
+                                                            label={t('form.field_name')}
+                                                            value={comp.name}
+                                                            onChange={e => updateCompanion(idx, 'name', e.target.value)}
+                                                            placeholder={t('form.placeholder_fullname')}
+                                                        />
+                                                        <div className="form-field">
+                                                            <label className="form-field__label">{t('form.child_or_adult')}</label>
+                                                            <select
+                                                                className="input w-full"
+                                                                value={comp.is_child ? 'child' : 'adult'}
+                                                                onChange={e => updateCompanion(idx, 'is_child', e.target.value === 'child')}
+                                                            >
+                                                                <option value="adult">{t('form.adult')}</option>
+                                                                <option value="child">{t('form.child')}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Alergias del acompañante */}
+                                                    {metaOptions.allergens.length > 0 && (
+                                                        <div className="mt-4">
+                                                            <p className="text-xs font-semibold text-gray-600 mb-2">
+                                                                {t('form.companion_allergies_label')}
+                                                            </p>
+                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                {metaOptions.allergens.map(code => (
+                                                                    <label key={code} className="flex items-center space-x-2 cursor-pointer">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={comp_allergies.includes(code)}
+                                                                            onChange={() => toggle_companion_allergy(idx, code)}
+                                                                            className="rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                                                                        />
+                                                                        <span className="text-xs text-gray-700">
+                                                                            {t(`options.allergen.${code}`)}
+                                                                        </span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
 
                                     {companions.length < guest.max_accomp && (

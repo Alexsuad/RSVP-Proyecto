@@ -1,7 +1,8 @@
-/* ────────────────────────────────────────────────────────────── */
-/* File: /assets/css/forms.css                                    */
-/* Propósito: Estilos comunes para formularios.                   */
-/* ────────────────────────────────────────────────────────────── */
+/* -------------------------------------------------------------------------- */
+/* File: public/assets/css/forms.css                                          */
+/* Propósito: Estilos comunes y reutilizables para formularios.               */
+/* Rol: Hoja base de formularios usada por páginas como login y RSVP.         */
+/* -------------------------------------------------------------------------- */
 
 /* --- Contenedor de un campo de formulario --- */
 .form-field {
@@ -54,10 +55,12 @@
   font-size: 0.9rem;
   text-align: center;
 }
+
 .form-message--error {
   color: var(--color-error);
   background-color: var(--color-error-bg);
 }
+
 .form-message--success {
   color: #155724;
   background-color: #d4edda;
@@ -105,4 +108,50 @@
   outline: 2px solid transparent;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px var(--focus-ring-color);
+}
+
+/* =========================================================================
+   Ajustes globales de tamaño de formularios
+   Motivo: comentario del tutor "aprovechar mejor el tamaño de la pantalla"
+   Afecta: tarjetas de login y formulario RSVP en escritorio y móvil
+   ========================================================================= */
+
+.form-card,
+.rsvp-card {
+  /* En escritorio: tarjeta más ancha pero sin llegar a pantalla completa */
+  max-width: 52rem;          /* ~832px, antes rondaba las 28–32rem */
+  width: 100%;
+  margin: -3rem auto 3rem auto;
+  padding: 2.5rem 3rem;
+}
+
+/* Versión móvil: tarjeta casi a ancho completo, pero con márgenes respirando */
+@media (max-width: 768px) {
+  .form-card,
+  .rsvp-card {
+    max-width: 100%;
+    margin: -2rem 1rem 2.5rem 1rem;
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+/* =========================================================================
+   Ajustes globales de campos y botones
+   Objetivo: mejorar legibilidad y facilidad de clic/toque
+   ========================================================================= */
+
+/* Campos de texto de formularios (incluye textareas si comparten clase) */
+.form-field__input,
+textarea.form-field__input {
+  min-height: 3rem;          /* Altura mínima cómoda */
+  font-size: 1rem;           /* 16px aprox. */
+  line-height: 1.4;
+}
+
+/* Botones principales de acción (ej. ACCEDER, ENVIAR, GUARDAR) */
+.btn-primary,
+button[type="submit"] {
+  min-height: 3rem;
+  font-size: 1rem;
+  padding-inline: 1.25rem;
 }

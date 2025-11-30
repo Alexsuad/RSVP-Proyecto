@@ -1,0 +1,36 @@
+<!-- ────────────────────────────────────────────────────────────── -->
+<!-- File: public/app/login.html                                  -->
+<!-- Ruta relativa: public/app/login.html                          -->
+<!-- Propósito: Página de acceso para invitados al sistema RSVP.   -->
+<!-- Rol: Valida el código de invitación y el medio de contacto    -->
+<!--      antes de acceder al formulario principal de RSVP.        -->
+<!-- ────────────────────────────────────────────────────────────── -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceso Invitados</title>
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Estilos Globales y Específicos -->
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/forms.css" />
+    <link rel="stylesheet" href="/assets/css/login.css" />
+  </head>
+  <body>
+    <!-- 
+      Punto de montaje de React.
+      data-page="login" le indica a src/index.tsx que debe cargar LoginPage.tsx
+    -->
+    <div id="root" data-page="login"></div>
+    
+    <!-- Carga el motor de React -->
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

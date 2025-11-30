@@ -1,0 +1,66 @@
+<!--
+  Archivo: public/app/rsvp-form.html
+  Descripción: Contenedor HTML para la página de formulario RSVP en React.
+               No contiene la lógica ni el marcado del formulario; solo
+               define el punto de montaje de la aplicación React.
+  Notas:
+    - La interfaz completa se renderiza desde RsvpFormPage.tsx.
+    - El layout general (header, main, footer) lo aporta PageLayout en React.
+    - Este archivo DEBE mantenerse ligero: solo recursos comunes y <div id="root">.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <!--
+      Bloque: Metadatos y recursos globales
+      - Define codificación, viewport y título de la pestaña.
+      - Carga tipografías y hojas de estilo compartidas entre páginas.
+    -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmar asistencia • Boda Daniela &amp; Cristian</title>
+
+    <!-- Tipografías compartidas (Playfair Display + Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      Hojas de estilo compartidas:
+      - base.css   → reset, tipografía y colores base.
+      - layout.css → estructura general del sitio.
+      - forms.css  → estilos comunes de formularios y tarjetas.
+      - login.css  → estilos para tarjetas centradas reutilizados en RSVP.
+      - rsvp-form.css → ajustes visuales específicos de esta página.
+    -->
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/forms.css" />
+    <link rel="stylesheet" href="/assets/css/login.css" />
+    <link rel="stylesheet" href="/assets/css/rsvp-form.css" />
+  </head>
+
+  <body class="site-body">
+    <!--
+      Bloque: Punto de montaje de React
+      - La aplicación React (RsvpFormPage) se monta dentro de este contenedor.
+      - El routing interno se gestiona desde src/main.tsx y la capa de React Router.
+    -->
+    <div id="root"></div>
+
+    <!--
+      Bloque: Script principal de la SPA
+      - Carga la entrada principal de la aplicación React (Vite).
+      - Desde aquí se resuelven todas las rutas, incluido /app/rsvp-form.
+    -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

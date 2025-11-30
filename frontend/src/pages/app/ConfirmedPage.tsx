@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { Card, Button, PageLayout, Loader } from '@/components/common';
+import { Card, Button,Loader } from '@/components/common';
+import PageLayout from '@/components/PageLayout';
 import { guestService } from '@/services/guestService';
 import { GuestData } from '@/types';
 

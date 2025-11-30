@@ -1,3 +1,20 @@
+// frontend/src/i18n/fallback.ts
+// =================================================================================
+// DICCIONARIO FALLBACK DE TEXTOS I18N
+// ---------------------------------------------------------------------------------
+// Este módulo define un conjunto mínimo de textos por defecto (fallback) para los
+// distintos idiomas soportados por la aplicación (es, en, ro).
+//
+// Su objetivo principal es:
+//   - Proporcionar mensajes de reserva cuando el backend no devuelve una traducción.
+//   - Garantizar que las pantallas críticas (login, panel de administración, etc.)
+//     siempre muestren textos legibles aunque falle la carga remota de i18n.
+//
+// IMPORTANTE:
+//   - Estas claves no sustituyen a las traducciones del backend, solo las complementan.
+//   - Deben mantenerse alineadas con las claves usadas en el frontend (t('...')) y,
+//     siempre que sea posible, con el módulo de traducciones del backend.
+// =================================================================================
 
 import type { Lang } from './types';
 
@@ -6,6 +23,9 @@ export const FALLBACK_I18N: Record<Lang, Record<string, string>> = {
   es: {
     "app.title": "Boda RSVP",
     "error.generic": "Ocurrió un error. Intenta de nuevo.",
+    // Claves específicas de la página de login
+    "login.errors_contact_invalid": "Por favor, introduce un correo o teléfono válido.",
+    "login.loading": "Validando datos...",
     "app.loading": "Cargando...",
     // Admin keys (not present in backend translations)
     "ad_title": "Panel de Administración", "ad_nav_dashboard": "Dashboard", "ad_nav_event": "Evento", "ad_nav_guests": "Invitados",
@@ -17,6 +37,9 @@ export const FALLBACK_I18N: Record<Lang, Record<string, string>> = {
   en: {
     "app.title": "Wedding RSVP",
     "error.generic": "Something went wrong. Try again.",
+    // Login-specific keys
+    "login.errors_contact_invalid": "Please enter a valid email address or phone number.",
+    "login.loading": "Checking your details...",
     "app.loading": "Loading...",
     "ad_title": "Admin Panel", "ad_nav_dashboard": "Dashboard", "ad_nav_event": "Event", "ad_nav_guests": "Guests",
     "ad_kpi_confirmed": "Confirmed", "ad_kpi_pending": "Pending", "ad_kpi_no": "Not Attending",
@@ -27,6 +50,9 @@ export const FALLBACK_I18N: Record<Lang, Record<string, string>> = {
   ro: {
     "app.title": "Nuntă RSVP",
     "error.generic": "A apărut o eroare. Încearcă din nou.",
+    // Chei specifice paginii de autentificare (login)
+    "login.errors_contact_invalid": "Te rugăm să introduci un email sau un număr de telefon valid.",
+    "login.loading": "Se verifică datele...",
     "app.loading": "Se încarcă...",
     "ad_title": "Panou de Administrare", "ad_nav_dashboard": "Dashboard", "ad_nav_event": "Eveniment", "ad_nav_guests": "Invitați",
     "ad_kpi_confirmed": "Confirmați", "ad_kpi_pending": "În așteptare", "ad_kpi_no": "Nu participă",

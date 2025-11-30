@@ -1,0 +1,52 @@
+/* -------------------------------------------------------------------------- */
+/* File: public/assets/css/rsvp-form.css                                      */
+/* Propósito: Estilos específicos para la página de formulario RSVP.          */
+/* Rol: Complementa base.css, layout.css y forms.css sin redefinir reglas     */
+/*      globales. Se centra en ajustar la estructura del formulario y la      */
+/*      presentación de los bloques de contenido de RSVP.                     */
+/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   Bloque: Cuerpo del formulario RSVP
+   Descripción:
+   - Ajusta el espaciado vertical entre secciones dentro del formulario.
+   - Solo aplica cuando el contenedor tenga las clases "form-body space-y-8",
+     utilizadas en el componente React RsvpFormPage.
+   ========================================================================== */
+
+.form-body.space-y-8 > * + * {
+  /* Espaciado vertical cómodo entre bloques del formulario */
+  margin-top: 2rem;
+}
+
+/* ==========================================================================
+   Bloque: Fieldset y leyendas del formulario
+   Descripción:
+   - Mejora la presentación de los grupos lógicos del formulario (asistencia,
+     alergias, acompañantes, etc.).
+   - Se limita al contexto de la tarjeta RSVP para evitar efectos no deseados
+     en otros formularios del sitio.
+   ========================================================================== */
+
+.rsvp-card fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 1.5rem 0; /* Separación entre grupos de campos */
+}
+
+.fieldset-legend {
+  display: block;
+  font-size: 1.125rem; /* Tamaño ligeramente mayor que el texto base */
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--color-heading);
+  font-family: var(--font-heading, "Playfair Display", serif);
+}
+
+.fieldset-description {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  max-width: 48rem; /* Mantiene el texto legible en pantallas grandes */
+}
