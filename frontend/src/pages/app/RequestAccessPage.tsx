@@ -158,8 +158,8 @@ const RequestAccessPage: React.FC = () => {
             />
             <FormField
               id="phone_last4"
-              label={t('request.phone_last4')}
-              placeholder={t('request.phone_last4_placeholder')}
+              label={t('request.phone_last4')}  
+              placeholder={t('request.phone_last4_placeholder')} // Usamos el mismo placeholder que en la página de recuperación.
               value={phoneLast4}
               onChange={(e) => setPhoneLast4(e.target.value)}
               maxLength={4}

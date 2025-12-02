@@ -8,7 +8,7 @@
 // - Procesa los errores HTTP para que la UI sepa si es un 401, 429, 500, etc.
 // =================================================================================
 
-import { getToken, clearToken } from '@/utils/auth';
+import { getToken, clearToken } from '@/utils/auth'; // 📝 Utilidades de autenticación
 
 // Configuración de URL: Intenta leer .env, si falla usa localhost:8000 (Backend local)
 const BASE_URL = (import.meta as any).env.VITE_BASE_URL ?? 'http://127.0.0.1:8000';
@@ -63,20 +63,38 @@ async function apiClient<T>(endpoint: string, { body, ...customConfig }: Omit<Re
 
   // Caso: Cualquier otro error (400, 429, 500)
   if (!response.ok) {
-    // Intentamos leer el mensaje de error que envió el backend (JSON)
     const errorData = await response.json().catch(() => ({}));
-    
-    // Creamos un objeto Error enriquecido
-    const error: any = new Error(errorData.message || errorData.detail || 'API Error');
-    
-    //  CLAVE: Guardamos el código de estado (ej: 429) en el error
-    // Esto permite que LoginPage.tsx sepa si mostrar "Datos incorrectos" o "Demasiados intentos"
-    error.status = response.status; 
-    
-    throw error;
+
+  let errorMessage: any =
+    errorData.message !== undefined
+      ? errorData.message
+      : errorData.detail !== undefined
+      ? errorData.detail
+      : 'API Error';
+
+  // Si detail / message viene como array (típico de errores 422 de FastAPI),
+  // convertimos el array en un texto legible.
+  if (Array.isArray(errorMessage)) {
+    errorMessage = errorMessage
+      .map((item: any) => {
+        if (typeof item === 'string') return item;
+        if (item?.msg) return item.msg;
+        return '';
+      })
+      .filter(Boolean)
+      .join(', ');
   }
 
-  // 4. Éxito: Devolver datos limpios
+  // Aseguramos que el mensaje final sea un string
+  if (typeof errorMessage !== 'string') {
+    errorMessage = 'API Error';
+  }
+
+  const error: any = new Error(errorMessage);
+  error.status = response.status;
+  throw error;
+  }
+
   return response.json();
 }
 

@@ -18,8 +18,25 @@ import apiClient from '@/services/apiClient'; // Para llamar a meta/options
 
 // --- HELPERS DE VALIDACIÓN ---
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const normalize_phone_for_frontend = (raw: string): string => {
+    // Eliminamos espacios, guiones, paréntesis y puntos
+    let result = raw.trim().replace(/[\s\-().]/g, '');
+
+    // Si el usuario ha puesto un '+' al inicio (formato E.164),
+    // lo dejamos tal cual.
+    if (result.startsWith('+')) {
+        return result;
+    }
+
+    // Si no empieza por '+', devolvemos el número tal y como queda
+    // tras la limpieza básica. El backend podrá aplicar su normalización.
+    return result;
+};
+
 const isValidPhone = (phone: string) => {
-    const digits = phone.replace(/\D/g, '');
+    const normalized = normalize_phone_for_frontend(phone);
+    const digits = normalized.replace(/\D/g, '');
     return digits.length >= 7 && digits.length <= 15;
 };
 
@@ -45,13 +62,10 @@ const RsvpFormPage: React.FC = () => {
 
     // --- MANEJADOR DE ASISTENCIA ---
     const handle_attending_change = (value: boolean) => {
+        // Solo actualizamos el estado de asistencia.
+        // No limpiamos acompañantes ni alergias aquí para que el usuario
+        // no pierda los datos si cambia de opinión antes de enviar.
         setAttending(value);
-
-        // Si marca "No asisto", limpiamos acompañantes y alergias
-        if (!value) {
-            setCompanions([]);
-            setAllergies([]);
-        }
     };
 
     // --- 1. CARGA INICIAL DE DATOS ---
@@ -183,7 +197,7 @@ const RsvpFormPage: React.FC = () => {
 
         // Validación B: Datos de contacto (limpieza y validación)
         const emailClean = email.trim();
-        const phoneClean = phone.trim().replace(/[\s-]/g, ''); 
+        const phoneClean = normalize_phone_for_frontend(phone);
 
         if (!emailClean && !phoneClean) {
             setError(t('form.contact_required_one'));
@@ -219,7 +233,9 @@ const RsvpFormPage: React.FC = () => {
                 notes: notes.trim() || null,
                 
                 // Si NO asiste, alergias y acompañantes se envían como null/vacío
-                allergies: attending ? (allergies.length > 0 ? allergies.join(',') : null) : null,
+                allergies: attending 
+                    ? (allergies.length > 0 ? allergies.join(',') : null) 
+                    : null,
                 companions: attending ? companions : [] 
             };
 
