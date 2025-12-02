@@ -134,6 +134,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "ok.sending": "Enviando...",
         "ok.resent_ok": "¡Correo de confirmación reenviado!",
         "ok.resent_fail": "No se pudo reenviar el correo.",
+        "ok.no_data": "Por ahora no vemos ninguna confirmación asociada a este enlace. Si ya respondiste, prueba a abrir de nuevo el enlace del correo de invitación.",
         # --- Panel de Invitación (usado en Formulario y Confirmado) ---
         "invite.panel_title": "Tu invitación",
         "invite.scope.full": "Estás invitado/a a la **Ceremonia** y a la **Recepción**.",
@@ -370,6 +371,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "ok.sending": "Se trimite...",
         "ok.resent_ok": "Emailul de confirmare a fost retrimis!",
         "ok.resent_fail": "Emailul nu a putut fi retrimis.",
+        "ok.no_data": "Momentan nu vedem nicio confirmare asociată acestui link. Dacă ai răspuns deja, te rugăm să deschizi din nou linkul din emailul de invitație.",
         # --- Panou Invitație (folosit în Formular și Confirmare) ---
         "invite.panel_title": "Invitația ta",
         "invite.scope.full": "Ești invitat(ă) la **Ceremonie** și la **Recepție**.",
@@ -606,6 +608,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "ok.sending": "Sending...",
         "ok.resent_ok": "Confirmation email resent!",
         "ok.resent_fail": "Could not resend the email.",
+        "ok.no_data": "We can’t see any confirmation linked to this link yet. If you already replied, please try opening the invitation email link again.",
         # --- Invitation Panel (used in Form & Confirmed) ---
         "invite.panel_title": "Your Invitation",
         "invite.scope.full": "You are invited to the **Ceremony** and the **Reception**.",
