@@ -7,20 +7,26 @@
     <title>Wedding RSVP – Confirmación</title>
 
     <!-- Fuentes (igual que el resto de páginas app) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Estilos globales -->
-    <link rel="stylesheet" href="/src/styles/tokens.css" />
-    <link rel="stylesheet" href="/src/styles/components.css" />
-    <!-- Si rsvp-form tiene CSS extra de página, aquí puedes reutilizarlo -->
-    <!-- <link rel="stylesheet" href="/src/styles/pages/rsvp-form.css" /> -->
+    <!-- Estilos globales (mismos que login y rsvp-form) -->
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/forms.css" />
+    <link rel="stylesheet" href="/assets/css/login.css" />
+    <link rel="stylesheet" href="/assets/css/rsvp-form.css" />
   </head>
+
   <body>
+    <!-- Punto de montaje de React para la página de confirmación -->
     <div id="root" data-page="confirmed"></div>
+
+    <!-- Entrada principal de la aplicación React -->
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

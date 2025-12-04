@@ -120,8 +120,12 @@ const RsvpFormPage: React.FC = () => {
 
                 setError(t(key));
             } finally {
+                // Cuando termina la carga inicial (con éxito o con error),
+                // apagamos el estado "loading" para ocultar el loader.
+                setLoading(false);
+                // Y también nos aseguramos de que "submitting" esté apagado.
                 setSubmitting(false);
-                }
+            }
         };
 
         initData();

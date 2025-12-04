@@ -57,7 +57,7 @@ export const guestService = {
       payload.phone = data.phone;
     }
 
-    return apiClient<LoginResponse>('/api/auth/login', {
+    return apiClient<LoginResponse>('/api/login', {
       body: payload,
       method: 'POST',
     });

@@ -188,7 +188,7 @@ const RequestAccessPage: React.FC = () => {
               </label>
             </div>
             {errors.consent && <Alert message={errors.consent} />}
-            <Button type="submit" loading={loading} disabled={loading || !consent}>
+            <Button type="submit" loading={loading} disabled={loading}>
               {t('request.submit')}
             </Button>
           </form>
