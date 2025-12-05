@@ -18,7 +18,7 @@ const AdminLoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     // Constante para validación mock (simulación)
-    const ADMIN_DEMO_KEY = 'ADMIN-DEMO';
+
 
     // -------------------------------------------------------------------------
     // Lógica de Negocio
@@ -30,12 +30,13 @@ const AdminLoginPage: React.FC = () => {
         setError(null);
         setLoading(true);
 
-        // Simulamos un retraso de red para dar feedback visual de carga
+        // Simulamos un leve retraso para UX
         setTimeout(() => {
-            // Validación directa contra la constante (Mock)
-            if (accessKey === ADMIN_DEMO_KEY) {
+            // Validación Client-Side contra variable de entorno
+            const validKey = import.meta.env.VITE_ADMIN_KEY || '';
+            
+            if (accessKey === validKey) {
                 console.log("Login admin correcto, redirigiendo al panel");
-                // Redirección forzada al dashboard tras éxito
                 window.location.href = '/admin/dashboard.html';
             } else {
                 setError("La clave de acceso es incorrecta.");

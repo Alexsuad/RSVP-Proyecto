@@ -1,6 +1,18 @@
 
 import apiClient from './apiClient';
-import { CsvGuest } from '@/types';
+// import { CsvGuest } from '@/types'; // Archivo no encontrado, definimos localmente
+
+export interface CsvGuest {
+    full_name: string;
+    email?: string;
+    phone?: string;
+    language: 'es' | 'en' | 'ro';
+    max_accomp: number;
+    invite_type: 'full' | 'ceremony' | 'party';
+    side?: 'bride' | 'groom';
+    relationship?: string;
+    group_id?: string;
+}
 
 // =============================================================================
 // Interfaces de Respuesta (DTOs)
@@ -14,6 +26,7 @@ export interface ImportResponse {
     errors: string[];
 }
 
+// Interfaz alineada con el schema GuestResponse del backend
 export interface Guest {
     id: number;
     full_name: string;
@@ -21,20 +34,16 @@ export interface Guest {
     phone?: string;
     language: string;
     side?: string;
-    rsvpStatus?: string; // Mapeado desde confirmed en el componente o backend
-    confirmed?: boolean; // Valor crudo del backend
-    companions?: any[]; // Estructura flexible por ahora
+    // El backend devuelve 'confirmed' como nulo o booleano, y 'rsvp_status' si se filtra
+    confirmed?: boolean | null;
     max_accomp: number;
+    num_adults: number;
+    num_children: number;
+    allergies?: string;
+    menu_choice?: string;
     notes?: string;
-    // Otros campos que vengan del backend
-}
-
-export interface LoginResponse {
-    token: string;
-    user?: {
-        username: string;
-        role: string;
-    };
+    guest_code?: string;
+    invite_type?: string;
 }
 
 // =============================================================================
@@ -42,19 +51,12 @@ export interface LoginResponse {
 // =============================================================================
 
 export const adminService = {
-  // --- Autenticación ---
-  login: (password: string) => {
-      // POST /api/admin/login
-      // Asumimos que el backend espera { password: ... } o similar
-      // Revisa la documentación si el endpoint espera otro body
-      return apiClient<LoginResponse>('/api/admin/login', {
-          body: { password }
-      });
-  },
-
+  // --- Autenticación (Solo Client-Side para MVP) ---
+  // El login real se maneja en el componente comparando con VITE_ADMIN_KEY.
+  // Este método queda reservado para futura expansión.
+  
   // --- Gestión de Invitados ---
   getGuests: (filters?: { search?: string; rsvp_status?: string; side?: string }) => {
-      // Construcción de query params
       const params = new URLSearchParams();
       if (filters?.search) params.append('search', filters.search);
       if (filters?.rsvp_status) params.append('rsvp_status', filters.rsvp_status);
@@ -65,6 +67,7 @@ export const adminService = {
   },
 
   createGuest: (guestData: Partial<Guest>) => {
+      // El backend espera fields como full_name, etc.
       return apiClient<Guest>('/api/admin/guests', {
           body: guestData,
           method: 'POST'
@@ -87,7 +90,7 @@ export const adminService = {
   // --- Importación Masiva ---
   importGuests: (guests: CsvGuest[]) => {
     return apiClient<ImportResponse>('/api/admin/import-guests', {
-      body: { items: guests }, // Ajuste: backend espera { items: [...] } o payload similar según schemas anteriores
+      body: { items: guests },
       method: 'POST',
     });
   },
