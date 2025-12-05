@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------------
 
 import React from 'react';
-import { useI18n } from '@/contexts/I18nContext';
 
 // -----------------------------------------------------------------------------
 // Componente: Card
@@ -63,6 +62,7 @@ interface FormFieldProps
   label: string;
   error?: string | null;
   as?: 'input' | 'textarea';
+  rows?: number;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -70,6 +70,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   id,
   error,
   as = 'input',
+  rows,
   ...props
 }) => {
   const Tag = as === 'textarea' ? 'textarea' : 'input';
@@ -89,6 +90,8 @@ export const FormField: React.FC<FormFieldProps> = ({
     className: `${baseClass} ${errorClass}`,
     'aria-invalid': !!error,
     'aria-describedby': describedBy || undefined,
+    // Solo añadimos "rows" cuando el campo es un textarea
+    ...(as === 'textarea' && typeof rows === 'number' ? { rows } : {}),
     ...props,
   };
 
@@ -153,19 +156,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   children,
   currentPage,
 }) => {
-  const { t } = useI18n();
+  // Eliminamos useI18n para el admin, usamos textos fijos en español.
 
   const navItems = [
-    { key: 'dashboard', label: 'ad_nav_dashboard', path: '/admin/dashboard' },
-    { key: 'event', label: 'ad_nav_event', path: '/admin/event' },
-    { key: 'guests', label: 'ad_nav_guests', path: '/admin/guests' },
+    { key: 'dashboard', label: 'Dashboard', path: '/admin/dashboard' },
+    { key: 'event', label: 'Evento', path: '/admin/event' },
+    { key: 'guests', label: 'Invitados', path: '/admin/guests' },
   ];
 
   return (
     <div className="admin-layout">
       <header className="admin-header">
         <nav className="container admin-nav">
-          <h1 className="admin-nav__title">{t('ad_title')}</h1>
+          <h1 className="admin-nav__title">Panel de gestión de invitados</h1>
           <div className="admin-nav__links">
             {navItems.map((item) => (
               <a
@@ -175,7 +178,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   currentPage === item.key ? 'admin-nav__link--active' : ''
                 }`}
               >
-                {t(item.label)}
+                {item.label}
               </a>
             ))}
           </div>

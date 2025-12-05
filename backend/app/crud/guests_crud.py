@@ -284,3 +284,39 @@ def _slug7(full_name: str) -> str:
               .replace("Ö", "O").replace("Ü", "U").replace("Ñ", "N"))       # Sustituye Ñ por N para consistencia ASCII.
     only_letters = re.sub(r"[^A-Z]", "", txt)                               # Elimina cualquier caracter que no sea letra A-Z.
     return (only_letters[:7] or "INVITAD")                                  # Devuelve hasta 7 letras; si queda vacío, usa fallback 'INVITAD'.
+
+# ---------------------------------------------------------------------------------
+# 👑 Helpers adicionales para Admin CRUD (Update / Delete)
+# ---------------------------------------------------------------------------------
+
+def update(db: Session, db_obj: Guest, obj_in) -> Guest:
+    """
+    Actualiza un invitado existente con los datos de un schema Update (dict o Pydantic).
+    """
+    # Convierte a dict excluyendo nulos si es un modelo Pydantic set_unset
+    if isinstance(obj_in, dict):
+        update_data = obj_in
+    else:
+        update_data = obj_in.model_dump(exclude_unset=True)
+
+    # Itera y asigna solo los campos presentes en el payload
+    for field, value in update_data.items():
+        if hasattr(db_obj, field):
+            setattr(db_obj, field, value)
+
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+def delete(db: Session, guest_id: int) -> bool:
+    """
+    Elimina un invitado por ID. Devuelve True si existía y se borró, False si no.
+    """
+    obj = db.query(Guest).get(guest_id)
+    if not obj:
+        return False
+    
+    db.delete(obj)
+    db.commit()
+    return True

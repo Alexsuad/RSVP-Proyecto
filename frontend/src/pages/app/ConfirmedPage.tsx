@@ -16,7 +16,7 @@ import { guestService } from '@/services/guestService';
 import { GuestData } from '@/types';
 
 // -----------------------------------------------------------------------------
-// Helper para construir un texto de alergias a partir de un string con códigos
+// Helper: construye un texto de alergias a partir de un string con códigos
 // separados por comas. Usa claves existentes 'options.allergen.<codigo>'.
 // -----------------------------------------------------------------------------
 const build_allergies_text = (
@@ -153,11 +153,22 @@ const ConfirmedPage: React.FC = () => {
   return (
     <PageLayout>
       <Card className="form-card text-center">
-        {/* Icono */}
-        <svg className="confirmed-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        {/* Icono de confirmación */}
+        <svg
+          className="confirmed-icon"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
 
+        {/* Título y mensaje principal */}
         <h1 className="mt-4 form-title h1-small">{t('ok.title')}</h1>
         <p className="mt-2 form-subtitle">{message}</p>
 
@@ -170,16 +181,31 @@ const ConfirmedPage: React.FC = () => {
 
             {is_attending && (
               <>
-                {/* USO DE CLAVES EXISTENTES: 
-                   'ok.adults_children' -> "Adultos / Niños" 
+                {/* ANTES:
+                    <SummaryItem
+                      label={t('ok.adults_children')}
+                      value={`${num_adults} / ${num_children}`}
+                    />
+                   AHORA: dos líneas separadas, reutilizando claves existentes
+                   'form.adult' y 'form.child'.
                 */}
                 <SummaryItem
-                  label={t('ok.adults_children')}
-                  value={`${num_adults} / ${num_children}`}
+                  label={t('form.adult')}
+                  value={String(num_adults)}
+                />
+                <SummaryItem
+                  label={t('form.child')}
+                  value={String(num_children)}
                 />
 
-                <SummaryItem label={t('ok.companions')} value={String(companions_count)} />
-                <SummaryItem label={t('ok.allergies')} value={allergies_text} />
+                <SummaryItem
+                  label={t('ok.companions')}
+                  value={String(companions_count)}
+                />
+                <SummaryItem
+                  label={t('ok.allergies')}
+                  value={allergies_text}
+                />
               </>
             )}
           </div>
@@ -188,29 +214,36 @@ const ConfirmedPage: React.FC = () => {
         {/* Detalle de Acompañantes */}
         {is_attending && companions_count > 0 && (
           <div className="companions-detail mt-6 text-left">
-            {/* USO DE CLAVE EXISTENTE: 'ok.companions' -> "Acompañantes"  */}
+            {/* USO DE CLAVE EXISTENTE: 'ok.companions' -> "Acompañantes" */}
             <h3 className="fieldset-legend">{t('ok.companions')}</h3>
-            
+
             <ul className="companions-list mt-3">
               {companions.map((comp: any, index: number) => {
-                // USO DE CLAVE EXISTENTE: 'form.companion_label' -> "Acompañante" 
+                // Nombre del acompañante (o etiqueta genérica)
                 const comp_name = comp.name || t('form.companion_label');
                 const comp_is_child = Boolean(comp.is_child);
-                
-                // USO DE CLAVES EXISTENTES: 'form.child' / 'form.adult' 
+
+                // USO DE CLAVES EXISTENTES: 'form.child' / 'form.adult'
                 const comp_type_label = comp_is_child
                   ? t('form.child')
                   : t('form.adult');
 
-                const comp_allergies_text = build_allergies_text(comp.allergies ?? null, t);
+                const comp_allergies_text = build_allergies_text(
+                  comp.allergies ?? null,
+                  t
+                );
 
                 return (
                   <li key={comp.id ?? index} className="companions-list__item">
                     <span className="companions-list__name">{comp_name}</span>
-                    <span className="companions-list__type"> – {comp_type_label}</span>
+                    <span className="companions-list__type">
+                      {' '}
+                      – {comp_type_label}
+                    </span>
                     {comp_allergies_text !== 'N/A' && (
                       <span className="companions-list__allergies">
-                        {' '}– {t('ok.allergies')}: {comp_allergies_text}
+                        {' '}
+                        – {t('ok.allergies')}: {comp_allergies_text}
                       </span>
                     )}
                   </li>
@@ -222,11 +255,21 @@ const ConfirmedPage: React.FC = () => {
 
         {/* Botones */}
         <div className="grid grid-cols-2 gap-4 responsive-grid mt-8">
-          <Button variant="secondary" onClick={() => { window.location.href = '/app/rsvp-form.html'; }}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              window.location.href = '/app/rsvp-form.html';
+            }}
+          >
             {t('ok.btn_edit')}
           </Button>
 
-          <Button onClick={() => { sessionStorage.removeItem('rsvp_token'); window.location.href = '/app/login.html'; }}>
+          <Button
+            onClick={() => {
+              sessionStorage.removeItem('rsvp_token');
+              window.location.href = '/app/login.html';
+            }}
+          >
             {t('ok.btn_logout')}
           </Button>
         </div>
@@ -235,8 +278,13 @@ const ConfirmedPage: React.FC = () => {
   );
 };
 
-// Componente auxiliar SummaryItem
-const SummaryItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+// -----------------------------------------------------------------------------
+// Componente auxiliar: fila de resumen (etiqueta + valor)
+// -----------------------------------------------------------------------------
+const SummaryItem: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => (
   <div className="summary-item">
     <span className="summary-item__label">{label}:</span>
     <span className="summary-item__value">{value}</span>

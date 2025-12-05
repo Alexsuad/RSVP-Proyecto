@@ -41,19 +41,21 @@ export default defineConfig({
     rollupOptions: {
       input: {
         // --- Sección APP (Invitados) ---
-        appLogin: path.resolve(__dirname, 'public/app/login.html'),
-        appRequest: path.resolve(__dirname, 'public/app/request-access.html'),
-        appRecover: path.resolve(__dirname, 'public/app/recover-code.html'),
-        appRsvp: path.resolve(__dirname, 'public/app/rsvp-form.html'),
-        appConfirmed: path.resolve(__dirname, 'public/app/confirmed.html'),
+        appLogin: path.resolve(__dirname, 'app/login.html'),
+        appRequest: path.resolve(__dirname, 'app/request-access.html'),
+        appRecover: path.resolve(__dirname, 'app/recover-code.html'),
+        appRsvp: path.resolve(__dirname, 'app/rsvp-form.html'),
+        appConfirmed: path.resolve(__dirname, 'app/confirmed.html'),
 
         // --- Sección ADMIN (Organizadores) ---
-        adminDashboard: path.resolve(__dirname, 'public/admin/dashboard.html'),
-        adminEvent: path.resolve(__dirname, 'public/admin/event.html'),
-        adminGuests: path.resolve(__dirname, 'public/admin/guests.html'),
+        adminDashboard: path.resolve(__dirname, 'admin/dashboard.html'),
+        adminEvent: path.resolve(__dirname, 'admin/event.html'),
+        adminGuests: path.resolve(__dirname, 'admin/guests.html'),
+        adminIndex: path.resolve(__dirname, 'admin/index.html'),
+        adminLogin: path.resolve(__dirname, 'admin/login.html'),
       }
     }
-  }, // <--- ¡AQUÍ ESTABA EL ERROR! Faltaba esta coma.
+  }, // <--- Coma final para cerrar build.
 
   // ---------------------------------------------------------------------------
   // Configuración de Tests (Vitest)

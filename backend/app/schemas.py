@@ -240,4 +240,35 @@ class ImportGuestsResult(BaseModel):
     created: int
     updated: int
     skipped: int
-    errors: List[str] = Field(default_factory=list)
+
+# =================================================================================
+# 👑 Schemas para Admin CRUD
+# =================================================================================
+
+class GuestCreateAdmin(GuestCreate):
+    """Schema para creación manual desde admin. guest_code es opcional (autogenerado)."""
+    guest_code: Optional[str] = None
+    # Hereda validaciones de contacto de GuestCreate
+
+class GuestUpdate(BaseModel):
+    """Schema para actualización parcial (PATCH/PUT) desde admin."""
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    language: Optional[LanguageEnum] = None
+    max_accomp: Optional[int] = Field(default=None, ge=0)
+    invite_type: Optional[InviteTypeEnum] = None
+    side: Optional[SideEnum] = None
+    relationship: Optional[str] = None
+    group_id: Optional[str] = None
+    rsvp_status: Optional[str] = None  # Para modificar estado manualmente si fuera necesario
+    confirmed: Optional[bool] = None   # Mapeo directo a columna
+    
+    @model_validator(mode="after")
+    def _normalize(self):
+        if self.phone is not None:
+             self.phone = _normalize_phone(self.phone)
+        if self.full_name is not None:
+             self.full_name = self.full_name.strip() or None
+        return self
+
