@@ -272,3 +272,18 @@ class GuestUpdate(BaseModel):
              self.full_name = self.full_name.strip() or None
         return self
 
+
+# =================================================================================
+# 📊 SCHEMAS DE REPORTES (KPIs)
+# ---------------------------------------------------------------------------------
+class AdminStatsResponse(BaseModel):
+    """Respuesta del endpoint de métricas/KPIs."""
+    total_guests: int
+    responses_received: int
+    confirmed_attendees: int
+    pending_rsvp: int
+    not_attending: int
+    total_companions: int
+    total_children: int
+    guests_with_allergies: int
+

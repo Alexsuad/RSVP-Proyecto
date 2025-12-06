@@ -85,25 +85,181 @@ def get_current_guest(
 # Endpoints
 # =================================================================================
 
+# =================================================================================
+# Endpoints
+# =================================================================================
+
+# --- RUTAS PROTEGIDAS (Requieren Token) ---
+
 @router.get("/me", response_model=schemas.GuestWithCompanionsResponse)
 def get_my_profile(
     current_guest: models.Guest = Depends(get_current_guest),
 ):
     """
     Obtiene el perfil completo del invitado autenticado.
-    
-    Incluye información de contacto, estado de la confirmación, acompañantes
-    registrados y el alcance de la invitación (ceremonia/recepción).
     """
-    # Cálculo de campos derivados para la interfaz
-    is_full_invite = (current_guest.invite_type == InviteTypeEnum.full)
-    invite_scope_label = "ceremony+reception" if is_full_invite else "reception-only"
+    return _format_response(current_guest)
 
-    # Construcción de la respuesta extendida
-    resp = schemas.GuestWithCompanionsResponse.model_validate(current_guest)
+
+@router.post("/me/rsvp", response_model=schemas.GuestWithCompanionsResponse)
+def update_my_rsvp(
+    payload: schemas.RSVPUpdateRequest,
+    db: Session = Depends(get_db),
+    current_guest: models.Guest = Depends(get_current_guest),
+):
+    """
+    Procesa y actualiza la confirmación de asistencia (RSVP) [Autenticado].
+    """
+    # 1. Validación de fecha límite
+    _check_deadline()
+
+    # 2. Validación de cupo máximo (Solo si asiste)
+    if payload.attending:
+        if len(payload.companions) > (current_guest.max_accomp or 0):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Has superado el número máximo de acompañantes permitido."
+            )
+
+    # 3. Delegar Update al CRUD (Atómico)
+    # Llama a guests_crud.update_rsvp
+    # Maneja conflicto de email/phone si ocurre (IntegrityError en CRUD re-lanzado?)
+    try:
+        from app.crud import guests_crud
+        updated_guest = guests_crud.update_rsvp(db, current_guest, payload.attending, payload)
+    except Exception as e:
+        # Si es integridad (email duplicado), el CRUD debería manejarlo o lo capturamos
+        # Asumimos que guests_crud puede lanzar excepciones de integridad
+        if "IntegrityError" in str(type(e).__name__):
+             raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"error_code": "EMAIL_OR_PHONE_CONFLICT", "message_key": "form.email_or_phone_conflict"}
+            )
+        logger.error(f"Error procesando RSVP: {e}")
+        raise HTTPException(status_code=500, detail="Error interno procesando RSVP")
+
+    # 4. Enviar Email
+    _send_rsvp_email(updated_guest)
+
+    return _format_response(updated_guest)
+
+
+# --- RUTAS PÚBLICAS (Acceso por Código) ---
+
+@router.get("/code/{guest_code}", response_model=schemas.GuestWithCompanionsResponse)
+def get_guest_by_code(
+    guest_code: str,
+    db: Session = Depends(get_db)
+):
+    """
+    [PÚBLICO] Obtiene datos del invitado por su código (para cargar el formulario).
+    Actúa como login implícito de solo lectura.
+    """
+    from app.crud import guests_crud
+    guest = guests_crud.get_by_guest_code(db, guest_code)
+    if not guest:
+        raise HTTPException(status_code=404, detail="Código de invitado no válido.")
+    
+    return _format_response(guest)
+
+
+@router.post("/code/{guest_code}/rsvp", response_model=schemas.GuestWithCompanionsResponse)
+def submit_public_rsvp(
+    guest_code: str,
+    payload: schemas.RSVPUpdateRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    [PÚBLICO] Envía la confirmación usando el código de invitado.
+    """
+    from app.crud import guests_crud
+    guest = guests_crud.get_by_guest_code(db, guest_code)
+    if not guest:
+        raise HTTPException(status_code=404, detail="Código de invitado no válido.")
+
+    # 1. Validación de fecha límite
+    _check_deadline()
+    
+    # 2. Validación de cupo máximo
+    if payload.attending:
+        if len(payload.companions) > (guest.max_accomp or 0):
+             raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Has superado el número máximo de acompañantes permitido."
+            )
+            
+    # 3. Delegar Update al CRUD
+    try:
+        updated_guest = guests_crud.update_rsvp(db, guest, payload.attending, payload)
+    except Exception as e:
+        if "IntegrityError" in str(type(e).__name__):
+             raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"error_code": "EMAIL_OR_PHONE_CONFLICT", "message_key": "form.email_or_phone_conflict"}
+            )
+        logger.error(f"Error procesando RSVP público: {e}")
+        raise HTTPException(status_code=500, detail="Error interno procesando RSVP")
+        
+    # 4. Enviar Email
+    _send_rsvp_email(updated_guest)
+    
+    return _format_response(updated_guest)
+
+
+# --- HELPERS INTERNOS ---
+
+def _check_deadline():
+    deadline_str = os.getenv("RSVP_DEADLINE", "2026-01-20")
+    try:
+        deadline = datetime.fromisoformat(deadline_str)
+    except:
+        deadline = datetime(2099, 12, 31)
+        
+    if datetime.utcnow() > deadline:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La fecha límite para confirmar la asistencia ya ha pasado."
+        )
+
+def _format_response(guest: models.Guest) -> schemas.GuestWithCompanionsResponse:
+    is_full_invite = (guest.invite_type == InviteTypeEnum.full)
+    resp = schemas.GuestWithCompanionsResponse.model_validate(guest)
     resp.invited_to_ceremony = is_full_invite
-    resp.invite_scope = invite_scope_label
+    resp.invite_scope = "ceremony+reception" if is_full_invite else "reception-only"
     return resp
+
+def _send_rsvp_email(guest: models.Guest):
+    """Envía el correo de confirmación o declinación."""
+    try:
+        if not guest.email:
+            return
+
+        attending = bool(guest.confirmed)
+        summary = {
+            "guest_name": guest.full_name or "",
+            "invite_scope": "ceremony+reception" if guest.invite_type == InviteTypeEnum.full else "reception-only",
+            "attending": attending,
+            "companions": [],
+            "allergies": guest.allergies or "",
+            "notes": (guest.notes or None),
+        }
+        
+        if attending:
+            summary["companions"] = [
+                {"name": c.name or "", "label": ("child" if c.is_child else "adult"), "allergens": c.allergies or ""}
+                for c in (guest.companions or [])
+            ]
+            
+        ok = mailer.send_confirmation_email(
+            to_email=guest.email,
+            language=(guest.language.value if guest.language else "en"),
+            summary=summary,
+        )
+        if not ok:
+            logger.error(f"Fallo envío email RSVP id={guest.id}")
+            
+    except Exception as e:
+        logger.error(f"Excepción enviando email RSVP id={guest.id} err={e}")
 
 
 @router.post("/me/rsvp", response_model=schemas.GuestWithCompanionsResponse)

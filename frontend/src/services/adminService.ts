@@ -26,6 +26,18 @@ export interface ImportResponse {
     errors: string[];
 }
 
+// Nueva interfaz para respuesta de KPIs
+export interface AdminStatsResponse {
+    total_guests: number;
+    responses_received: number;
+    confirmed_attendees: number;
+    pending_rsvp: number;
+    not_attending: number;
+    total_companions: number;
+    total_children: number;
+    guests_with_allergies: number;
+}
+
 // Interfaz alineada con el schema GuestResponse del backend
 export interface Guest {
     id: number;
@@ -56,6 +68,10 @@ export const adminService = {
   // Este método queda reservado para futura expansión.
   
   // --- Gestión de Invitados ---
+  getStats: () => {
+      return apiClient<AdminStatsResponse>('/api/admin/stats');
+  },
+
   getGuests: (filters?: { search?: string; rsvp_status?: string; side?: string }) => {
       const params = new URLSearchParams();
       if (filters?.search) params.append('search', filters.search);

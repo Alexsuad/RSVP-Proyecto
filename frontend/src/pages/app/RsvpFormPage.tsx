@@ -45,6 +45,9 @@ const RsvpFormPage: React.FC = () => {
     const [guest, setGuest] = useState<GuestData | null>(null); // Datos originales
     const [metaOptions, setMetaOptions] = useState<{ allergens: string[] }>({ allergens: [] }); // Opciones del backend
     
+    // Estado para código público (si viene en URL)
+    const [publicCode, setPublicCode] = useState<string | null>(null);
+
     // Estados de UI
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -63,8 +66,6 @@ const RsvpFormPage: React.FC = () => {
     // --- MANEJADOR DE ASISTENCIA ---
     const handle_attending_change = (value: boolean) => {
         // Solo actualizamos el estado de asistencia.
-        // No limpiamos acompañantes ni alergias aquí para que el usuario
-        // no pierda los datos si cambia de opinión antes de enviar.
         setAttending(value);
     };
 
@@ -72,10 +73,30 @@ const RsvpFormPage: React.FC = () => {
     useEffect(() => {
         const initData = async () => {
             try {
-                // Carga paralela: más rápido que esperar una tras otra
+                // Detectar código en URL
+                const params = new URLSearchParams(window.location.search);
+                const codeFromUrl = params.get('code');
+                
+                if (codeFromUrl) {
+                    setPublicCode(codeFromUrl);
+                }
+
+                // Carga paralela: Guest + Meta
+                // Si hay código, usamos endpoint público. Si no, endpoint "/me" (requiere token).
+                const guestRequest = codeFromUrl 
+                    ? guestService.getGuestByCode(codeFromUrl)
+                    : guestService.getMe();
+
+                // Hacemos la carga de metadata resiliente. Si falla, no bloquea la página.
+                const metaRequest = apiClient<{ allergens: string[] }>('/api/meta/options')
+                    .catch((err) => {
+                        console.warn('⚠️ Fallo carga de metadatos (no bloqueante):', err);
+                        return { allergens: [] };
+                    });
+
                 const [guestData, metaData] = await Promise.all([
-                    guestService.getMe(),
-                    apiClient<{ allergens: string[] }>('/api/meta/options')
+                    guestRequest,
+                    metaRequest
                 ]);
 
                 setGuest(guestData);
@@ -89,7 +110,6 @@ const RsvpFormPage: React.FC = () => {
                 setPhone(guestData.phone || '');
                 setNotes(guestData.notes || '');
 
-                // Transformación: String de BD "gluten,soy" -> Array JS ["gluten", "soy"]
                 if (guestData.allergies) {
                     setAllergies(guestData.allergies.split(',').map(s => s.trim()));
                 }
@@ -97,33 +117,11 @@ const RsvpFormPage: React.FC = () => {
                 setCompanions(guestData.companions || []);
 
             } catch (err: any) {
-               // Log técnico en consola para depuración (no visible para el usuario)
-                console.error('Error al enviar RSVP', err);
-
-                // Intentamos obtener una clave de mensaje coherente con el backend
-                const status = err?.response?.status ?? err?.status;
-                const messageKeyFromResponse = err?.response?.data?.message_key;
-
-                // Clave por defecto si no logramos identificar nada más específico
-                let key: string = 'form.generic_error';
-
-                if (typeof messageKeyFromResponse === 'string') {
-                    // Caso ideal: el backend envía una message_key ya pensada para i18n
-                    key = messageKeyFromResponse;
-                } else if (status === 409) {
-                    // Conflicto de datos: email o teléfono ya usados por otro invitado
-                    key = 'form.email_or_phone_conflict';
-                } else if (typeof err?.message === 'string' && err.message.includes('.')) {
-                    // Compatibilidad: si nos llega una clave directa (ej. form.error_unauthorized)
-                    key = err.message;
-                }
-
-                setError(t(key));
+                console.error('Error cargando datos RSVP', err);
+                // Si falla loading, error fatal
+                setError(t('form.generic_error')); // O "Código inválido" si status 404
             } finally {
-                // Cuando termina la carga inicial (con éxito o con error),
-                // apagamos el estado "loading" para ocultar el loader.
                 setLoading(false);
-                // Y también nos aseguramos de que "submitting" esté apagado.
                 setSubmitting(false);
             }
         };
@@ -244,7 +242,11 @@ const RsvpFormPage: React.FC = () => {
             };
 
             // Llamada API
-            await guestService.submitRsvp(payload);
+            if (publicCode) {
+                await guestService.submitRsvpByCode(publicCode, payload);
+            } else {
+                await guestService.submitRsvp(payload);
+            }
             
             // Redirección a página de éxito
             window.location.href = '/app/confirmed.html';

@@ -101,10 +101,29 @@ export const guestService = {
   // --- Envío del RSVP (submitRsvp) ---
   // Envía al backend la respuesta de asistencia del invitado (asiste o no,
   // número de personas, acompañantes, alergias, etc.).
+  // --- Envío del RSVP (submitRsvp) [Autenticado] ---
   submitRsvp: (data: RsvpPayload) => {
     return apiClient<SubmitRsvpResponse>('/api/guest/me/rsvp', {
       body: data,
       method: 'POST',
     });
   },
+
+  // --- Métodos Públicos (Por Código) ---
+  
+  // Obtiene invitado por código (para carga inicial sin login)
+  getGuestByCode: (code: string) => {
+    return apiClient<GuestData>(`/api/guest/code/${code}`, {
+        method: 'GET'
+    });
+  },
+
+  // Envía RSVP usando código
+  submitRsvpByCode: (code: string, data: RsvpPayload) => {
+      return apiClient<SubmitRsvpResponse>(`/api/guest/code/${code}/rsvp`, {
+          body: data,
+          method: 'POST'
+      });
+  }
 };
+

@@ -16,7 +16,7 @@ import string                       # Para definir alfabetos de generación.
 from typing import Optional         # Tipado opcional para claridad.
 from loguru import logger           # ✅ Logger para trazas internas del CRUD (depuración y auditoría).
 
-from app.models import Guest        # Importa el modelo ORM de invitados (tabla 'guests').
+from app.models import Guest, Companion        # Importa el modelo ORM de invitados y acompañantes.
 import unicodedata                  # Para eliminar acentos/diacríticos de los nombres.
 
 # ---------------------------------------------------------------------------------
@@ -309,14 +309,84 @@ def update(db: Session, db_obj: Guest, obj_in) -> Guest:
     db.refresh(db_obj)
     return db_obj
 
-def delete(db: Session, guest_id: int) -> bool:
-    """
-    Elimina un invitado por ID. Devuelve True si existía y se borró, False si no.
-    """
-    obj = db.query(Guest).get(guest_id)
-    if not obj:
-        return False
-    
     db.delete(obj)
     db.commit()
     return True
+
+def update_rsvp(db: Session, guest: Guest, attending: bool, payload) -> Guest:
+    """
+    Actualiza la confirmación de asistencia (RSVP) de forma atómica.
+    - Gestiona confirmed, contact info, notes, allergies.
+    - Reemplaza la lista de acompañantes si asiste.
+    - Limpia datos si no asiste.
+    """
+    now = datetime.utcnow()
+    
+    # 1. Actualización de RSVP Status
+    guest.confirmed = attending
+    guest.confirmed_at = now
+    
+    # 2. Lógica dependiendo de si asiste o no
+    if not attending:
+        # --- CASO: NO ASISTE (Limpieza) ---
+        guest.menu_choice = None
+        guest.allergies = None
+        guest.needs_accommodation = bool(payload.needs_accommodation) # A veces quieren transporte igual?
+        guest.needs_transport = bool(payload.needs_transport)         # Se guarda preferencia pusiacaso.
+        guest.companions.clear()
+        guest.num_adults = 0
+        guest.num_children = 0
+        guest.notes = (payload.notes or None)
+        # Nota: No borramos email/phone para mantener contacto
+    else:
+        # --- CASO: ASISTE (Actualización) ---
+        guest.menu_choice = None # (Si hubiera campo en payload se pondría aquí)
+        guest.allergies = (payload.allergies or None)
+        guest.needs_accommodation = bool(payload.needs_accommodation)
+        guest.needs_transport = bool(payload.needs_transport)
+        guest.notes = (payload.notes or None)
+
+        # Actualiza contacto si se provee
+        if payload.email:
+            guest.email = payload.email
+        if payload.phone:
+            guest.phone = payload.phone
+            
+        # Reemplazo de Acompañantes
+        guest.companions.clear()
+        
+        # Contadores
+        titular_adult = 1 # El invitado principal cuenta como adulto por defecto (o lógica de negocio)
+        # Ajuste: Si el invitado principal es niño? Normalmente no.
+        
+        adults_count = titular_adult
+        children_count = 0
+        
+        for c in payload.companions:
+            comp = Companion(
+                guest_id=guest.id,
+                name=c.name.strip(),
+                is_child=bool(c.is_child),
+                menu_choice=c.menu_choice,
+                allergies=(c.allergies or None)
+            )
+            guest.companions.append(comp)
+            
+            if c.is_child:
+                children_count += 1
+            else:
+                adults_count += 1
+                
+        guest.num_adults = adults_count
+        guest.num_children = children_count
+
+    try:
+        db.add(guest)
+        db.commit()
+        db.refresh(guest)
+    except Exception as e:
+        db.rollback()
+        raise e
+        
+    return guest
+

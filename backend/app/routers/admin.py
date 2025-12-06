@@ -39,6 +39,65 @@ def _normalize_phone_local(phone: Optional[str]) -> Optional[str]:
 
 # --------------------------------- Endpoints -----------------------------------
 
+@router.get("/stats", response_model=schemas.AdminStatsResponse, dependencies=[Depends(require_admin)])
+def get_dashboard_stats(db: Session = Depends(get_db)):
+    """
+    Calcula y devuelve las métricas clave (KPIs) del evento en tiempo real.
+    Devuelve totales, desglose de respuestas y conteos de asistencia.
+    """
+    # 1. Totales generales de invitaciones (filas en BD)
+    total_guests = db.query(func.count(Guest.id)).scalar() or 0
+
+    # 2. Desglose por estado de confirmación
+    # Confirmados (True)
+    confirmed_attendees = db.query(func.count(Guest.id)).filter(Guest.confirmed == True).scalar() or 0
+    # No asisten (False)
+    not_attending = db.query(func.count(Guest.id)).filter(Guest.confirmed == False).scalar() or 0
+    # Pendientes (None)
+    pending_rsvp = db.query(func.count(Guest.id)).filter(Guest.confirmed == None).scalar() or 0
+    
+    # Respuestas totales (Confirmados + No asisten)
+    # Alternativa: count(id) where confirmed IS NOT NULL
+    responses_received = confirmed_attendees + not_attending
+
+    # 3. Totales de Personas y Perfiles (Solo Confirmados)
+    # total_companions: Suma de adultos + niños de los registros confirmados.
+    # total_children: Suma de niños de los registros confirmados.
+    
+    # Consulta agregada para sumar num_adults y num_children de invitados CONFIRMADOS
+    # Usamos coalesce para manejar nulos como 0 por seguridad
+    people_stats = db.query(
+        func.sum(func.coalesce(Guest.num_adults, 0)),
+        func.sum(func.coalesce(Guest.num_children, 0))
+    ).filter(Guest.confirmed == True).first()
+
+    sum_adults = people_stats[0] or 0
+    sum_children = people_stats[1] or 0
+    
+    total_companions = sum_adults + sum_children
+    total_children = sum_children
+
+    # 4. Alergias (Cualquiera con texto en alergias, independientemente de confirmación, 
+    # o quizás mejor solo confirmados? El requerimiento dice "Guests with allergies count"
+    # Generalmente interesa saber de todos para planificar o solo los que vienen.
+    # Asumiremos TODOS para tener el dato crudo, o solo confirmados si el dashboard es "Asistencia".
+    # La especificación de tarea no lo restringió, pero por coherencia Dashboard suele ser "Confirmed Stats".
+    # Sin embargo, la definición de "guests_with_allergies" suele ser global.
+    # Para ser conservador y útil, mostraremos el total de alertas de alergia en BD.
+    guests_with_allergies = db.query(func.count(Guest.id)).filter(Guest.allergies != None, Guest.allergies != "").scalar() or 0
+
+    return schemas.AdminStatsResponse(
+        total_guests=total_guests,
+        responses_received=responses_received,
+        confirmed_attendees=confirmed_attendees,
+        pending_rsvp=pending_rsvp,
+        not_attending=not_attending,
+        total_companions=total_companions,
+        total_children=total_children,
+        guests_with_allergies=guests_with_allergies
+    )
+
+
 @router.get("/guests", response_model=List[schemas.GuestResponse], dependencies=[Depends(require_admin)])
 def list_guests(
     search: Optional[str] = None,

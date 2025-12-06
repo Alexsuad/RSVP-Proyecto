@@ -12,53 +12,33 @@
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
-import { Card, AdminLayout, Button, Loader } from '@/components/common';
-
-// -----------------------------------------------------------------------------
-// Definiciones: Interfaces y Mocks
-// -----------------------------------------------------------------------------
-
-interface KpiData {
-    total: number;
-    responses: number;
-    confirmed: number;
-    pending: number;
-    notAttending: number;
-    companions: number;
-    children: number;
-    allergies: number;
-}
-
-// Datos Mock estáticos (Separados para fácil reemplazo futuro)
-const MOCK_KPI_DATA: KpiData = {
-    total: 150,
-    responses: 127,
-    confirmed: 85,
-    pending: 42,
-    notAttending: 15,
-    companions: 20,
-    children: 5,
-    allergies: 3,
-};
+import { Card, AdminLayout, Button, Loader, Alert } from '@/components/common';
+import { adminService, AdminStatsResponse } from '@/services/adminService';
 
 // -----------------------------------------------------------------------------
 // Componente Principal
 // -----------------------------------------------------------------------------
 
 const AdminDashboardPage: React.FC = () => {
-    // Estado local para permitir carga asíncrona futura
-    const [kpiData, setKpiData] = useState<KpiData | null>(null);
+    // Estado local de métricas
+    const [kpiData, setKpiData] = useState<AdminStatsResponse | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Efecto de carga (Simulado por ahora)
+    // Efecto de carga
     useEffect(() => {
-        // TODO: Reemplazar con llamada real a API cuando exista (ej. adminService.getStats())
         const loadStats = async () => {
             setLoading(true);
-            // Simulamos delay de red
-            await new Promise(resolve => setTimeout(resolve, 500));
-            setKpiData(MOCK_KPI_DATA);
-            setLoading(false);
+            setError(null);
+            try {
+                const data = await adminService.getStats();
+                setKpiData(data);
+            } catch (err) {
+                console.error("Error cargando estadísticas:", err);
+                setError("Error al cargar métricas. Intente recargar.");
+            } finally {
+                setLoading(false);
+            }
         };
 
         loadStats();
@@ -77,9 +57,32 @@ const AdminDashboardPage: React.FC = () => {
             </AdminLayout>
         );
     }
+    
+    if (error) {
+         return (
+            <AdminLayout currentPage="dashboard">
+                <div className="p-4">
+                    <Alert message={error} variant="danger" />
+                    <Button onClick={() => window.location.reload()} variant="secondary" className="mt-4">
+                        Reintentar
+                    </Button>
+                </div>
+            </AdminLayout>
+         );
+    }
 
-    // Fallback seguro si data es null
-    const data = kpiData || MOCK_KPI_DATA;
+    // Si no hay datos (y no cargando/error), mostramos estado vacío seguro
+    // Mapeamos a la vista
+    const data = kpiData || {
+        total_guests: 0,
+        responses_received: 0,
+        confirmed_attendees: 0,
+        pending_rsvp: 0,
+        not_attending: 0,
+        total_companions: 0,
+        total_children: 0,
+        guests_with_allergies: 0
+    };
 
     return (
         <AdminLayout currentPage="dashboard">
@@ -88,50 +91,50 @@ const AdminDashboardPage: React.FC = () => {
             <div className="kpi-grid">
                 <KpiCard 
                     title="Invitados totales" 
-                    value={data.total} 
+                    value={data.total_guests} 
                     subtext="Lista completa"
                     colorClass="kpi-value--neutral" 
                 />
                 <KpiCard 
                     title="Respuestas recibidas"
-                    value={data.responses}
+                    value={data.responses_received}
                     subtext="Han contestado Sí o No"
                     colorClass="kpi-value--neutral"
                 />
                 <KpiCard 
                     title="Asistentes confirmados" 
-                    value={data.confirmed} 
+                    value={data.confirmed_attendees} 
                     subtext="Han dicho SÍ"
                     colorClass="kpi-value--confirmed" 
                 />
                 <KpiCard 
                     title="Pendientes de respuesta" 
-                    value={data.pending} 
+                    value={data.pending_rsvp} 
                     subtext="Sin contestar"
                     colorClass="kpi-value--pending" 
                 />
                 <KpiCard 
                     title="No asisten" 
-                    value={data.notAttending} 
+                    value={data.not_attending} 
                     subtext="Han dicho NO"
                     colorClass="kpi-value--no" 
                 />
                 <KpiCard 
-                    title="Acompañantes" 
-                    value={data.companions} 
-                    subtext="Extras (+1)"
+                    title="Personas Totales" 
+                    value={data.total_companions} 
+                    subtext="Confirmados (Adultos + Niños)"
                     colorClass="kpi-value--neutral" 
                 />
                 <KpiCard 
                     title="Niños" 
-                    value={data.children} 
-                    subtext="Menores de edad"
+                    value={data.total_children} 
+                    subtext="Menores confirmados"
                     colorClass="kpi-value--neutral" 
                 />
                 <KpiCard 
                     title="Alergias / Dietas" 
-                    value={data.allergies} 
-                    subtext="Requieren atención"
+                    value={data.guests_with_allergies} 
+                    subtext="Registros con alergias"
                     colorClass="kpi-value--warning" 
                 />
             </div>
