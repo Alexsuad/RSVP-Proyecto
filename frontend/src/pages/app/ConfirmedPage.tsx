@@ -1,30 +1,24 @@
-// -----------------------------------------------------------------------------
-// Archivo: src/pages/app/ConfirmedPage.tsx
-// Propósito:
-//   Página de confirmación del RSVP. Replica la lógica de 2_Confirmado.py en
-//   versión React:
-//     - Verifica que exista un token válido en sessionStorage.
-//     - Llama a GET /api/guest/me para recuperar la respuesta guardada.
-//     - Muestra un resumen visual reutilizando claves i18n existentes.
-// -----------------------------------------------------------------------------
+// File: frontend/src/pages/app/ConfirmedPage.tsx
+// ──────────────────────────────────────────────────────────────────────
+// Propósito: Página de confirmación del RSVP versión React.
+// Muestra el resumen de asistencia y permite editar o cerrar sesión.
+// ──────────────────────────────────────────────────────────────────────
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useI18n } from '@/contexts/I18nContext';
-import { Card, Button, Loader } from '@/components/common';
-import PageLayout from '@/components/PageLayout';
-import { guestService } from '@/services/guestService';
-import { GuestData } from '@/types';
+import { useI18n } from '@/contexts/I18nContext'; // Contexto de internacionalización
+import { Card, Button, Loader } from '@/components/common'; // Componentes reutilizables de UI
+import PageLayout from '@/components/PageLayout'; // Layout principal con imagen de fondo
+import { guestService } from '@/services/guestService'; // Servicio para gestionar datos del invitado
+import { GuestData } from '@/types'; // Definiciones de tipos TypeScript
 
-// -----------------------------------------------------------------------------
-// Helper: construye un texto de alergias a partir de un string con códigos
-// separados por comas. Usa claves existentes 'options.allergen.<codigo>'.
-// -----------------------------------------------------------------------------
+// --- Función auxiliar: Construir texto de alergias ---
+// Construye un texto legible a partir de códigos de alergias separados por comas.
 const build_allergies_text = (
   raw_allergies: string | null,
   t: (key: string) => string
 ): string => {
-  if (!raw_allergies) {
-    return 'N/A';
+  if (!raw_allergies || !raw_allergies.trim()) {
+    return '';
   }
 
   const codes = raw_allergies
@@ -33,7 +27,7 @@ const build_allergies_text = (
     .filter(Boolean);
 
   if (codes.length === 0) {
-    return 'N/A';
+    return '';
   }
 
   return codes
@@ -41,22 +35,19 @@ const build_allergies_text = (
     .join(', ');
 };
 
-// -----------------------------------------------------------------------------
-// Componente principal: ConfirmedPage
-// -----------------------------------------------------------------------------
+// --- Constantes ---
+const BG_IMAGE = 'https://images.unsplash.com/photo-1530023367847-a683933f4172?q=80&w=2070&auto=format&fit=crop';
+
+// --- Componente Principal: ConfirmedPage ---
 const ConfirmedPage: React.FC = () => {
   const { t } = useI18n();
 
-  // ---------------------------------------------------------------------------
-  // Estado local
-  // ---------------------------------------------------------------------------
+  // --- Estado Local ---
   const [guest, setGuest] = useState<GuestData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ---------------------------------------------------------------------------
-  // Función: fetch_guest_data
-  // ---------------------------------------------------------------------------
+  // --- Función: Recuperar datos del invitado ---
   const fetch_guest_data = useCallback(async () => {
     try {
       setLoading(true);
@@ -83,9 +74,7 @@ const ConfirmedPage: React.FC = () => {
     }
   }, [t]);
 
-  // ---------------------------------------------------------------------------
-  // Efecto de montaje
-  // ---------------------------------------------------------------------------
+  // --- Efecto: Verificación de token y carga inicial ---
   useEffect(() => {
     const token = sessionStorage.getItem('rsvp_token');
     if (!token) {
@@ -95,9 +84,7 @@ const ConfirmedPage: React.FC = () => {
     fetch_guest_data();
   }, [fetch_guest_data]);
 
-  // ---------------------------------------------------------------------------
-  // Renderizado condicional (Carga / Error / No Data)
-  // ---------------------------------------------------------------------------
+  // --- Renderizado Condicional (Carga / Error / Sin Datos) ---
   if (loading) return <PageLayout><Loader /></PageLayout>;
 
   if (error) {
@@ -122,21 +109,27 @@ const ConfirmedPage: React.FC = () => {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Cálculo de variables para el render
-  // ---------------------------------------------------------------------------
+  // --- Lógica de Presentación ---
   const companions = Array.isArray(guest.companions) ? guest.companions : [];
   const companions_count = companions.length;
 
-  const num_adults =
-    (guest as any).num_adults !== undefined
-      ? Number((guest as any).num_adults)
-      : Math.max(companions_count, 0);
+  // Cálculo de adultos y niños
+  let num_adults = 0;
+  let num_children = 0;
 
-  const num_children =
-    (guest as any).num_children !== undefined
-      ? Number((guest as any).num_children)
-      : 0;
+  if ((guest as any).num_adults !== undefined && (guest as any).num_children !== undefined) {
+    // Si el backend envía los contadores ya calculados, los usamos
+    num_adults = Number((guest as any).num_adults);
+    num_children = Number((guest as any).num_children);
+  } else {
+    // Fallback: Calcular basándonos en companions + titular
+    // Titular siempre cuenta como 1 adulto
+    const adult_companions = companions.filter(c => !c.is_child).length;
+    const child_companions = companions.filter(c => c.is_child).length;
+
+    num_adults = 1 + adult_companions;
+    num_children = child_companions;
+  }
 
   const is_attending = Boolean(
     (guest as any).attending !== undefined
@@ -147,140 +140,168 @@ const ConfirmedPage: React.FC = () => {
   const message = is_attending ? t('ok.msg_yes') : t('ok.msg_no');
   const allergies_text = build_allergies_text(guest.allergies, t);
 
-  // ---------------------------------------------------------------------------
-  // Render principal
-  // ---------------------------------------------------------------------------
+  // --- Renderizado Principal (UI) ---
   return (
-    <PageLayout>
-      <Card className="form-card text-center">
-        {/* Icono de confirmación */}
-        <svg
-          className="confirmed-icon"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-
-        {/* Título y mensaje principal */}
-        <h1 className="mt-4 form-title h1-small">{t('ok.title')}</h1>
-        <p className="mt-2 form-subtitle">{message}</p>
-
-        {/* Resumen */}
-        <div className="confirmed-summary">
-          <h2 className="fieldset-legend text-left">{t('ok.summary')}</h2>
-
-          <div className="space-y-2 mt-4">
-            <SummaryItem label={t('ok.main_guest')} value={guest.full_name} />
-
-            {is_attending && (
-              <>
-                {/* ANTES:
-                    <SummaryItem
-                      label={t('ok.adults_children')}
-                      value={`${num_adults} / ${num_children}`}
-                    />
-                   AHORA: dos líneas separadas, reutilizando claves existentes
-                   'form.adult' y 'form.child'.
-                */}
-                <SummaryItem
-                  label={t('form.adult')}
-                  value={String(num_adults)}
+    <PageLayout backgroundImage={BG_IMAGE}>
+      <div className="rsvp-container">
+        <Card className="rsvp-card relative border-none shadow-xl bg-white">
+          <header className="text-center mb-8 pt-6">
+            {/* Icono de confirmación */}
+            <div className="confirmation-icon mx-auto text-[var(--color-gold-primary)]">
+              <svg
+                className="w-12 h-12"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-                <SummaryItem
-                  label={t('form.child')}
-                  value={String(num_children)}
-                />
+              </svg>
+            </div>
 
-                <SummaryItem
-                  label={t('ok.companions')}
-                  value={String(companions_count)}
-                />
-                <SummaryItem
-                  label={t('ok.allergies')}
-                  value={allergies_text}
-                />
-              </>
+            {/* Título y mensaje principal */}
+            <h1 className="form-title font-serif text-3xl text-[var(--color-gold-primary)] mb-2">{t('ok.title')}</h1>
+            <p className="form-subtitle text-[var(--color-text-muted)] italic">{message}</p>
+
+            {/* Resumen de eventos a los que se asiste */}
+            {guest && (
+              <div className="mt-6 p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-[var(--color-border)] inline-block">
+                <p className="page-subtitle mt-0 text-lg text-[var(--color-text-main)] mb-1">
+                  {guest.invited_to_ceremony && guest.invited_to_reception && t('summary.events_both_confirmed')}
+                  {guest.invited_to_ceremony && !guest.invited_to_reception && t('summary.events_ceremony_only_confirmed')}
+                  {!guest.invited_to_ceremony && guest.invited_to_reception && t('summary.events_reception_only_confirmed')}
+                 </p>
+              </div>
             )}
+          </header>
+
+          {/* Sección: Resumen de datos */}
+          <div className="rsvp-section mb-8">
+            <h3 className="rsvp-section__title text-left">{t('summary.title')}</h3>
+
+            <div className="space-y-2 mt-4 text-left">
+              <p>
+                <strong>{t('summary.main_guest_label')}:</strong>{' '}
+                {guest.full_name}
+              </p>
+
+              {/* Email y Teléfono */}
+              {guest.email && guest.email.trim() && (
+                <p>
+                  <strong>{t('summary.email_label')}:</strong>{' '}
+                  {guest.email}
+                </p>
+              )}
+              {guest.phone && guest.phone.trim() && (
+                <p>
+                  <strong>{t('summary.phone_label')}:</strong>{' '}
+                  {guest.phone}
+                </p>
+              )}
+
+              {is_attending && (
+                <>
+                  <p>
+                    <strong>{t('summary.adults_label')}:</strong>{' '}
+                    {num_adults}
+                  </p>
+                  <p>
+                    <strong>{t('summary.children_label')}:</strong>{' '}
+                    {num_children}
+                  </p>
+
+                  <p>
+                    <strong>{t('summary.companions_label')}:</strong>{' '}
+                    {companions_count}
+                  </p>
+                  
+                  {/* Alergias */}
+                  {allergies_text && (
+                    <p>
+                      <strong>{t('summary.allergies_main_label')}:</strong>{' '}
+                      {allergies_text}
+                    </p>
+                  )}
+                </>
+              )}
+              
+              {/* Notas del invitado */}
+              {guest.notes && guest.notes.trim() && (
+                 <div className="summary-item !block text-left pt-2 border-t border-dashed border-gray-200 mt-2">
+                    <span className="summary-item__label block mb-1">{t('form.notes.expander_label')}:</span>
+                    <span className="summary-item__value text-sm block whitespace-pre-wrap">{guest.notes}</span>
+                 </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Detalle de Acompañantes */}
-        {is_attending && companions_count > 0 && (
-          <div className="companions-detail mt-6 text-left">
-            {/* USO DE CLAVE EXISTENTE: 'ok.companions' -> "Acompañantes" */}
-            <h3 className="fieldset-legend">{t('ok.companions')}</h3>
+          {/* Sección: Detalle de Acompañantes */}
+          {is_attending && companions_count > 0 && (
+            <div className="rsvp-section mt-6 text-left">
+              <h3 className="rsvp-section__title">{t('summary.companions_section_title')}</h3>
 
-            <ul className="companions-list mt-3">
-              {companions.map((comp: any, index: number) => {
-                // Nombre del acompañante (o etiqueta genérica)
-                const comp_name = comp.name || t('form.companion_label');
-                const comp_is_child = Boolean(comp.is_child);
+              <ul className="rsvp-companion-list mt-3 space-y-4">
+                {companions.map((comp: any, index: number) => {
+                  const comp_name = comp.name || t('form.companion_label');
+                  const comp_is_child = Boolean(comp.is_child);
+                  const profileLabel = comp_is_child
+                    ? t('form.child')
+                    : t('form.adult');
 
-                // USO DE CLAVES EXISTENTES: 'form.child' / 'form.adult'
-                const comp_type_label = comp_is_child
-                  ? t('form.child')
-                  : t('form.adult');
+                  const companion_allergies_text = build_allergies_text(comp.allergies, t);
 
-                const comp_allergies_text = build_allergies_text(
-                  comp.allergies ?? null,
-                  t
-                );
+                  return (
+                    <li key={comp.id ?? index} className="rsvp-companion-card list-none">
+                      <strong>{comp_name}</strong>, que es {profileLabel.toLowerCase()},
+                      {companion_allergies_text ? (
+                        <>
+                          {' '}{t('summary.companion_has_allergies')}:
+                          <br />
+                          {companion_allergies_text}
+                        </>
+                      ) : (
+                        <> {t('summary.companion_no_allergies')}.</>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
 
-                return (
-                  <li key={comp.id ?? index} className="companions-list__item">
-                    <span className="companions-list__name">{comp_name}</span>
-                    <span className="companions-list__type">
-                      {' '}
-                      – {comp_type_label}
-                    </span>
-                    {comp_allergies_text !== 'N/A' && (
-                      <span className="companions-list__allergies">
-                        {' '}
-                        – {t('ok.allergies')}: {comp_allergies_text}
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+          {/* Botones de Acción */}
+          <div className="rsvp-footer-actions flex flex-col">
+            <Button
+              onClick={() => {
+                window.location.href = '/app/rsvp-form.html';
+              }}
+              className="w-full text-lg h-14 btn-primary shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all mb-4"
+            >
+              {t('ok.btn_edit')}
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => {
+                sessionStorage.removeItem('rsvp_token');
+                window.location.href = '/app/login.html';
+              }}
+              className="btn-dashed w-full"
+            >
+              {t('ok.btn_logout')}
+            </Button>
           </div>
-        )}
-
-        {/* Botones */}
-        <div className="grid grid-cols-2 gap-4 responsive-grid mt-8">
-          <Button
-            variant="secondary"
-            onClick={() => {
-              window.location.href = '/app/rsvp-form.html';
-            }}
-          >
-            {t('ok.btn_edit')}
-          </Button>
-
-          <Button
-            onClick={() => {
-              sessionStorage.removeItem('rsvp_token');
-              window.location.href = '/app/login.html';
-            }}
-          >
-            {t('ok.btn_logout')}
-          </Button>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </PageLayout>
   );
 };
 
-// -----------------------------------------------------------------------------
-// Componente auxiliar: fila de resumen (etiqueta + valor)
-// -----------------------------------------------------------------------------
+// --- Componente auxiliar: SummaryItem (actualmente no utilizado pero conservado) ---
 const SummaryItem: React.FC<{ label: string; value: string }> = ({
   label,
   value,

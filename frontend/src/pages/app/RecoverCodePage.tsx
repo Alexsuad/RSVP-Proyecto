@@ -1,23 +1,18 @@
 // File: frontend/src/pages/app/RecoverCodePage.tsx 
-//-----------------------------------------------------------------------------
-// Propósito: Página de recuperación de código de invitado.
-// Rol en el sistema: Permite al usuario solicitar el reenvío de su código de
-//            acceso mediante email o teléfono, manejando validaciones y
-//            feedback de errores (incluyendo Rate Limiting).
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// Propósito: Página de recuperación de código (Diseño final con ActionRow).
+// ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { guestService } from '@/services/guestService';
-import { Card, Button, FormField, Alert } from '@/components/common';
+import { Card, Button, FormField, Alert, ActionRow } from '@/components/common';
 import PageLayout from '@/components/PageLayout';
 
+const BG_IMAGE = 'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=2070&auto=format&fit=crop';
+
+
 const RecoverCodePage: React.FC = () => {
-    // -------------------------------------------------------------------------
-    // Bloque: Estado local
-    // Propósito: Gestionar inputs del formulario y estados de feedback (carga,
-    //            errores, éxito).
-    // -------------------------------------------------------------------------
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState<string | null>(null);
@@ -26,86 +21,75 @@ const RecoverCodePage: React.FC = () => {
     
     const { t } = useI18n();
 
-    // -------------------------------------------------------------------------
-    // Bloque: Manejo del envío (Submit)
-    // Propósito: Normalizar datos, validar requisitos mínimos y llamar a la API
-    //            gestionando respuestas 200, 429 y errores genéricos.
-    // -------------------------------------------------------------------------
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
         setMessage(null);
 
-        // Normalización previa a validación (Logic Fix)
         const emailClean = email.trim().toLowerCase();
         const phoneClean = phone.trim();
 
-        // Validación: Al menos un campo requerido
         if (!emailClean && !phoneClean) {
-            setErrors({ form: t('recover.invalid') }); // Alineado con Python
+            setErrors({ form: t('recover.invalid') });
             return;
         }
         
         setLoading(true);
 
         try {
-            // Envío de datos sanitizados
             await guestService.recoverCode({ 
                 email: emailClean || undefined, 
                 phone: phoneClean || undefined 
             });
-            
-            // Éxito: Mostramos mensaje y ocultamos formulario
             setMessage(t('recover.success'));
 
         } catch (err: any) {
             console.error('Recover error:', err);
-            
-            // Gestión de errores específica (repara el manejo de 429)
             const status = err?.response?.status ?? err?.status;
             let errorKey = 'recover.generic';
 
             if (status === 429) {
-                // Rate Limit: "Has realizado demasiados intentos..."
                 errorKey = 'recover.rate_limited'; 
-                // Nota: Si translations soporta {retry}, se podría formatear aquí,
-                // pero por simplicidad usamos el mensaje base o genérico.
             } else if (status === 400) {
                 errorKey = 'recover.invalid';
             }
-
             setErrors({ form: t(errorKey) });
         } finally {
             setLoading(false);
         }
     };
 
-    // -------------------------------------------------------------------------
-    // Bloque: Renderizado
-    // Propósito: Construir la UI centrada con tarjeta, manejando condicionalmente
-    //            el formulario o el mensaje de éxito.
-    // -------------------------------------------------------------------------
     return (
-        <PageLayout>
+        <PageLayout backgroundImage={BG_IMAGE}>
             <Card className="form-card">
-                {/* Cabecera común */}
-                <div className="text-center">
-                    <h1 className="form-title h1-small">{t('recover.title')}</h1>
-                    <p className="form-subtitle">{t('recover.subtitle')}</p>
+                
+                <div className="text-center pt-6 mb-6">
+                    <h1 className="form-title font-serif text-3xl mb-3 text-[var(--color-gold-primary)]">
+                        {t('recover.title')}
+                    </h1>
+                    <p className="form-subtitle text-[var(--color-text-muted)]">
+                        {t('recover.subtitle')}
+                    </p>
                 </div>
 
                 {message ? (
-                    // Estado de Éxito
                     <div className="form-body text-center animate-fade-in">
                         <Alert message={message} variant="success" />
-                        <a href="/app/login.html" className="form-footer__link inline-block mt-4">
-                            ⬅️ {t('recover.back')}
-                        </a>
+                        
+                        <div className="auth-card__footer mt-6">
+                            <ActionRow 
+                                href="/app/login.html"
+                                icon={
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M19 12H5m7 7l-7-7 7-7"/>
+                                    </svg>
+                                }
+                                text={t('recover.back')} 
+                            />
+                        </div>
                     </div>
                 ) : (
-                    // Formulario de Solicitud
-                    <form onSubmit={handleSubmit} className="form-body space-y-4" noValidate>
-                        {errors.form && <Alert message={errors.form} variant="danger" />}
+                    <form onSubmit={handleSubmit} className="form-body space-y-5" noValidate>
                         
                         <FormField 
                             id="email" 
@@ -113,7 +97,6 @@ const RecoverCodePage: React.FC = () => {
                             type="email" 
                             value={email} 
                             onChange={(e) => setEmail(e.target.value)} 
-                            error={errors.form ? ' ' : undefined} 
                         />
                         <FormField 
                             id="phone" 
@@ -121,21 +104,37 @@ const RecoverCodePage: React.FC = () => {
                             type="tel" 
                             value={phone} 
                             onChange={(e) => setPhone(e.target.value)} 
-                            error={errors.form ? ' ' : undefined} 
                         />
                         
-                        <Button type="submit" loading={loading} disabled={loading}>
+                        <Button 
+                            type="submit" 
+                            loading={loading} 
+                            disabled={loading} 
+                            className="w-full mt-4 btn-primary"
+                        >
                             {t('recover.submit')}
                         </Button>
+
+                        {/* Error Global */}
+                        {errors.form && (
+                            <div style={{ marginTop: '1.5rem', color: '#dc3545', textAlign: 'center' }}>
+                                <Alert message={errors.form} variant="danger" />
+                            </div>
+                        )}
                     </form>
                 )}
 
-                {/* Pie de página (siempre visible si no hay éxito, o condicional) */}
                 {!message && (
-                    <div className="form-footer">
-                        <a href="/app/login.html" className="form-footer__link">
-                            ⬅️ {t('recover.back')}
-                        </a>
+                    <div className="auth-card__footer mt-8">
+                        <ActionRow 
+                            href="/app/login.html"
+                            icon={
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M19 12H5m7 7l-7-7 7-7"/>
+                                </svg>
+                            }
+                            text={t('recover.back')} 
+                        />
                     </div>
                 )}
             </Card>

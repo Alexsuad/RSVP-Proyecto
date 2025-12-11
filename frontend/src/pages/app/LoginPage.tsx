@@ -13,7 +13,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { guestService } from '@/services/guestService';
-import { Card, Button, FormField, Alert } from '@/components/common';
+import { Card, Button, FormField, Alert, ActionRow } from '@/components/common';
+
 import PageLayout from '@/components/PageLayout';
 
 // ----------------------------------------------------------------------------------
@@ -37,6 +38,10 @@ const sanitizeContact = (
   const phone = v.replace(/[^\d+]/g, '');
   return { phone: phone || undefined };
 };
+
+// Imagen de fondo específica (Rings/Love)
+// Imagen de fondo específica (Wedding Flowers/Soft)
+const BG_IMAGE = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop';
 
 const LoginPage: React.FC = () => {
   // -------------------------------------------------------------------------------
@@ -110,78 +115,118 @@ const LoginPage: React.FC = () => {
   // Renderizado de la vista
   // -------------------------------------------------------------------------------
   return (
-    <PageLayout>
-      <div
-        className="flex items-center justify-center p-4"
-        style={{ minHeight: 'calc(100vh - 200px)' }}
-      >
-        <Card className="form-card w-full max-w-md mx-auto">
-          {/* Cabecera de la tarjeta de login */}
-          <div className="text-center mb-8">
-            <h1 className="form-title font-serif text-3xl mb-3 text-[var(--color-heading)]">
-              {t('login.title')}
-            </h1>
-            <p className="form-subtitle text-[var(--color-text)] opacity-80">
-              {t('login.intro')}
-            </p>
-          </div>
+    <PageLayout backgroundImage={BG_IMAGE}>
+      <Card className="form-card relative w-full max-w-md mx-auto">
+        {/* LanguageSwitcher eliminado (manejado por PageLayout) */}
 
-          {/* Cuerpo del formulario de login */}
-          <form
-            onSubmit={handleSubmit}
-            className="form-body space-y-6"
-            noValidate
+        <div className="text-center mb-8 pt-6">
+          <h1 className="form-title font-serif text-3xl mb-3 text-[var(--color-gold-primary)]">
+            {t('login.title')}
+          </h1>
+          <p className="form-subtitle text-[var(--color-text-muted)]">
+            {t('login.intro')}
+          </p>
+        </div>
+
+        {/* Cuerpo del formulario de login */}
+        <form
+          onSubmit={handleSubmit}
+          className="form-body space-y-6"
+          noValidate
+        >
+
+
+          <FormField
+            id="guest_code"
+            label={t('login.code')}
+            value={guestCode}
+            onChange={(e) => setGuestCode(e.target.value)}
+            required
+            placeholder={t('login.code_placeholder')}
+            autoCapitalize="characters"
+          />
+
+          <FormField
+            id="contact"
+            label={t('login.contact')}
+            type="text"
+            value={contactInput}
+            onChange={(e) => setContactInput(e.target.value)}
+            required
+            placeholder={t('login.contact_placeholder')}
+          />
+
+          <Button
+            type="submit"
+            loading={loading}
+            disabled={loading}
+            className="w-full mt-4 btn-primary"
           >
-            {error && <Alert message={error} variant="danger" />}
+            {loading ? t('login.validating') : t('login.submit')}
+          </Button>
 
-            <FormField
-              id="guest_code"
-              label={t('login.code')}
-              value={guestCode}
-              onChange={(e) => setGuestCode(e.target.value)}
-              required
-              placeholder={t('login.code_placeholder')}
-              autoCapitalize="characters"
-            />
 
-            <FormField
-              id="contact"
-              label={t('login.contact')}
-              type="text"
-              value={contactInput}
-              onChange={(e) => setContactInput(e.target.value)}
-              required
-              placeholder={t('login.contact_placeholder')}
-            />
+          {/* Nuevo lugar para el error con margen superior */}
+          {error && (
+            <div className="form-error-container">
+              <Alert message={error} variant="danger" />
+            </div>
+          )}
 
-            <Button
-              type="submit"
-              loading={loading}
-              disabled={loading}
-              className="w-full mt-4 btn-primary"
-            >
-              {loading ? t('login.validating') : t('login.submit')}
-            </Button>
-          </form>
+          {/* Nota de seguridad (Micro-copy) */}
+          <p className="text-xs text-center text-gray-400 mt-4 leading-snug">
+            {t('login.security_note')}
+          </p>
+        </form>
 
-          {/* Enlaces de ayuda relacionados con el login */}
-          <div className="form-footer mt-8 pt-6 border-t border-gray-100 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-            <a
-              href="/app/recover-code.html"
-              className="hover:text-[var(--color-primary)] hover:underline transition-colors"
-            >
-              {t('login.forgot')}
-            </a>
-            <span className="text-gray-300">|</span>
-            <a
-              href="/app/request-access.html"
-              className="hover:text-[var(--color-primary)] hover:underline transition-colors"
-            >
-              {t('nav.request')}
-            </a>
-          </div>
-        </Card>
-      </div>
+        {/* Enlaces de ayuda relacionados con el login */}
+        {/* Pie de página con enlaces de ayuda mejorados (Filas de Acción) */}
+        <div className="auth-card__footer">
+          
+          {/* Opción 1: Recuperar código */}
+          <ActionRow
+            href="/app/recover-code.html"
+            icon={
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+              </svg>
+            }
+            text={t('login.forgot')}
+          />
+          
+          {/* Opción 2: Solicitar acceso */}
+          <ActionRow
+            href="/app/request-access.html"
+            icon={
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            }
+            subtext={t('login.no_code_prompt')}
+            text={t('login.request_access_link')}
+          />
+
+        </div>
+      </Card>
     </PageLayout>
   );
 };
