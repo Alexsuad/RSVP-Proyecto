@@ -143,6 +143,37 @@ export const Loader: React.FC = () => (
 );
 
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Componente: ActionRow
+// Link de acción visualmente destacado para opciones secundarias (Login, etc.)
+// Utiliza un diseño de fila con icono y texto, optimizado para UX móvil.
+// -----------------------------------------------------------------------------
+interface ActionRowProps {
+  href: string;               // URL de destino del enlace
+  icon: React.ReactNode;      // Elemento SVG o icono a mostrar
+  text: string;               // Texto principal del enlace
+  subtext?: string;           // (Opcional) Texto secundario o descriptivo
+}
+
+export const ActionRow: React.FC<ActionRowProps> = ({
+  href,
+  icon,
+  text,
+  subtext,
+}) => {
+  return (
+    <a href={href} className="auth-card__action-row">
+      <div className="auth-card__icon">{icon}</div>
+      <div className="auth-card__text-group">
+        {subtext && <span className="auth-card__text-muted">{subtext}</span>}
+        <span className="auth-card__link-text">{text}</span>
+      </div>
+    </a>
+  );
+};
+
+
+// -----------------------------------------------------------------------------
 // Componente: AdminLayout
 // Estructura base para las páginas de administración (dashboard, evento, invitados).
 // Renderiza la cabecera con navegación y un contenedor principal para el contenido.
@@ -165,10 +196,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   ];
 
   return (
-    <div className="admin-layout">
+    <div className="admin-scope admin-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header className="admin-header">
-        <nav className="container admin-nav">
-          <h1 className="admin-nav__title">Panel de gestión de invitados</h1>
+        <nav className="admin-nav">
+          <h1 className="admin-nav__title">Panel de gestión</h1>
           <div className="admin-nav__links">
             {navItems.map((item) => (
               <a
@@ -185,7 +216,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </nav>
       </header>
 
-      <main className="container admin-main">
+      <main className="admin-page">
         {children}
       </main>
     </div>

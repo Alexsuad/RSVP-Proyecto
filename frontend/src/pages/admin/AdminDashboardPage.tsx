@@ -7,8 +7,8 @@
 //   - Muestra resumenes de asistencia, pendientes, etc.
 //   - Provee accesos directos a secciones clave.
 // Estado:
-//   - Actualmente usa DATOS MOCK (MOCK_KPI_DATA).
-//   - Preparado para futura integración con endpoint /api/admin/stats.
+//   - Obtiene KPIs reales desde /api/admin/stats usando adminService.getStats().
+//   - Muestra alerta de error si falla la carga.
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -88,72 +88,73 @@ const AdminDashboardPage: React.FC = () => {
         <AdminLayout currentPage="dashboard">
             <h2 className="admin-page-title">Resumen general de invitados</h2>
             
-            <div className="kpi-grid">
+            <div className="admin-grid-kpi">
                 <KpiCard 
                     title="Invitados totales" 
                     value={data.total_guests} 
                     subtext="Lista completa"
-                    colorClass="kpi-value--neutral" 
                 />
                 <KpiCard 
                     title="Respuestas recibidas"
                     value={data.responses_received}
                     subtext="Han contestado Sí o No"
-                    colorClass="kpi-value--neutral"
                 />
                 <KpiCard 
                     title="Asistentes confirmados" 
                     value={data.confirmed_attendees} 
                     subtext="Han dicho SÍ"
-                    colorClass="kpi-value--confirmed" 
+                    status="confirmed"
                 />
                 <KpiCard 
                     title="Pendientes de respuesta" 
                     value={data.pending_rsvp} 
                     subtext="Sin contestar"
-                    colorClass="kpi-value--pending" 
+                    status="pending"
                 />
                 <KpiCard 
                     title="No asisten" 
                     value={data.not_attending} 
                     subtext="Han dicho NO"
-                    colorClass="kpi-value--no" 
+                    status="declined"
                 />
                 <KpiCard 
                     title="Personas Totales" 
                     value={data.total_companions} 
                     subtext="Confirmados (Adultos + Niños)"
-                    colorClass="kpi-value--neutral" 
                 />
                 <KpiCard 
                     title="Niños" 
                     value={data.total_children} 
                     subtext="Menores confirmados"
-                    colorClass="kpi-value--neutral" 
                 />
                 <KpiCard 
                     title="Alergias / Dietas" 
                     value={data.guests_with_allergies} 
                     subtext="Registros con alergias"
-                    colorClass="kpi-value--warning" 
+                    status="warning"
                 />
             </div>
 
-            <div className="dashboard-actions">
-                <h3 className="dashboard-actions__title">Acciones rápidas</h3>
-                <div className="dashboard-actions__grid">
-                    <Button 
-                        variant="primary" 
-                        onClick={() => window.location.href = '/admin/guests.html'}
-                    >
-                        Ver listado detallado de invitados
-                    </Button>
-                    <Button 
-                        variant="secondary" 
-                        onClick={handleExport}
-                    >
-                        Exportar datos (CSV/Excel)
-                    </Button>
+            <div className="admin-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h3 className="admin-section-title" style={{ marginBottom: '0.5rem' }}>Acciones rápidas</h3>
+                        <p className="admin-text-muted">Accesos directos a las funciones más usadas</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <Button 
+                            className="admin-btn-primary"
+                            onClick={() => window.location.href = '/admin/guests.html'}
+                        >
+                            Ver listado detallado
+                        </Button>
+                        <Button 
+                            className="admin-btn-secondary"
+                            onClick={handleExport}
+                        >
+                            Exportar datos
+                        </Button>
+                    </div>
                 </div>
             </div>
         </AdminLayout>
@@ -168,15 +169,35 @@ interface KpiCardProps {
     title: string;
     value: number;
     subtext: string;
-    colorClass: string;
+    status?: 'confirmed' | 'pending' | 'declined' | 'warning' | 'neutral';
 }
 
-const KpiCard: React.FC<KpiCardProps> = ({ title, value, subtext, colorClass }) => (
-    <Card className="kpi-card">
-        <h3 className="kpi-title">{title}</h3>
-        <p className={`kpi-value ${colorClass}`}>{value}</p>
-        <p className="kpi-subtext">{subtext}</p>
-    </Card>
-);
+const KpiCard: React.FC<KpiCardProps> = ({ title, value, subtext, status = 'neutral' }) => {
+    let colorClass = '';
+    
+    // Mapeo simple de status a colores de texto según CSS nuevo o existente
+    // En admin.css definimos .admin-kpi-value pero no modificadores de color específicos en texto allí,
+    // salvo que los añadamos. Usaremos estilos inline o clases auxiliares si es necesario.
+    // Revisando admin.css, no pusimos modificadores de color en .admin-kpi-value.
+    // Usaremos las clases de utilidad de texto si existen, o definimos color dinámico.
+    
+    const getColor = () => {
+        switch(status) {
+            case 'confirmed': return '#03543f';
+            case 'pending': return '#723b13';
+            case 'declined': return '#9b1c1c';
+            case 'warning': return '#c53030';
+            default: return 'var(--color-admin-primary)';
+        }
+    }
+
+    return (
+        <div className="admin-card admin-kpi-card" style={{ marginBottom: 0 }}>
+            <h3 className="admin-kpi-label">{title}</h3>
+            <p className="admin-kpi-value" style={{ color: getColor() }}>{value}</p>
+            <p className="admin-text-muted" style={{ fontSize: '0.75rem' }}>{subtext}</p>
+        </div>
+    );
+};
 
 export default AdminDashboardPage;

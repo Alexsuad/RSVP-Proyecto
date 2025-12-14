@@ -94,9 +94,11 @@ const RequestAccessPage: React.FC = () => {
           <h1 className="form-title font-serif text-3xl mb-3 text-[var(--color-gold-primary)]">
             {t('request.title')}
           </h1>
-          <p className="form-subtitle text-[var(--color-text-muted)]">
-            {t('request.intro')}
-          </p>
+          {!message && (
+            <p className="form-subtitle text-[var(--color-text-muted)]">
+              {t('request.intro')}
+            </p>
+          )}
         </div>
 
         {message ? (

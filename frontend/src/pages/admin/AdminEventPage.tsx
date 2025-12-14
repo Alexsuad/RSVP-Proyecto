@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Card, AdminLayout, FormField } from '@/components/common';
+import { AdminLayout, FormField } from '@/components/common';
+import '@/styles/admin.css';
 
 const AdminEventPage: React.FC = () => {
     // Estado local para los campos del formulario
@@ -24,22 +25,34 @@ const AdminEventPage: React.FC = () => {
 
     return (
         <AdminLayout currentPage="event">
-            <h2 className="admin-page-title">Configuración del evento</h2>
+            <div className="admin-page-header">
+                <div>
+                    <h2 className="admin-page-title" style={{ marginBottom: 0 }}>Configuración del evento</h2>
+                    <p className="admin-text-muted">Personaliza la información que verán tus invitados</p>
+                </div>
+                <div className="admin-page-header__actions">
+                    {/* Botón de guardar simulado */}
+                    <button className="admin-btn-primary">Guardar Cambios</button>
+                </div>
+            </div>
             
             <div className="admin-grid">
                 {/* Columna Izquierda: Formulario */}
-                <div className="admin-grid__col">
-                    <Card>
-                        <h3 className="card-title mb-4">Datos del evento</h3>
-                        <form className="space-y-4">
-                            <FormField 
-                                id="nombreEvento"
-                                label="Nombre del evento"
-                                value={eventData.nombreEvento}
-                                onChange={handleChange}
-                                placeholder="Ej: Boda de Alex y Ruxandra"
-                            />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <div className="admin-card">
+                        <h3 className="admin-section-title">Datos del evento</h3>
+                        <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div>
+                                <FormField 
+                                    id="nombreEvento"
+                                    label="Nombre del evento"
+                                    value={eventData.nombreEvento}
+                                    onChange={handleChange}
+                                    placeholder="Ej: Boda de Alex y Ruxandra"
+                                />
+                            </div>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                                 <FormField 
                                     id="fechaEvento"
                                     label="Fecha del evento"
@@ -55,86 +68,100 @@ const AdminEventPage: React.FC = () => {
                                     placeholder="Ej: Bucarest, Rumanía"
                                 />
                             </div>
-                            <FormField 
-                                id="lugarRecepcion"
-                                label="Lugar de recepción"
-                                value={eventData.lugarRecepcion}
-                                onChange={handleChange}
-                                placeholder="Ej: Salón Terra Events"
-                            />
-                            <FormField 
-                                id="mensajeBienvenida"
-                                label="Mensaje de bienvenida"
-                                as="textarea"
-                                rows={3}
-                                value={eventData.mensajeBienvenida}
-                                onChange={handleChange}
-                            />
-                            <FormField 
-                                id="mensajeDresscode"
-                                label="Dress code / recomendaciones"
-                                as="textarea"
-                                rows={2}
-                                value={eventData.mensajeDresscode}
-                                onChange={handleChange}
-                            />
-                            <FormField 
-                                id="mensajeNinos"
-                                label="Información sobre niñas y niños"
-                                as="textarea"
-                                rows={2}
-                                value={eventData.mensajeNinos}
-                                onChange={handleChange}
-                            />
+
+                            <div>
+                                <FormField 
+                                    id="lugarRecepcion"
+                                    label="Lugar de recepción"
+                                    value={eventData.lugarRecepcion}
+                                    onChange={handleChange}
+                                    placeholder="Ej: Salón Terra Events"
+                                />
+                            </div>
+
+                            <div>
+                                <FormField 
+                                    id="mensajeBienvenida"
+                                    label="Mensaje de bienvenida"
+                                    as="textarea"
+                                    rows={3}
+                                    value={eventData.mensajeBienvenida}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            <div>
+                                <FormField 
+                                    id="mensajeDresscode"
+                                    label="Dress code / recomendaciones"
+                                    as="textarea"
+                                    rows={2}
+                                    value={eventData.mensajeDresscode}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            
+                            <div>
+                                <FormField 
+                                    id="mensajeNinos"
+                                    label="Información sobre niñas y niños"
+                                    as="textarea"
+                                    rows={2}
+                                    value={eventData.mensajeNinos}
+                                    onChange={handleChange}
+                                />
+                            </div>
                         </form>
-                    </Card>
+                    </div>
                 </div>
 
                 {/* Columna Derecha: Vista Previa */}
-                <div className="admin-grid__col">
-                    <Card className="preview-card sticky top-4">
-                        <h3 className="card-title mb-4 text-gray-500 text-sm uppercase tracking-wider">Vista previa para los invitados</h3>
+                <div>
+                    <div className="admin-card" style={{ position: 'sticky', top: '1rem' }}>
+                        <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+                            <h3 className="admin-text-muted" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>Vista previa para invitados</h3>
+                        </div>
                         
-                        <div className="preview-content border rounded-lg p-6 bg-gray-50">
-                            <h1 className="text-2xl font-serif text-center mb-2 text-gray-800">
+                        <div style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '2rem', backgroundColor: '#fafafa' }}>
+                            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', color: 'var(--color-admin-primary)', textAlign: 'center', marginBottom: '0.5rem' }}>
                                 {eventData.nombreEvento || 'Nombre del Evento'}
                             </h1>
                             
-                            <div className="text-center text-gray-600 mb-6 flex justify-center gap-2 text-sm uppercase tracking-wide">
+                            <div style={{ textAlign: 'center', color: '#666', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                                 <span>{eventData.fechaEvento || 'Fecha'}</span>
                                 <span>•</span>
                                 <span>{eventData.ciudad || 'Ciudad'}</span>
                             </div>
 
-                            <div className="mb-6 text-center">
-                                <p className="font-semibold text-gray-700">Recepción:</p>
-                                <p className="text-gray-600">{eventData.lugarRecepcion || 'Lugar de la recepción'}</p>
+                            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                                <p style={{ fontWeight: 600, color: '#444', marginBottom: '0.25rem' }}>Recepción:</p>
+                                <p style={{ color: '#666' }}>{eventData.lugarRecepcion || 'Lugar de la recepción'}</p>
                             </div>
 
-                            <div className="mb-6">
-                                <p className="text-gray-700 italic text-center leading-relaxed">
+                            <div style={{ marginBottom: '2rem' }}>
+                                <p style={{ fontStyle: 'italic', textAlign: 'center', color: '#555', lineHeight: '1.6' }}>
                                     "{eventData.mensajeBienvenida || 'Mensaje de bienvenida...'}"
                                 </p>
                             </div>
 
                             {(eventData.mensajeDresscode || eventData.mensajeNinos) && (
-                                <div className="border-t pt-4 mt-4 space-y-3 text-sm">
+                                <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.9rem' }}>
                                     {eventData.mensajeDresscode && (
                                         <div>
-                                            <span className="font-semibold text-gray-700">Dress Code:</span>
-                                            <p className="text-gray-600">{eventData.mensajeDresscode}</p>
+                                            <span style={{ fontWeight: 600, color: '#444' }}>Dress Code:</span>
+                                            <p style={{ color: '#666', marginTop: '0.25rem' }}>{eventData.mensajeDresscode}</p>
                                         </div>
                                     )}
                                     {eventData.mensajeNinos && (
                                         <div>
-                                            <span className="font-semibold text-gray-700">Niños:</span>
-                                            <p className="text-gray-600">{eventData.mensajeNinos}</p>
+                                            <span style={{ fontWeight: 600, color: '#444' }}>Niños:</span>
+                                            <p style={{ color: '#666', marginTop: '0.25rem' }}>{eventData.mensajeNinos}</p>
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </AdminLayout>
