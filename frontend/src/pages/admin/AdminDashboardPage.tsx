@@ -44,9 +44,7 @@ const AdminDashboardPage: React.FC = () => {
         loadStats();
     }, []);
     
-    const handleExport = () => {
-        console.log("Acción de exportar pendiente de implementación.");
-    };
+    const handleExport = () => {};
 
     if (loading) {
         return (

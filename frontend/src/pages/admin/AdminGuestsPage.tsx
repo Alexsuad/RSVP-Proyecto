@@ -75,11 +75,11 @@ const AdminGuestsPage: React.FC = () => {
     // -------------------------------------------------------------------------
 
     const handleImport = () => {
-        console.log("Funcionalidad de importación pendiente (Tarea futura)");
+        // Funcionalidad de importación pendiente de implementación
     };
 
     const handleExport = () => {
-        console.log("Funcionalidad de exportación pendiente");
+        // Funcionalidad de exportación pendiente de implementación
     };
 
     // --- Funcionalidad de Creación (Create) ---
