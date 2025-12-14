@@ -1,0 +1,440 @@
+/* File: frontend/src/styles/admin.css
+   ─────────────────────────────────────────────────────────────────────────────
+   Propósito: Estilos específicos para el panel de administración.
+   Rol: Implementa el tema "Gold & Gray" unificado con la app, usando BEM.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* 1. SCOPE & THEME VARIABLES */
+.admin-scope {
+    /* Redefinimos variables admin para igualar el tema de la app (Gold/Gray/Sand) */
+    --color-admin-primary: #b48a50;  /* Gold Primary (App match) */
+    --color-admin-primary-dark: #96703d; /* Gold Dark */
+    --color-admin-bg: #f5f5f5;       /* Light Gray Background (Clean) */
+    --color-admin-surface: #ffffff;  /* White Surface */
+    --color-admin-text: #333333;
+    --color-admin-text-muted: #666666;
+    --color-admin-border: #e0e0e0;
+    
+    font-family: var(--font-body, 'Inter', sans-serif);
+    background-color: var(--color-admin-bg);
+    /* Subtle texture to reduce whiteness as requested */
+    background-image: linear-gradient(135deg, #fdfbf7 25%, transparent 25%), 
+                      linear-gradient(225deg, #fdfbf7 25%, transparent 25%), 
+                      linear-gradient(45deg, #fdfbf7 25%, transparent 25%), 
+                      linear-gradient(315deg, #fdfbf7 25%, transparent 25%);
+    background-position: 10px 0, 10px 0, 0 0, 0 0;
+    background-size: 20px 20px;
+    background-repeat: repeat;
+    color: var(--color-admin-text);
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+/* 2. BASE CLASSES */
+
+/* Contenedor principal de pagina */
+.admin-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* HEADER & NAVBAR (Restored) */
+.admin-header {
+    background-color: var(--color-admin-surface);
+    border-bottom: 1px solid var(--color-admin-border);
+    padding: 0 2rem;
+}
+
+.admin-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-nav__title {
+    font-family: var(--font-body) !important; /* Force Sans Serif */
+    font-size: 1.25rem;
+    color: var(--color-admin-primary);
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-nav__links {
+    display: flex;
+    gap: 24px; /* Defined spacing */
+    height: 100%;
+}
+
+.admin-nav__link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--color-admin-text-muted);
+    font-weight: 500;
+    font-size: 0.95rem;
+    height: 100%;
+    border-bottom: 3px solid transparent; /* Prepare for active */
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-nav__link:hover {
+    color: var(--color-admin-primary);
+}
+
+.admin-nav__link--active {
+    color: var(--color-admin-primary);
+    border-bottom-color: var(--color-admin-primary); /* Gold active border */
+}
+
+/* Tarjetas */
+.admin-card {
+    background-color: var(--color-admin-surface);
+    border-radius: 12px; /* Smooth radius */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow */
+    padding: 24px;
+    border: 1px solid var(--color-admin-border);
+    margin-bottom: 1.5rem;
+}
+
+/* Tipografía */
+.admin-page-title {
+    font-family: var(--font-body) !important; /* Force Clean Sans-Serif */
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-admin-text);
+    margin-bottom: 1.5rem;
+    /* Gold Line Detail */
+    position: relative;
+    display: inline-block;
+}
+
+.admin-page-title::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 3px;
+    background-color: var(--color-admin-primary);
+    margin-top: 0.5rem;
+    border-radius: 2px;
+}
+
+.admin-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-admin-text);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-admin-border);
+    display: block;
+    padding-bottom: 0.5rem;
+}
+
+.admin-text-muted {
+    color: var(--color-admin-text-muted);
+    font-size: 0.875rem;
+    font-family: var(--font-body);
+}
+
+/* 3. BUTTONS */
+.admin-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-admin-primary);
+    color: white;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.admin-btn-primary:hover {
+    background-color: var(--color-admin-primary-dark);
+}
+
+.admin-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: var(--color-admin-text);
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-admin-border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.admin-btn-secondary:hover {
+    border-color: var(--color-admin-primary);
+    color: var(--color-admin-primary);
+}
+
+/* Link peligroso (ej: Eliminar) */
+.admin-link-danger {
+    color: #e53e3e;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.admin-link-danger:hover {
+    text-decoration: underline;
+}
+
+/* 4. UTILITIES & COMPONENTS */
+
+/* Toolbar (Buscadores, filtros) */
+.admin-toolbar {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-admin-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Tablas */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.admin-table thead th {
+    background-color: #f8f9fa;
+    color: var(--color-admin-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-admin-border);
+}
+
+.admin-table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-admin-border);
+    color: var(--color-admin-text);
+}
+
+.admin-table-row--striped:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Badges de Estado */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.badge-status--confirmed {
+    background-color: #def7ec;
+    color: #03543f; /* Verde */
+}
+
+.badge-status--pending {
+    background-color: #fdf6b2; /* Amarillo */
+    color: #723b13;
+}
+
+.badge-status--declined {
+    background-color: #fde8e8; /* Rojo */
+    color: #9b1c1c;
+}
+
+/* KPI Cards */
+.admin-kpi-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.admin-kpi-value {
+    font-size: 2rem; /* Reduced from 2.5rem */
+    font-weight: 700;
+    color: var(--color-admin-primary);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.admin-kpi-label {
+    font-size: 0.75rem; /* Reduced */
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-admin-text-muted);
+    letter-spacing: 0.05em;
+}
+
+/* Form Helpers */
+/* Target almost ALL inputs to catch default (no type) and explicit types */
+.admin-scope input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="image"]):not([type="range"]),
+.admin-scope select,
+.admin-scope textarea {
+    width: 100%;
+    padding: 0.75rem 1rem; /* Uniform padding */
+    height: 48px;           /* FORCE Consistent height */
+    min-height: 48px;       
+    border: 1px solid var(--color-admin-border);
+    border-radius: 6px;
+    font-family: var(--font-body) !important; /* Force Font */
+    font-size: 0.95rem;     /* Refined size */
+    color: var(--color-admin-text);
+    background-color: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    appearance: none;       /* Remove browser default styling (Safari/iOS) */
+}
+
+.admin-scope textarea {
+    height: auto;
+    min-height: auto; /* Textarea determines its own height via rows */
+    padding: 0.75rem;
+}
+
+.admin-scope label {
+    font-family: var(--font-body) !important;
+    color: var(--color-admin-text-muted);
+    font-weight: 500;
+}
+
+.admin-scope input:focus,
+.admin-scope select:focus,
+.admin-scope textarea:focus {
+    border-color: var(--color-admin-primary);
+    box-shadow: 0 0 0 3px rgba(180, 138, 80, 0.15); /* Softer Gold aura */
+}
+
+/* Alerts */
+.admin-alert-error {
+    background-color: #fde8e8;
+    color: #c53030;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border: 1px solid #feb2b2;
+    margin-top: 1rem;
+}
+
+/* Layout Grids */
+.admin-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .admin-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.admin-grid-kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Login Wrapper (Centering) */
+.admin-login-wrapper {
+    position: relative; /* Context for pseudo-element */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+    background-color: #ffffff; /* Base color */
+    overflow: hidden;
+}
+
+/* Subtle, barely visible floral background */
+.admin-login-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/assets/admin_login_floral.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.35; /* "Apenas se vea" - Very subtle */
+    z-index: 0;
+}
+
+.admin-login-wrapper .admin-card {
+    position: relative; /* Lift above background */
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    margin: 0; 
+    
+    /* Clean white card */
+    background-color: white; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Modals */
+.admin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.admin-modal-content {
+    background: white;
+    border-radius: 8px; /* admin radius */
+    padding: 2rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--color-admin-primary);
+}
+
+.admin-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+

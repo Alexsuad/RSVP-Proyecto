@@ -1,0 +1,45 @@
+:root {
+  /* ----------------------------------------------------------------------- */
+  /* PALETTE: App (Wedding Theme) - Gold & Sand */
+  /* ----------------------------------------------------------------------- */
+  --color-gold-primary: #b48a50;
+  --color-gold-hover: #96703d;
+  --color-sand-bg: #fdfcf9;
+  --color-white: #ffffff;
+  --color-text-main: #333333;
+  --color-text-muted: #666666;
+
+  /* ----------------------------------------------------------------------- */
+  /* PALETTE: Admin (Professional Theme) - Blue & Gray */
+  /* ----------------------------------------------------------------------- */
+  --color-admin-primary: #2c3e50;
+  --color-admin-accent: #3498db;
+  --color-admin-bg: #f4f6f9;
+  --color-admin-card: #ffffff;
+  --color-border: #dfe6e9;
+
+  /* ----------------------------------------------------------------------- */
+  /* GLOBAL STATES */
+  /* ----------------------------------------------------------------------- */
+  --color-success: #28a745;
+  --color-error: #dc3545;
+  --color-warning: #ffc107;
+
+  /* ----------------------------------------------------------------------- */
+  /* TYPOGRAPHY */
+  /* ----------------------------------------------------------------------- */
+  --font-display: 'Playfair Display', serif; /* Used for App Titles */
+  --font-body: 'Inter', sans-serif;          /* Used for Body & Admin */
+
+  /* ----------------------------------------------------------------------- */
+  /* SPACING & RADIUS */
+  /* ----------------------------------------------------------------------- */
+  --radius-sm: 4px;   /* Admin inputs/btns */
+  --radius-md: 8px;   /* App inputs/btns */
+  --radius-lg: 16px;  /* App Cards */
+  
+  --spacing-unit: 8px; /* Base unit */
+  
+  --shadow-soft: 0 10px 25px rgba(0,0,0,0.05); /* App Card */
+  --shadow-hard: 0 1px 3px rgba(0,0,0,0.1);    /* Admin Card */
+}
