@@ -23,6 +23,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "nav.recover": "Recuperar Código",
         "nav.login_prompt": "Iniciar sesión",
         "nav.home": "Inicio",
+        "common.language": "Idioma",
+        "hero.tagline": "Una fecha, un lugar, un amor eterno. Solo falta tu presencia.",
         # --- Login ---
         "login.title": "💍 Confirmar asistencia",
         "login.intro": "¡Qué alegría que estés aquí! Ingresa los datos de tu invitación para continuar.",
@@ -39,6 +41,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "login.errors_rate_limit": "Has superado el número máximo de intentos. Por favor, espera unos minutos y vuelve a intentarlo.",
         "login.code_placeholder": "Ej: ALEX-1234",
         "login.contact_placeholder": "Ej: +57... o nombre@mail.com",
+        "login.security_note": "Tus datos se utilizarán únicamente para verificar tu identidad y gestionar tu invitación.",
+        "login.no_code_prompt": "¿No tienes tu código?",
+        "login.request_access_link": "Solicita acceso aquí",
         # --- Solicitar Acceso ---
         "request.title": "Solicita tu acceso",
         "request.intro": "Para identificarte, indícanos tu nombre completo, los últimos 4 dígitos de tu teléfono y el email donde quieres recibir tu enlace.",
@@ -101,7 +106,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "form.companion_allergies_label": "Alergias e intolerancias del acompañante (opcional)",
         # --- Acompañantes ---
         "form.companions_title": "Acompañantes",
-        "form.companions_db_note": "La cantidad de acompañantes permitidos depende de tu invitación.",
+        "form.companions_db_note": "Tu invitación te permite venir con hasta",
+        "form.companions_suffix": "acompañantes adicionales.",
         "form.no_companions_info": "Tu invitación no incluye acompañantes.",
         "form.bring_companions": "¿Vienes acompañada/o?",
         "form.companions_count": "¿Cuántas personas te acompañarán?",
@@ -109,6 +115,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "form.field_name": "Nombre",
         "form.placeholder_fullname": "Nombre y apellido",
         "form.field_name_caption": "Nombre completo del acompañante.",
+        "form.profile_label": "Perfil",
         "form.child_or_adult": "Tipo",
         "form.child_or_adult_caption": "Indica si es adulto o niño.",
         "form.adult": "Adulto",
@@ -165,7 +172,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "recover.invalid": "Solicitud inválida. Verifica los datos e inténtalo de nuevo.",
         "recover.generic": "No pudimos procesar la solicitud en este momento. Inténtalo más tarde.",
         "recover.network": "No hay conexión con el servidor. Detalle: {err}",
-        "recover.back": "⬅️ Volver al inicio",
+        "recover.back": "Volver al inicio",
         "recover.go_rsvp": "Ir al formulario RSVP",
         # --- Fechas / meses ---
         "date.month.01": "enero",
@@ -247,6 +254,34 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "email.confirmation.label.allergies": "Alergias",
         "email.confirmation.label.notes": "Notas",
         "email.confirmation.footer.more_details": "Te iremos informando con más detalles conforme se acerque la fecha.",
+        # --- Validaciones ---
+        "val_required": "Este campo es obligatorio.",
+        "val_email": "El formato del email no es válido.",
+        "val_last4": "Deben ser exactamente 4 dígitos.",
+        "val_full_name_length": "El nombre es muy corto o demasiado largo.",
+        "val_full_name_chars": "El nombre contiene caracteres no válidos.",
+        "val_guest_code": "El formato del código no es válido.",
+
+        # --- Resumen de confirmación (página confirmed) ---
+        "summary.title": "Este es un resumen de tu confirmación:",
+        "summary.main_guest_label": "Invitado principal",
+        "summary.email_label": "Email",
+        "summary.phone_label": "Teléfono",
+        "summary.adults_label": "Adultos",
+        "summary.children_label": "Niños",
+        "summary.companions_label": "Acompañantes",
+        "summary.allergies_main_label": "Alergias (titular)",
+        "summary.allergies_label": "Alergias",
+        "summary.companions_section_title": "Acompañantes",
+        
+        # Resumen de confirmación – eventos a los que asiste
+        "summary.events_both_confirmed": "Has confirmado tu asistencia a la Ceremonia y la Recepción.",
+        "summary.events_ceremony_only_confirmed": "Has confirmado tu asistencia solo a la Ceremonia.",
+        "summary.events_reception_only_confirmed": "Has confirmado tu asistencia solo a la Recepción.",
+
+        # Texto amigable por acompañante
+        "summary.companion_has_allergies": "tiene restricciones alimentarias que tendremos en cuenta",
+        "summary.companion_no_allergies": "no tiene restricciones alimentarias registradas",
     },
     # ==================================================
     # Română — ton cald, clar, cu notă festivă
@@ -260,6 +295,10 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "nav.recover": "Recuperează Codul",
         "nav.login_prompt": "Autentificare",
         "nav.home": "Acasă",
+        "common.language": "Limbă",
+        "hero.tagline": "O dată, un loc, o dragoste eternă. Doar prezența ta lipsește.",
+        "common.language": "Limbă",
+        "hero.tagline": "O dată, un loc, o dragoste eternă. Doar prezența ta lipsește.",
         # --- Login ---
         "login.title": "💍 Confirmă prezența",
         "login.intro": "Ne bucurăm că ești aici! Introdu datele invitației pentru a continua.",
@@ -276,6 +315,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "login.errors_rate_limit": "Ați depășit numărul maxim de încercări. Vă rugăm să așteptați câteva minute și să încercați din nou.",
         "login.code_placeholder": "Ex: ALEX-1234",
         "login.contact_placeholder": "Ex: +40... sau nume@mail.com",
+        "login.security_note": "Datele tale vor fi folosite doar pentru a-ți verifica identitatea și a gestiona invitația.",
+        "login.no_code_prompt": "Nu ai codul?",
+        "login.request_access_link": "Solicită acces aici",
         # --- Cere Accesul ---
         "request.title": "Solicită accesul",
         "request.intro": "Pentru identificare, te rugăm să ne spui numele complet, ultimele 4 cifre ale telefonului și emailul unde vrei să primești linkul.",
@@ -339,6 +381,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         # --- Însoțitori ---
         "form.companions_title": "Însoțitori",
         "form.companions_db_note": "Numărul de însoțitori permiși depinde de invitația ta.",
+        "form.companions_suffix": "",
         "form.no_companions_info": "Invitația ta nu include însoțitori.",
         "form.bring_companions": "Vii însoțit(ă)?",
         "form.companions_count": "Câți oameni te vor însoți?",
@@ -346,6 +389,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "form.field_name": "Nume",
         "form.placeholder_fullname": "Nume și prenume",
         "form.field_name_caption": "Numele complet al însoțitorului.",
+        "form.profile_label": "Profil",
         "form.child_or_adult": "Tip",
         "form.child_or_adult_caption": "Indică dacă este adult sau copil.",
         "form.adult": "Adult",
@@ -402,7 +446,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "recover.invalid": "Cerere invalidă. Verifică datele și încearcă din nou.",
         "recover.generic": "Nu am putut procesa cererea acum. Încearcă mai târziu.",
         "recover.network": "Nu se poate contacta serverul. Detalii: {err}",
-        "recover.back": "⬅️ Înapoi la început",
+        "recover.back": "Înapoi la început",
         "recover.go_rsvp": "Mergi la formularul RSVP",
         # --- Date / luni ---
         "date.month.01": "ianuarie",
@@ -484,11 +528,60 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "email.confirmation.label.allergies": "Alergii",
         "email.confirmation.label.notes": "Note",
         "email.confirmation.footer.more_details": "Te vom ține la curent cu mai multe detalii pe măsură ce se apropie data.",
+        # --- Validări ---
+        "val_required": "Acest câmp este obligatoriu.",
+        "val_email": "Formatul emailului nu este valid.",
+        "val_last4": "Trebuie să fie exact 4 cifre.",
+        "val_full_name_length": "Numele este prea scurt sau prea lung.",
+        "val_full_name_chars": "Numele conține caractere nepermise.",
+        "val_guest_code": "Formatul codului nu este valid.",
+
+        # --- Resumen de confirmación (página confirmed) ---
+        "summary.title": "Acesta este un rezumat al răspunsului tău:",
+        "summary.main_guest_label": "Invitat principal",
+        "summary.email_label": "Email",
+        "summary.phone_label": "Telefon",
+        "summary.adults_label": "Adulți",
+        "summary.children_label": "Copii",
+        "summary.companions_label": "Însoțitori",
+        "summary.allergies_main_label": "Alergii (invitat principal)",
+        "summary.allergies_label": "Alergii",
+        "summary.companions_section_title": "Însoțitori",
+
+        # Resumen de confirmación – eventos a los que asiste
+        "summary.events_both_confirmed": "Ai confirmat prezența la Ceremonie și Recepție.",
+        "summary.events_ceremony_only_confirmed": "Ai confirmat prezența doar la Ceremonie.",
+        "summary.events_reception_only_confirmed": "Ai confirmat prezența doar la Recepție.",
+
+        # Texto amigable por acompañante
+        "summary.companion_has_allergies": "are restricții alimentare de care vom ține cont",
+        "summary.companion_no_allergies": "nu are restricții alimentare înregistrate",
     },
     # ==================================================
     # English — warm, clear, a touch celebratory
     # ==================================================
     "en": {
+        # --- Resumen de confirmación (página confirmed) ---
+        "summary.title": "Here is a summary of your response:",
+        "summary.main_guest_label": "Main guest",
+        "summary.email_label": "Email",
+        "summary.phone_label": "Phone",
+        "summary.adults_label": "Adults",
+        "summary.children_label": "Children",
+        "summary.companions_label": "Companions",
+        "summary.allergies_main_label": "Main guest allergies",
+        "summary.allergies_label": "Allergies",
+        "summary.companions_section_title": "Companions",
+
+        # Resumen de confirmación – eventos a los que asiste
+        "summary.events_both_confirmed": "You have confirmed your attendance to the Ceremony and the Reception.",
+        "summary.events_ceremony_only_confirmed": "You have confirmed your attendance to the Ceremony only.",
+        "summary.events_reception_only_confirmed": "You have confirmed your attendance to the Reception only.",
+
+        # Texto amigable por acompañante
+        "summary.companion_has_allergies": "has dietary restrictions that we will take into account",
+        "summary.companion_no_allergies": "has no dietary restrictions recorded",
+
         # --- Menu ---
         "nav.login": "Login",
         "nav.form": "RSVP Form",
@@ -497,6 +590,10 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "nav.recover": "Recover Code",
         "nav.login_prompt": "Log in",
         "nav.home": "Home",
+        "common.language": "Language",
+        "hero.tagline": "A date, a place, an eternal love. Only your presence is missing.",
+        "common.language": "Language",
+        "hero.tagline": "A date, a place, an eternal love. Only your presence is missing.",
         # --- Login ---
         "login.title": "💍 Confirm attendance",
         "login.intro": "We’re so happy you’re here! Enter your invitation details to continue.",
@@ -513,6 +610,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "login.errors_rate_limit": "You have exceeded the maximum number of attempts. Please wait a few minutes and try again.",
         "login.code_placeholder": "Ex: ALEX-1234",
         "login.contact_placeholder": "Ex: +40... sau nume@mail.com",
+        "login.security_note": "Your data will only be used to verify your identity and manage your invitation.",
+        "login.no_code_prompt": "Don't have your code?",
+        "login.request_access_link": "Request access here",
         # --- Request Access ---
         "request.title": "Request access",
         "request.intro": "To identify you, please share your full name, the last 4 digits of your phone, and the email where you’d like to receive your access link.",
@@ -583,6 +683,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "form.field_name": "Name",
         "form.placeholder_fullname": "First and last name",
         "form.field_name_caption": "Companion’s full name.",
+        "form.profile_label": "Profile",
         "form.child_or_adult": "Type",
         "form.child_or_adult_caption": "Indicate if they are an adult or a child.",
         "form.adult": "Adult",
@@ -639,7 +740,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "recover.invalid": "Invalid request. Please check the data and try again.",
         "recover.generic": "We couldn't process your request at the moment. Please try again later.",
         "recover.network": "Cannot reach the server. Details: {err}",
-        "recover.back": "⬅️ Back to home",
+        "recover.back": "Back to home",
         "recover.go_rsvp": "Go to RSVP form",
         # --- Dates / months ---
         "date.month.01": "January",
@@ -721,6 +822,13 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "email.confirmation.label.allergies": "Allergies",
         "email.confirmation.label.notes": "Notes",
         "email.confirmation.footer.more_details": "We’ll keep you updated with more details as the date approaches.",
+        # --- Validation ---
+        "val_required": "This field is required.",
+        "val_email": "Invalid email format.",
+        "val_last4": "Must be exactly 4 digits.",
+        "val_full_name_length": "Name is too short or too long.",
+        "val_full_name_chars": "Name contains invalid characters.",
+        "val_guest_code": "Invalid code format.",
     },
 }
 

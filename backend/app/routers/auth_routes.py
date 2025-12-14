@@ -128,8 +128,8 @@ def login(
     if email:
         query = query.filter(func.lower(models.Guest.email) == email)
     elif phone_digits:
-        # Normalización SQL para comparar teléfono
-        query = query.filter(func.replace(models.Guest.phone, " ", "") == phone_digits)
+        # Normalización SQL para comparar teléfono (quita espacios y +)
+        query = query.filter(func.replace(func.replace(models.Guest.phone, " ", ""), "+", "") == phone_digits)
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
