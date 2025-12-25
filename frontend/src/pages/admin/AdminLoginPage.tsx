@@ -6,12 +6,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import '@/styles/admin.css'; // Aseguramos que carguen los estilos admin
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Componente Principal: AdminLoginPage
 // ─────────────────────────────────────────────────────────────────────────────
 const AdminLoginPage: React.FC = () => {
+    const { adminLogin } = useAuth();
     // -------------------------------------------------------------------------
     // Estado local del formulario
     // -------------------------------------------------------------------------
@@ -24,27 +26,33 @@ const AdminLoginPage: React.FC = () => {
     // -------------------------------------------------------------------------
 
     // Maneja el envío del formulario de login
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
 
-        // Simulamos un leve retraso para UX (feedback visual de carga)
-        setTimeout(() => {
-            // Validación Client-Side contra variable de entorno
-            const validKey = import.meta.env.VITE_ADMIN_KEY || '';
+        try {
+            const { default: apiClient } = await import('@/services/apiClient');
             
-            if (accessKey === validKey) {
-                // Éxito: Guardamos flag de sesión y redirigimos
-                localStorage.setItem('admin_auth', 'true');
-                // IMPORTANTE: Redirección directa ya que no usamos react-router-dom globalmente
-                window.location.href = '/admin/dashboard.html';
-            } else {
-                // Error: Clave incorrecta
-                setError("La clave de acceso es incorrecta.");
-                setLoading(false);
+            interface LoginResponse {
+                access_token: string;
+                token_type: string;
             }
-        }, 800);
+
+            const data = await apiClient<LoginResponse>('/api/admin/login', {
+                method: 'POST',
+                body: { password: accessKey }
+            });
+
+            // Éxito: Guardamos token en el contexto y redirigimos
+            adminLogin(data.access_token);
+            window.location.href = '/admin/dashboard.html';
+  
+        } catch (err: any) {
+             console.error(err);
+             setError("La contraseña es incorrecta o hubo un error de conexión.");
+             setLoading(false);
+        }
     };
 
     // -------------------------------------------------------------------------

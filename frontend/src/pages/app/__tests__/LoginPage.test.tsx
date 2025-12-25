@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import LoginPage from '../LoginPage';
 import { guestService } from '@/services/guestService';
 import * as AuthContextModule from '@/contexts/AuthContext';
@@ -73,10 +73,14 @@ describe('LoginPage', () => {
 
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
+      isAdmin: false,
+      token: null,
+      adminToken: null,
       login: mockLoginUser,
       logout: vi.fn(),
-      isAdmin: false,
-    });
+      adminLogin: vi.fn(),
+      adminLogout: vi.fn(),
+    } as any);
   });
 
   afterAll(() => {
@@ -149,7 +153,6 @@ describe('LoginPage', () => {
       });
     });
 
-    (guestService.login as jest.Mock).mockClear?.();
     (guestService.login as any).mockClear?.();
 
     // Escenario 2: Teléfono "sucio"
@@ -198,7 +201,7 @@ describe('LoginPage', () => {
     { status: 429, errorKey: 'login.errors_rate_limit', desc: 'Rate limit', retryAfter: 60 },
     { status: 500, errorKey: 'login.server_err', desc: 'Error servidor' },
     { status: 400, errorKey: 'login.server_err', desc: 'Error genérico' },
-  ])('debe manejar error $status ($desc)', async ({ status, errorKey, retryAfter }) => {
+  ])('debe manejar error $status ($desc)', async ({ status, errorKey, retryAfter }: { status: number, errorKey: string, retryAfter?: number }) => {
     (guestService.login as any).mockRejectedValue({ status, retryAfter });
 
     const { unmount } = renderComponent();

@@ -46,7 +46,8 @@ class SideEnum(str, enum.Enum):  # Enum para lado/familia (opcional para métric
 
 class InviteTypeEnum(str, enum.Enum):  # Enum para tipo de invitación (segmentación clave).
     ceremony = "ceremony"          # Invitado solo a ceremonia.
-    full = "full"                  # ✅ Alineado con schemas/frontend (antes: "ceremony+reception")
+    full = "full"                  # Ceremonia + Recepción (invitación completa).
+    party = "party"                # Solo Recepción (fiesta posterior, sin ceremonia).
 
 class TaskStatusEnum(str, enum.Enum):  # Enum para estado de tareas del planner (dashboard).
     pending = "pending"  # Tarea pendiente.

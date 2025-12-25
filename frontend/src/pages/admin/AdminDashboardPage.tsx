@@ -12,7 +12,7 @@
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
-import { Card, AdminLayout, Button, Loader, Alert } from '@/components/common';
+import { AdminLayout, Button, Loader, Alert } from '@/components/common';
 import { adminService, AdminStatsResponse } from '@/services/adminService';
 
 // -----------------------------------------------------------------------------
@@ -171,7 +171,6 @@ interface KpiCardProps {
 }
 
 const KpiCard: React.FC<KpiCardProps> = ({ title, value, subtext, status = 'neutral' }) => {
-    let colorClass = '';
     
     // Mapeo simple de status a colores de texto según CSS nuevo o existente
     // En admin.css definimos .admin-kpi-value pero no modificadores de color específicos en texto allí,

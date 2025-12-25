@@ -125,6 +125,9 @@ class LoginRequest(BaseModel):                                                  
             raise ValueError("guest_code es obligatorio.")                                    # ...lanza error.
         return self                                                                           # Devuelve el modelo validado.
 
+class AdminLogin(BaseModel):
+    password: str
+
 class Token(BaseModel):                                                                       # Modelo de respuesta para /login y /magic-login.
     access_token: str                                                                         # JWT de acceso.
     token_type: str                                                                           # Tipo de token (normalmente "bearer").
@@ -240,6 +243,24 @@ class ImportGuestsResult(BaseModel):
     created: int
     updated: int
     skipped: int
+
+# =================================================================================
+# 📥 Schemas para Import CSV (Épica B)
+# =================================================================================
+
+class CsvImportError(BaseModel):
+    """Representa un error de validación en una fila del CSV."""
+    row_number: int                                                               # Número de fila (1-indexed, sin contar header).
+    phone_raw: str                                                                # Teléfono original (crudo) del CSV para referencia.
+    reason: str                                                                   # Razón del rechazo (texto legible).
+
+class CsvImportResult(BaseModel):
+    """Respuesta del endpoint POST /api/admin/guests/import."""
+    created_count: int                                                            # Invitados nuevos creados.
+    updated_count: int                                                            # Invitados existentes actualizados.
+    rejected_count: int                                                           # Filas rechazadas por errores de validación.
+    errors: List[CsvImportError] = Field(default_factory=list)                    # Lista de errores detallados.
+
 
 # =================================================================================
 # 👑 Schemas para Admin CRUD

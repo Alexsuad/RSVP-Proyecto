@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { Lang, FALLBACK_I18N, fetchTranslations } from '@/i18n';
 
 type I18nContextType = {

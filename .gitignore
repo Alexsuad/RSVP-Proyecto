@@ -71,13 +71,13 @@ htmlcov/
 # 📂 4. DATOS Y TEMPORALES
 # ------------------------------------------------------------
 # Archivos de datos masivos o exportaciones
-*.csv
+#*.csv
 *.zip
 *.tar
 *.gz
 *.bak
 *.sql
-/data/
+#/data/
 backups/
 
 # Logs del sistema
@@ -94,4 +94,4 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-docs/
+#docs/

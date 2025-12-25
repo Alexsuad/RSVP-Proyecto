@@ -57,7 +57,7 @@ else:
 
     from app.db import engine                                                                       # Importa el engine para inicializar tablas.
     from app import models                                                                          # Importa modelos ORM (definen las tablas).
-    from app.routers import auth_routes, guest, admin, meta                                               # Importa routers reales de la aplicación.
+    from app.routers import auth_routes, guest, admin, meta, admin_auth                                   # Importa routers reales de la aplicación.
     from app.db import log_db_path_on_startup                                                       # ✅ Importa la utilidad para loguear la ruta real de la BD.
 
     app = FastAPI(                                                                                  # Crea la instancia de la aplicación FastAPI.
@@ -112,3 +112,4 @@ else:
     app.include_router(guest.router)                                                                 # Monta el router de invitados (gestión de guest).
     app.include_router(meta.router)                                                                  # Monta el router meta (información de la API).
     app.include_router(admin.router)                                                                 # Monta el router admin (endpoints protegidos por API key).
+    app.include_router(admin_auth.router)                                                            # Monta el router de autenticación admin.

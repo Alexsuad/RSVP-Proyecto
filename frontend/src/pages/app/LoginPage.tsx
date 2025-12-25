@@ -24,7 +24,7 @@ import PageLayout from '@/components/PageLayout';
 //   - email en minúsculas si la cadena contiene "@", o
 //   - phone solo con dígitos y el signo "+" en el resto de casos.
 // ----------------------------------------------------------------------------------
-const sanitizeContact = (
+export const sanitizeContact = (
   value: string
 ): { email?: string; phone?: string } => {
   const v = (value || '').trim();

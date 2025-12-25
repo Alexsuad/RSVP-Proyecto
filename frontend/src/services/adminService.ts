@@ -1,18 +1,12 @@
+//frontend/src/services/adminService.ts
 
 import apiClient from './apiClient';
-// import { CsvGuest } from '@/types'; // Archivo no encontrado, definimos localmente
+import { getAdminToken } from '@/utils/auth';
 
-export interface CsvGuest {
-    full_name: string;
-    email?: string;
-    phone?: string;
-    language: 'es' | 'en' | 'ro';
-    max_accomp: number;
-    invite_type: 'full' | 'ceremony' | 'party';
-    side?: 'bride' | 'groom';
-    relationship?: string;
-    group_id?: string;
-}
+import { CsvGuest } from '@/types';
+
+// Configuración de URL consistente con apiClient
+const BASE_URL = (import.meta as any).env.VITE_BASE_URL ?? 'http://127.0.0.1:8000';
 
 // =============================================================================
 // Interfaces de Respuesta (DTOs)
@@ -56,6 +50,23 @@ export interface Guest {
     notes?: string;
     guest_code?: string;
     invite_type?: string;
+}
+
+// =============================================================================
+// Interfaces para Import/Export CSV (Épica B)
+// =============================================================================
+
+export interface CsvImportError {
+    row_number: number;
+    phone_raw: string;
+    reason: string;
+}
+
+export interface CsvImportResult {
+    created_count: number;
+    updated_count: number;
+    rejected_count: number;
+    errors: CsvImportError[];
 }
 
 // =============================================================================
@@ -103,11 +114,66 @@ export const adminService = {
       });
   },
 
-  // --- Importación Masiva ---
+  // --- Importación Masiva (Legacy JSON) ---
   importGuests: (guests: CsvGuest[]) => {
     return apiClient<ImportResponse>('/api/admin/import-guests', {
       body: { items: guests },
       method: 'POST',
     });
   },
+
+  // --- Export/Import CSV (Épica B) ---
+
+  /**
+   * Exporta todos los invitados a un archivo CSV.
+   * Retorna un Blob que puede descargarse.
+   */
+  exportGuestsCsv: async (): Promise<Blob> => {
+    // Obtiene el token correcto (sessionStorage rsvp_admin_token)
+    const token = getAdminToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Usa URL absoluta con BASE_URL para no depender de proxy
+    const response = await fetch(`${BASE_URL}/api/admin/guests-export`, {
+      method: 'GET',
+      headers,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error exportando CSV: ${response.status}`);
+    }
+    
+    return response.blob();
+  },
+
+  /**
+   * Importa invitados desde un archivo CSV.
+   * Envía el archivo como multipart/form-data.
+   */
+  importGuestsCsv: async (file: File): Promise<CsvImportResult> => {
+    const token = getAdminToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${BASE_URL}/api/admin/guests-import`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error importando CSV: ${response.status}`);
+    }
+    
+    return response.json();
+  },
 };
+

@@ -116,7 +116,7 @@ const RsvpFormPage: React.FC = () => {
                 setNotes(guestData.notes || '');
 
                 if (guestData.allergies) {
-                    setAllergies(guestData.allergies.split(',').map(s => s.trim()));
+                    setAllergies(guestData.allergies.split(',').map((s: string) => s.trim()));
                 }
 
                 setCompanions(guestData.companions || []);
@@ -167,12 +167,12 @@ const RsvpFormPage: React.FC = () => {
 
             // Convertimos string "gluten,soy" -> ["gluten", "soy"]
             const current_list = current.allergies
-                ? current.allergies.split(',').map(s => s.trim()).filter(Boolean)
+                ? current.allergies.split(',').map((s: string) => s.trim()).filter(Boolean)
                 : [];
 
             const exists = current_list.includes(code);
             const new_list = exists
-                ? current_list.filter(c => c !== code)
+                ? current_list.filter((c: string) => c !== code)
                 : [...current_list, code];
 
             updated[index] = {
@@ -479,7 +479,7 @@ const RsvpFormPage: React.FC = () => {
                                         <div className="rsvp-companion-list mb-6">
                                             {companions.map((comp, idx) => {
                                                 const comp_allergies = comp.allergies
-                                                    ? comp.allergies.split(',').map(s => s.trim()).filter(Boolean)
+                                                    ? comp.allergies.split(',').map((s: string) => s.trim()).filter(Boolean)
                                                     : [];
 
                                                 return (

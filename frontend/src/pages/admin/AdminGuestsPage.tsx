@@ -1,13 +1,13 @@
 // File: frontend/src/pages/admin/AdminGuestsPage.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Propósito: Gestión del listado de invitados (CRUD Real).
+// Propósito: Gestión del listado de invitados (CRUD Real + Import/Export CSV).
 // Rol: Muestra tabla de invitados consumiendo /api/admin/guests.
-//      Permite buscar, crear y eliminar invitados persistentes.
+//      Permite buscar, crear, eliminar, importar y exportar invitados.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, AdminLayout, FormField, Loader } from '@/components/common';
-import { adminService, Guest as ServiceGuest } from '@/services/adminService';
+import { adminService, Guest as ServiceGuest, CsvImportResult } from '@/services/adminService';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Definiciones de Tipos (Adaptador Local)
@@ -33,6 +33,12 @@ const AdminGuestsPage: React.FC = () => {
     // Control de visibilidad de Modales
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    
+    // --- Estado para Import CSV ---
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [importResult, setImportResult] = useState<CsvImportResult | null>(null);
+    const [importLoading, setImportLoading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     
     // Estado transitorio para operaciones
     const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null);
@@ -74,13 +80,56 @@ const AdminGuestsPage: React.FC = () => {
     // Manejadores de Eventos (Actions)
     // -------------------------------------------------------------------------
 
-    const handleImport = () => {
-        // Funcionalidad de importación pendiente de implementación
+    // --- Export CSV: descarga el archivo ---
+    const handleExport = async () => {
+        try {
+            const blob = await adminService.exportGuestsCsv();
+            // Crea un enlace temporal para descargar el archivo.
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'guests_export.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Error exportando CSV:", err);
+            alert("Error al exportar el CSV. Verifica tu sesión.");
+        }
     };
 
-    const handleExport = () => {
-        // Funcionalidad de exportación pendiente de implementación
+    // --- Import CSV: abre selector y procesa archivo ---
+    const handleImport = () => {
+        // Abre el input de archivo oculto.
+        fileInputRef.current?.click();
     };
+
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setImportLoading(true);
+        setImportResult(null);
+
+        try {
+            const result = await adminService.importGuestsCsv(file);
+            setImportResult(result);
+            setIsImportModalOpen(true);
+            // Refresca la lista de invitados.
+            await fetchGuests();
+        } catch (err) {
+            console.error("Error importando CSV:", err);
+            alert("Error al importar el CSV. Verifica el formato del archivo.");
+        } finally {
+            setImportLoading(false);
+            // Limpia el input para permitir reimportar el mismo archivo.
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
 
     // --- Funcionalidad de Creación (Create) ---
     
@@ -157,13 +206,21 @@ const AdminGuestsPage: React.FC = () => {
                     <Button className="admin-btn-secondary" onClick={handleExport}>
                         Exportar CSV
                     </Button>
-                    <Button className="admin-btn-secondary" onClick={handleImport}>
-                        Importar
+                    <Button className="admin-btn-secondary" onClick={handleImport} disabled={importLoading}>
+                        {importLoading ? 'Importando...' : 'Importar'}
                     </Button>
                     <Button className="admin-btn-primary" onClick={handleOpenCreateModal}>
                         Añadir nuevo invitado
                     </Button>
                 </div>
+                {/* Input oculto para selección de archivo CSV */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".csv"
+                    style={{ display: 'none' }}
+                    onChange={handleFileSelected}
+                />
             </div>
 
             <div className="admin-card">
@@ -343,6 +400,50 @@ const AdminGuestsPage: React.FC = () => {
                                 Eliminar
                             </Button>
                          </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Resultados de Importación CSV */}
+            {isImportModalOpen && importResult && (
+                <div className="admin-modal-overlay">
+                    <div className="admin-modal-content">
+                        <h3 className="admin-modal-title">Resultado de la importación</h3>
+                        
+                        <div style={{ marginBottom: '1rem' }}>
+                            <p><strong>Creados:</strong> {importResult.created_count}</p>
+                            <p><strong>Actualizados:</strong> {importResult.updated_count}</p>
+                            <p><strong>Rechazados:</strong> {importResult.rejected_count}</p>
+                        </div>
+
+                        {importResult.errors.length > 0 && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                                    Errores ({importResult.errors.length}):
+                                </h4>
+                                <div style={{ 
+                                    maxHeight: '150px', 
+                                    overflowY: 'auto', 
+                                    fontSize: '0.85rem',
+                                    backgroundColor: '#fef2f2',
+                                    padding: '0.75rem',
+                                    borderRadius: '4px'
+                                }}>
+                                    {importResult.errors.map((err, idx) => (
+                                        <div key={idx} style={{ marginBottom: '0.25rem' }}>
+                                            <strong>Fila {err.row_number}:</strong> {err.reason}
+                                            {err.phone_raw && <span style={{ color: '#666' }}> (tel: {err.phone_raw})</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="admin-modal-actions">
+                            <Button className="admin-btn-primary" onClick={() => setIsImportModalOpen(false)}>
+                                Cerrar
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}

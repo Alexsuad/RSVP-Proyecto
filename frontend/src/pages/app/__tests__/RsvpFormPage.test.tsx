@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 
 import RsvpFormPage from '../RsvpFormPage';
 import { guestService } from '@/services/guestService';
@@ -68,7 +68,7 @@ vi.mock('@/components/common', () => ({
 // 2. SETUP DE ENTORNO
 // ----------------------------------------------------------------------
 
-const apiClientMock = apiClient as unknown as vi.Mock;
+const apiClientMock = apiClient as any;
 
 const mocked_guest = {
   id: 1,

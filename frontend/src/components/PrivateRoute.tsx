@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const ADMIN_KEY = (import.meta as any).env.VITE_ADMIN_KEY;
 
 interface PrivateRouteProps {
   children: React.ReactElement;
@@ -10,19 +9,20 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, adminOnly = false }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   
-  // For this MVP, an "admin session" is considered active if the admin key is present in the environment variables.
-  // This allows access to admin pages without a separate admin login flow.
-  const isAdminSession = !!ADMIN_KEY;
-
-  const isAuthorized = adminOnly ? isAdminSession : isAuthenticated;
+  // Decide auth status based on route requirement
+  const isAuthorized = adminOnly ? isAdmin : isAuthenticated;
 
   useEffect(() => {
     if (!isAuthorized) {
-      window.location.href = '/app/login.html';
+       if (adminOnly) {
+           window.location.href = '/admin/login.html';
+       } else {
+           window.location.href = '/app/login.html';
+       }
     }
-  }, [isAuthorized]);
+  }, [isAuthorized, adminOnly]);
 
   if (!isAuthorized) {
     // Render nothing while the redirect occurs.

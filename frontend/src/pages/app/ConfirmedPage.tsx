@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'; // Contexto de internacionaliz
 import { Card, Button, Loader } from '@/components/common'; // Componentes reutilizables de UI
 import PageLayout from '@/components/PageLayout'; // Layout principal con imagen de fondo
 import { guestService } from '@/services/guestService'; // Servicio para gestionar datos del invitado
-import { GuestData } from '@/types'; // Definiciones de tipos TypeScript
+import { GuestData, Companion } from '@/types'; // Definiciones de tipos TypeScript
 
 // --- Función auxiliar: Construir texto de alergias ---
 // Construye un texto legible a partir de códigos de alergias separados por comas.
@@ -124,8 +124,8 @@ const ConfirmedPage: React.FC = () => {
   } else {
     // Fallback: Calcular basándonos en companions + titular
     // Titular siempre cuenta como 1 adulto
-    const adult_companions = companions.filter(c => !c.is_child).length;
-    const child_companions = companions.filter(c => c.is_child).length;
+    const adult_companions = companions.filter((c: Companion) => !c.is_child).length;
+    const child_companions = companions.filter((c: Companion) => c.is_child).length;
 
     num_adults = 1 + adult_companions;
     num_children = child_companions;
@@ -302,6 +302,7 @@ const ConfirmedPage: React.FC = () => {
 };
 
 // --- Componente auxiliar: SummaryItem (actualmente no utilizado pero conservado) ---
+/*
 const SummaryItem: React.FC<{ label: string; value: string }> = ({
   label,
   value,
@@ -311,5 +312,6 @@ const SummaryItem: React.FC<{ label: string; value: string }> = ({
     <span className="summary-item__value">{value}</span>
   </div>
 );
+*/
 
 export default ConfirmedPage;

@@ -8,27 +8,30 @@
 // - Procesa los errores HTTP para que la UI sepa si es un 401, 429, 500, etc.
 // =================================================================================
 
-import { getToken, clearToken } from '@/utils/auth'; // 📝 Utilidades de autenticación
+import { getToken, clearToken, getAdminToken, clearAdminToken } from '@/utils/auth'; // 📝 Utilidades de autenticación
 
 // Configuración de URL: Intenta leer .env, si falla usa localhost:8000 (Backend local)
 const BASE_URL = (import.meta as any).env.VITE_BASE_URL ?? 'http://127.0.0.1:8000';
-const ADMIN_KEY = (import.meta as any).env.VITE_ADMIN_KEY;
 
 // Función genérica <T>: T es el tipo de dato que esperamos recibir (ej: GuestData)
 async function apiClient<T>(endpoint: string, { body, ...customConfig }: Omit<RequestInit, 'body'> & { body?: any } = {}): Promise<T> {
   
   // 1. Preparación de Cabeceras
-  const token = getToken();
+  let token = getToken();
+  
+  // Lógica de selección de token: Si es ruta admin, usamos token de admin si existe.
+  if (endpoint.startsWith('/api/admin/') || endpoint.startsWith('/admin/')) {
+      const adminToken = getAdminToken();
+      if (adminToken) {
+          token = adminToken;
+      }
+  }
+
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
 
   // Si hay sesión iniciada, pegamos el token JWT
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  // Si es una petición administrativa, pegamos la clave maestra
-  if (endpoint.startsWith('/api/admin/') && ADMIN_KEY) {
-      headers['x-admin-key'] = ADMIN_KEY;
   }
 
   const config: RequestInit = {
@@ -51,10 +54,18 @@ async function apiClient<T>(endpoint: string, { body, ...customConfig }: Omit<Re
 
   // Caso: Token vencido o inválido (401) -> Cerrar sesión automáticamente
   if (response.status === 401) {
-    clearToken();
-    // Redirigir al login si no estamos ya allí
-    if (!window.location.pathname.includes('login')) {
-       window.location.href = '/app/login.html';
+    // Detectar si fue un fallo de admin o de invitado para limpiar lo correcto
+    if (endpoint.startsWith('/api/admin/') || endpoint.startsWith('/admin/')) {
+        clearAdminToken();
+        if (!window.location.pathname.includes('login')) {
+            window.location.href = '/admin/login.html';
+        }
+    } else {
+        clearToken();
+        // Redirigir al login si no estamos ya allí
+        if (!window.location.pathname.includes('login')) {
+           window.location.href = '/app/login.html';
+        }
     }
     const error: any = new Error('Unauthorized');
     error.status = 401;

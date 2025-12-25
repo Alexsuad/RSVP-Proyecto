@@ -309,7 +309,15 @@ def update(db: Session, db_obj: Guest, obj_in) -> Guest:
     db.refresh(db_obj)
     return db_obj
 
-    db.delete(obj)
+
+def delete(db: Session, guest_id: int) -> bool:
+    """
+    Elimina un invitado por su ID. Retorna True si se eliminó, False si no existe.
+    """
+    guest = db.query(Guest).filter(Guest.id == guest_id).first()
+    if not guest:
+        return False
+    db.delete(guest)
     db.commit()
     return True
 
