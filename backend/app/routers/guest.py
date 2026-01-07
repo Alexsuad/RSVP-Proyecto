@@ -291,104 +291,22 @@ def update_my_rsvp(
             detail="La fecha límite para confirmar la asistencia ya ha pasado.",
         )
 
-    # 2. Caso: Invitado Declina Asistencia
-    if not payload.attending:
-        current_guest.confirmed = False
-        current_guest.confirmed_at = datetime.utcnow()
-        current_guest.menu_choice = None
-        current_guest.allergies = None
-        current_guest.needs_accommodation = bool(payload.needs_accommodation)
-        current_guest.needs_transport = bool(payload.needs_transport)
-        current_guest.companions.clear()
-        current_guest.num_adults = 0
-        current_guest.num_children = 0
-        current_guest.notes = (payload.notes or None)
-
-        db.commit()
-        db.refresh(current_guest)
-
-        logger.info(
-            "RSVP: declinado | guest_id={} | code={} | email={}",
-            current_guest.id, current_guest.guest_code, _mask_email(current_guest.email)
-        )
-
-        # Envío de correo de declinación
-        try:
-            if current_guest.email:
-                summary = {
-                    "guest_name": current_guest.full_name or "",
-                    "invite_scope": "ceremony+reception" if current_guest.invite_type == InviteTypeEnum.full else "reception-only",
-                    "attending": False,
-                    "companions": [],
-                    "allergies": "",
-                    "notes": None,
-                }
-                ok = mailer.send_confirmation_email(
-                    to_email=current_guest.email,
-                    language=(current_guest.language.value if current_guest.language else "en"),
-                    summary=summary,
-                )
-                if not ok:
-                    logger.error("RSVP: Fallo envío email (ret False) id={}", current_guest.id)
-        except Exception as e:
-            logger.error("RSVP: Excepción enviando email (declinó) id={} err={}", current_guest.id, e)
-
-        # Retorno de respuesta actualizada
-        is_full_invite = (current_guest.invite_type == InviteTypeEnum.full)
-        resp = schemas.GuestWithCompanionsResponse.model_validate(current_guest)
-        resp.invited_to_ceremony = is_full_invite
-        resp.invite_scope = "ceremony+reception" if is_full_invite else "reception-only"
-        return resp
-
-    # 3. Caso: Invitado Confirma Asistencia
-    
-    # Validación de cupo máximo
-    if len(payload.companions) > (current_guest.max_accomp or 0):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Has superado el número máximo de acompañantes permitido."
-        )
-
-    # Cálculo de contadores
-    titular_adult = 1
-    adults = titular_adult + sum(1 for c in payload.companions if not c.is_child)
-    children = sum(1 for c in payload.companions if c.is_child)
-
-    # Persistencia de datos del titular
-    current_guest.confirmed = True
-    current_guest.confirmed_at = datetime.utcnow()
-    current_guest.menu_choice = None
-    current_guest.allergies = (payload.allergies or None)
-    current_guest.needs_accommodation = bool(payload.needs_accommodation)
-    current_guest.needs_transport = bool(payload.needs_transport)
-    current_guest.notes = (payload.notes or None)
-    
-    # Actualización de contacto si se provee nuevo
-    current_guest.email = (payload.email or current_guest.email)
-    current_guest.phone = (payload.phone or current_guest.phone)
-
-    # Actualización de acompañantes (Reemplazo completo)
-    current_guest.companions.clear()
-    for c in payload.companions:
-        current_guest.companions.append(
-            models.Companion(
-                guest_id=current_guest.id,
-                name=c.name.strip(),
-                is_child=bool(c.is_child),
-                menu_choice=None,
-                allergies=(c.allergies or None),
-            )
-        )
-
-    # Actualización de contadores y Commit
-    current_guest.num_adults = adults
-    current_guest.num_children = children
+    # 2. Delegar a process_rsvp_submission en CRUD
+    from app.crud import guests_crud
     
     try:
-        db.commit()
-        db.refresh(current_guest)
+        updated_guest = guests_crud.process_rsvp_submission(
+            db=db,
+            guest=current_guest,
+            payload=payload,
+            updated_by="guest",
+            channel="web"
+        )
+    except ValueError as ve:
+        # Errores de validación de negocio (ej. cupo máximo)
+        raise HTTPException(status_code=400, detail=str(ve))
     except IntegrityError:
-        db.rollback()
+        # Conflictos de unicidad (email/phone)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
@@ -396,40 +314,8 @@ def update_my_rsvp(
                 "message_key": "form.email_or_phone_conflict"
             }
         )
-        
-    logger.info(
-        "RSVP: confirmado | id={} | code={} | email={} | adults={} | children={}",
-        current_guest.id, current_guest.guest_code, _mask_email(current_guest.email),
-        current_guest.num_adults, current_guest.num_children
-    )
-
-    # Envío de correo de confirmación
-    try:
-        if current_guest.email:
-            summary = {
-                "guest_name": current_guest.full_name or "",
-                "invite_scope": "ceremony+reception" if current_guest.invite_type == InviteTypeEnum.full else "reception-only",
-                "attending": True,
-                "companions": [
-                    {"name": c.name or "", "label": ("child" if c.is_child else "adult"), "allergens": c.allergies or ""}
-                    for c in (current_guest.companions or [])
-                ],
-                "allergies": current_guest.allergies or "",
-                "notes": (current_guest.notes or None),
-            }
-            ok = mailer.send_confirmation_email(
-                to_email=current_guest.email,
-                language=(current_guest.language.value if current_guest.language else "en"),
-                summary=summary,
-            )
-            if not ok:
-                logger.error("RSVP: Fallo envío email (confirmación) id={}", current_guest.id)
     except Exception as e:
-        logger.error("RSVP: Excepción enviando email (confirmación) id={} err={}", current_guest.id, e)
+        logger.error(f"Error procesando RSVP guest: {e}")
+        raise HTTPException(status_code=500, detail="Error interno procesando RSVP")
 
-    # Retorno de respuesta final
-    is_full_invite = (current_guest.invite_type == InviteTypeEnum.full)
-    resp = schemas.GuestWithCompanionsResponse.model_validate(current_guest)
-    resp.invited_to_ceremony = is_full_invite
-    resp.invite_scope = "ceremony+reception" if is_full_invite else "reception-only"
-    return resp
+    return _format_response(updated_guest)

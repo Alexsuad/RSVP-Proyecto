@@ -175,21 +175,26 @@ def pytest_sessionstart(session):
         raise pytest.UsageError(msg)                                     # Abortamos la sesión con error de uso
 
     # Preflight UI: esperar a que la app de Streamlit esté arriba
-    base_ui = ENTRY_URL                                                  # Leemos URL base definida arriba (o por entorno)
-    if tr:
-        tr.write_line(f"🔍 Verificando UI en {base_ui}…")                 # Informamos que verificaremos UI
-
-    ui_ok = _wait_for_ui(base_ui, PREFLIGHT_TIMEOUT, PREFLIGHT_POLL)     # Esperamos hasta timeout o éxito
-    if not ui_ok:                                                        # Si la UI no respondió a tiempo
-        _ticker_stop.set()                                               # Detenemos el cronómetro para que el mensaje sea legible
-        if _ticker_thread:
-            _ticker_thread.join(timeout=2)                               # Esperamos a que el hilo termine limpio
-        msg = (f"❌ No pude contactar la UI en {base_ui} tras {PREFLIGHT_TIMEOUT}s.\n"
-               "   Asegúrate de tener Streamlit corriendo (p.ej. `streamlit run Home.py`) "
-               "y que la variable ENTRY_URL apunte a la URL correcta.")  # Mensaje de error orientativo
+    if os.getenv("SKIP_UI_CHECK"):
         if tr:
-            tr.write_line(msg, red=True)                                 # Pintamos el mensaje en rojo
-        raise pytest.UsageError(msg)                                     # Abortamos de forma explícita
+            tr.write_line("⚠️  Skipping UI preflight check (SKIP_UI_CHECK is set).")
+    else:
+        base_ui = ENTRY_URL                                                  # Leemos URL base definida arriba (o por entorno)
+        if tr:
+            tr.write_line(f"🔍 Verificando UI en {base_ui}…")                 # Informamos que verificaremos UI
+
+
+        ui_ok = _wait_for_ui(base_ui, PREFLIGHT_TIMEOUT, PREFLIGHT_POLL)     # Esperamos hasta timeout o éxito
+        if not ui_ok:                                                        # Si la UI no respondió a tiempo
+            _ticker_stop.set()                                               # Detenemos el cronómetro para que el mensaje sea legible
+            if _ticker_thread:
+                _ticker_thread.join(timeout=2)                               # Esperamos a que el hilo termine limpio
+            msg = (f"❌ No pude contactar la UI en {base_ui} tras {PREFLIGHT_TIMEOUT}s.\n"
+                   "   Asegúrate de tener Streamlit corriendo (p.ej. `streamlit run Home.py`) "
+                   "y que la variable ENTRY_URL apunte a la URL correcta.")  # Mensaje de error orientativo
+            if tr:
+                tr.write_line(msg, red=True)                                 # Pintamos el mensaje en rojo
+            raise pytest.UsageError(msg)                                     # Abortamos de forma explícita
 
     if tr:
         tr.write_line("✅ UI lista, continuando con preflight opcional…") # Confirmamos que la UI está lista

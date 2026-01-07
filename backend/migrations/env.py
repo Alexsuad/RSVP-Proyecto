@@ -13,6 +13,7 @@ if ROOT_DIR not in sys.path:
 
 # Importa tu engine y Base desde el proyecto
 from app.db import engine, Base  # <-- requiere que app/db.py exporte 'engine' y 'Base'
+import app.models  # <-- IMPORTANT: Register models with Base
 
 # Alembic Config (lee alembic.ini para logging, etc.)
 config = context.config

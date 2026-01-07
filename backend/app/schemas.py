@@ -307,4 +307,23 @@ class AdminStatsResponse(BaseModel):
     total_companions: int
     total_children: int
     guests_with_allergies: int
+    allergy_breakdown: dict[str, int] = Field(default_factory=dict)
 
+
+# =================================================================================
+# 🕒 SCHEMAS DE ACTIVIDAD RECIENTE
+# ---------------------------------------------------------------------------------
+class RecentActivityItem(BaseModel):
+    """Representa un evento de actividad reciente (RSVP)."""
+    guest_id: int
+    guest_name: str
+    action: str  # "confirmed", "declined", "updated"
+    timestamp: datetime
+    channel: Optional[str] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RecentActivityResponse(BaseModel):
+    """Lista de actividad reciente del dashboard."""
+    items: List[RecentActivityItem] = Field(default_factory=list)

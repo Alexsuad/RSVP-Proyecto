@@ -106,7 +106,19 @@ async function apiClient<T>(endpoint: string, { body, ...customConfig }: Omit<Re
   throw error;
   }
 
-  return response.json();
+  // Caso especial: 204 No Content (éxito sin cuerpo). No se debe intentar parsear JSON.
+  if (response.status === 204) {
+    return undefined as unknown as T;
+  }
+
+  // Algunos endpoints pueden responder 200 sin body (o sin JSON válido). Evitamos el crash.
+  const raw_body = await response.text();
+
+  if (!raw_body) {
+    return undefined as unknown as T;
+  }
+
+  return JSON.parse(raw_body) as T;
 }
 
 export default apiClient;

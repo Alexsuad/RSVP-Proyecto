@@ -26,12 +26,14 @@ from loguru import logger
 from app import models, schemas, auth, mailer
 from app.db import SessionLocal
 from app.rate_limit import is_allowed, get_limits_from_env
+from app.crud import guests_crud  # Import module for namespaced usage
 from app.crud.guests_crud import (
     find_guest_for_magic,
     set_magic_link,
     consume_magic_link,
 )
 from app.utils.i18n import resolve_lang
+from app.utils.phone import normalize_phone  # Utilidad centralizada de normalización
 
 # --- Configuración e Inicialización ---
 router = APIRouter(prefix="/api", tags=["auth"])
@@ -69,10 +71,7 @@ def _client_ip(request: Request) -> str:
         return xff.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
-def _only_digits(s: str | None) -> str:
-    """Elimina caracteres no numéricos de una cadena."""
-    s = (s or "")
-    return re.sub(r"\D", "", s)
+
 
 def _norm_email(s: str | None) -> str:
     """Normaliza un email a minúsculas y sin espacios extremos."""
@@ -114,7 +113,7 @@ def login(
     # 2. Normalización de entradas
     guest_code = (login_data.guest_code or "").strip()
     email = _norm_email(login_data.email)
-    phone_digits = _only_digits(login_data.phone)
+
 
     if not guest_code:
         raise HTTPException(
@@ -122,25 +121,41 @@ def login(
             detail={"ok": False, "error": "missing_guest_code", "message": "Falta el código de invitado."},
         )
 
-    # 3. Búsqueda del invitado
-    query = db.query(models.Guest).filter(models.Guest.guest_code == guest_code)
+    # 3. Búsqueda y Validación
+    # Estrategia: Buscar por guest_code (único) y luego validar el contacto (email o teléfono).
+    guest = guests_crud.get_by_guest_code(db, guest_code)
+    
+    if not guest:
+        # Por seguridad, mismo error que credenciales inválidas para no enumerar usuarios
+        logger.info("Login fallido: code='{}' no existe. ip={}", guest_code, client_ip)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"ok": False, "error": "invalid_credentials", "message": "Credenciales incorrectas."},
+        )
 
+    credentials_valid = False
+    
     if email:
-        query = query.filter(func.lower(models.Guest.email) == email)
-    elif phone_digits:
-        # Normalización SQL para comparar teléfono (quita espacios y +)
-        query = query.filter(func.replace(func.replace(models.Guest.phone, " ", ""), "+", "") == phone_digits)
+        # Validación por Email
+        db_email = _norm_email(guest.email)
+        if db_email == email:
+            credentials_valid = True
+    elif login_data.phone:
+        # Validación por Teléfono (usando normalización centralizada)
+        input_phone_norm = normalize_phone(login_data.phone)
+        db_phone_norm = normalize_phone(guest.phone)
+        
+        # Comparamos solo dígitos: "34600..." == "34600..."
+        if input_phone_norm and db_phone_norm and input_phone_norm == db_phone_norm:
+            credentials_valid = True
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"ok": False, "error": "missing_contact", "message": "Falta email o teléfono."},
         )
 
-    guest = query.first()
-    
-    # 4. Validación final
-    if not guest:
-        logger.info("Login fallido code='{}' ip={}", guest_code, client_ip)
+    if not credentials_valid:
+        logger.info("Login fallido: code='{}' contacto no coincide. ip={}", guest_code, client_ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"ok": False, "error": "invalid_credentials", "message": "Credenciales incorrectas."},

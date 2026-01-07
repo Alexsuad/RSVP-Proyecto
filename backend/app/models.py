@@ -28,6 +28,7 @@ from sqlalchemy import (  # Importa utilidades de SQLAlchemy para definir tablas
     Enum as SQLAlchemyEnum,  # Enum de SQLAlchemy para mapear enumeraciones.
     CheckConstraint,  # Restricción CHECK a nivel de tabla.
     Index, # ✅ AJUSTE B (Opcional): Importado para el índice compuesto.
+    JSON,  # Tipo JSON para logs de auditoría.
 )
 from sqlalchemy.orm import relationship as orm_relationship  # Importa relationship para relaciones ORM.
 
@@ -161,3 +162,16 @@ class Task(Base):
     parent_task_id = Column(Integer, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# 📝 AUDITORÍA RSVP (TABLA 'rsvp_logs')
+# ---------------------------------------------------------------------------------
+class RsvpLog(Base):
+    __tablename__ = "rsvp_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    guest_id = Column(Integer, ForeignKey("guests.id", ondelete="CASCADE"), nullable=False, index=True)
+    timestamp = Column(DateTime, server_default=func.now())
+    updated_by = Column(String, nullable=False)  # "admin", "guest"
+    channel = Column(String, nullable=True)      # "web", "whatsapp", "phone"
+    action_type = Column(String, nullable=False) # "update_rsvp", "create", etc.
+    payload_json = Column(JSON, nullable=True)   # Snapshot completo de la operación

@@ -8,7 +8,7 @@
 # =================================================================================
 
 from sqlalchemy.orm import Session  # Importa la sesión de SQLAlchemy para operaciones DB.
-from sqlalchemy import func         # Importa funciones SQL (ej. lower) para búsquedas case-insensitive.
+from sqlalchemy import func, or_    # Importa funciones SQL (ej. lower) para búsquedas case-insensitive.
 from datetime import datetime, timedelta   # ✅ Para timestamps de emisión/expiración de Magic Link.
 import re                           # Módulo estándar para limpiar/normalizar strings.
 import secrets                      # Para generar sufijos aleatorios seguros.
@@ -16,7 +16,9 @@ import string                       # Para definir alfabetos de generación.
 from typing import Optional         # Tipado opcional para claridad.
 from loguru import logger           # ✅ Logger para trazas internas del CRUD (depuración y auditoría).
 
-from app.models import Guest, Companion        # Importa el modelo ORM de invitados y acompañantes.
+from app.models import Guest, Companion, RsvpLog, InviteTypeEnum        # Importa el modelo ORM.
+from app import mailer, schemas  # Importa mailer y schemas.
+from app.utils.phone import normalize_phone # Utilidad centralizada
 import unicodedata                  # Para eliminar acentos/diacríticos de los nombres.
 
 # ---------------------------------------------------------------------------------
@@ -70,15 +72,17 @@ def get_by_email(db: Session, email: str) -> Optional[Guest]:
     )                                                          # Cierra la expresión de retorno.
 
 def get_by_phone(db: Session, phone: str) -> Optional[Guest]:
-    """Devuelve el invitado por teléfono (formato normalizado '+/dígitos'), o None."""  # Docstring de la función.
-    if not phone:                                              # Verifica si no se proporcionó teléfono.
-        return None                                            # Retorna None si no hay teléfono.
-    norm = _normalize_phone(phone)                             # Normaliza el teléfono a formato '+/dígitos'.
-    return (                                                   # Inicia la consulta.
-        db.query(Guest)                                        # Crea un query sobre 'guests'.
-        .filter(Guest.phone == norm)                           # Compara por igualdad exacta (ya normalizado).
-        .first()                                               # Devuelve el primer match o None.
-    )                                                          # Cierra la expresión de retorno.
+    """Devuelve el invitado por teléfono (busca tanto formato '34...' como '+34...')."""
+    norm = normalize_phone(phone)
+    if not norm:
+        return None
+    
+    # Busca por coincidencias exactas o legado con '+'
+    return (
+        db.query(Guest)
+        .filter(or_(Guest.phone == norm, Guest.phone == f"+{norm}"))
+        .first()
+    )
 
 def get_by_guest_code(db: Session, code: str) -> Optional[Guest]:
     """Devuelve invitado por su guest_code exacto, o None si no existe."""  # Docstring de la función.
@@ -94,10 +98,6 @@ def get_by_guest_code(db: Session, code: str) -> Optional[Guest]:
 # 🔐 Búsqueda robusta para Magic Link (nombre + últimos 4 del teléfono + email)
 # ---------------------------------------------------------------------------------
 
-def _only_digits(s: str) -> str:
-    """Devuelve solo los dígitos contenidos en la cadena (ignora cualquier otro carácter)."""
-    return "".join(ch for ch in (s or "") if ch.isdigit())
-
 def find_guest_for_magic(db: Session, full_name: str, phone_last4: str, email: str) -> Optional[Guest]:
     """
     Localiza un invitado por últimos 4 del teléfono + nombre (flex).
@@ -105,7 +105,10 @@ def find_guest_for_magic(db: Session, full_name: str, phone_last4: str, email: s
     """
     full_name_norm = _norm_name(full_name)                      # Normaliza el nombre (sin acentos, casefold).
     email_norm = (email or "").strip().lower() or None          # Email del payload normalizado o None si vacío.
-    last4 = _only_digits(phone_last4)[-4:]                      # Toma los últimos 4 dígitos reales.
+    
+    # Extrae dígitos usando la utilidad centralizada
+    last4_digits = normalize_phone(phone_last4) or ""
+    last4 = last4_digits[-4:]                                   # Toma los últimos 4 dígitos reales.
 
     if len(last4) != 4:                                         # Validación básica de last4.
         logger.debug("CRUD/find_guest_for_magic → last4 inválido: {}", last4)
@@ -254,12 +257,11 @@ def consume_magic_link(db: Session, token: str) -> Optional[Guest]:
 # ---------------------------------------------------------------------------------
 
 def _normalize_phone(raw: Optional[str]) -> Optional[str]:
-    """Deja solo dígitos y '+' (colapsa múltiples '+'); devuelve None si queda vacío."""  # Docstring del normalizador de teléfono.
-    if not raw:                                                             # Verifica si la entrada es falsy (None, "", etc.).
-        return None                                                         # Devuelve None si no hay contenido.
-    txt = re.sub(r"[^\d+]", "", str(raw).strip())                           # Elimina cualquier carácter que no sea dígito o '+'.
-    txt = re.sub(r"^\++", "+", txt)                                         # Colapsa múltiples '+' consecutivos iniciales a uno solo.
-    return txt or None                                                      # Devuelve el string resultante o None si quedó vacío.
+    """Wrapper para usar la utilidad centralizada de normalización (solo dígitos)."""
+    if not raw:
+        return None
+    # Usamos la utilidad centralizada que deja solo dígitos
+    return normalize_phone(raw) or None
 
 def _generate_guest_code(full_name: str, is_unique_callable) -> str:
     """
@@ -397,4 +399,97 @@ def update_rsvp(db: Session, guest: Guest, attending: bool, payload) -> Guest:
         raise e
         
     return guest
+
+
+def log_rsvp_action(
+    db: Session,
+    guest_id: int,
+    updated_by: str,
+    channel: Optional[str],
+    action_type: str,
+    payload_json: dict,
+) -> None:
+    """Registra una acción de RSVP en el log de auditoría."""
+    log_entry = RsvpLog(
+        guest_id=guest_id,
+        updated_by=updated_by,
+        channel=channel,
+        action_type=action_type,
+        payload_json=payload_json,
+    )
+    db.add(log_entry)
+    db.commit()
+
+
+def process_rsvp_submission(
+    db: Session,
+    guest: Guest,
+    payload: schemas.RSVPUpdateRequest,
+    updated_by: str,
+    channel: str,
+) -> Guest:
+    """
+    Procesa una sumisión de RSVP completa:
+    1. Validaciones de negocio (cupos).
+    2. Actualización atómica en BD.
+    3. Auditoría.
+    4. Envío de Email.
+    """
+    # 1. Validación de cupo máximo (Solo si asiste)
+    if payload.attending:
+        if len(payload.companions) > (guest.max_accomp or 0):
+            # Excepción genérica, el router la convertirá a HTTP 400
+            raise ValueError("Has superado el número máximo de acompañantes permitido.")
+
+    # 2. Actualización en BD using existing Atomic Helper
+    # Nota: update_rsvp maneja commits y rollbacks.
+    # Si payload.attending es False, limpia acompañantes.
+    updated_guest = update_rsvp(db, guest, payload.attending, payload)
+
+    # 3. Auditoría
+    # Convertimos payload a dict para guardar el snapshot JSON
+    try:
+        payload_dict = payload.model_dump(mode='json')
+    except:
+        payload_dict = payload.dict() # Fallback pydantic v1
+
+    log_rsvp_action(
+        db=db,
+        guest_id=guest.id,
+        updated_by=updated_by,
+        channel=channel,
+        action_type="update_rsvp",
+        payload_json=payload_dict
+    )
+
+    # 4. Envío de Email (Lógica reutilizada de guest.py)
+    try:
+        if updated_guest.email:
+            attending = bool(updated_guest.confirmed)
+            invite_scope = "ceremony+reception" if updated_guest.invite_type == InviteTypeEnum.full else "reception-only"
+            
+            summary = {
+                "guest_name": updated_guest.full_name or "",
+                "invite_scope": invite_scope,
+                "attending": attending,
+                "companions": [],
+                "allergies": updated_guest.allergies or "",
+                "notes": (updated_guest.notes or None),
+            }
+            
+            if attending:
+                summary["companions"] = [
+                    {"name": c.name or "", "label": ("child" if c.is_child else "adult"), "allergens": c.allergies or ""}
+                    for c in (updated_guest.companions or [])
+                ]
+
+            mailer.send_confirmation_email(
+                to_email=updated_guest.email,
+                language=(updated_guest.language.value if updated_guest.language else "en"),
+                summary=summary,
+            )
+    except Exception as e:
+        logger.error(f"Fallo envío email RSVP process_rsvp_submission id={guest.id} err={e}")
+
+    return updated_guest
 
