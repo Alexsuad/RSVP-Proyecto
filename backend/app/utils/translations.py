@@ -381,7 +381,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         # --- Însoțitori ---
         "form.companions_title": "Însoțitori",
         "form.companions_db_note": "Numărul de însoțitori permiși depinde de invitația ta.",
-        "form.companions_suffix": "",
+        "form.companions_suffix": "însoțitor(i) suplimentari.",
         "form.no_companions_info": "Invitația ta nu include însoțitori.",
         "form.bring_companions": "Vii însoțit(ă)?",
         "form.companions_count": "Câți oameni te vor însoți?",
@@ -676,6 +676,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         # --- Companions ---
         "form.companions_title": "Companions",
         "form.companions_db_note": "The number of companions allowed depends on your invitation.",
+        "form.companions_suffix": "additional companion{plural}.",
         "form.no_companions_info": "Your invitation does not include companions.",
         "form.bring_companions": "Will you bring companions?",
         "form.companions_count": "How many people will join you?",

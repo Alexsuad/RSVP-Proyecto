@@ -33,6 +33,10 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
     
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+    
+    // Flag de seguridad: SOLO permitimos guardar si el detalle completo cargó.
+    // Evita sobrescribir companions reales por [] cuando falla la carga de detalle.
+    const [detail_loaded, setDetail_loaded] = useState(false);
     const [metaOptions, setMetaOptions] = useState<string[]>([]);
     const [isEditing, setIsEditing] = useState(false); // Default to Read-Only
 
@@ -59,8 +63,11 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
                     
                     // Ahora sí tenemos los acompañantes reales
                     setCompanions(fullGuest.companions || []); 
+                    setDetail_loaded(true);
                 } catch (error) {
                     console.error("Error cargando detalle:", error);
+                    setDetail_loaded(false);
+                    setIsEditing(false); // Si no hay detalle, no dejamos editar (evita guardar basura)
                     alert("Error cargando detalles del invitado. Verifica tu conexión.");
                     // Fallback seguro: inicializar con lo básico pero companions vacíos es peligroso
                     setAttending(guest.confirmed ?? null);
@@ -77,14 +84,17 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
 
     // Reset editing mode when modal opens/closes
     useEffect(() => {
-        if (isOpen) setIsEditing(false);
+        if (isOpen) {
+            setIsEditing(false);
+            setDetail_loaded(false); // se recalcula cuando loadDetail termine bien
+        }
     }, [isOpen]);
 
     if (!isOpen || !guest) return null;
 
     const handleAddCompanion = () => {
         if (companions.length >= (guest?.max_accomp || 0)) return;
-        setCompanions([...companions, { name: '', is_child: false, allergies: '' }]);
+        setCompanions([...companions, { name: '', is_child: false, allergies: null }]);
     };
 
     const handleRemoveCompanion = (index: number) => {
@@ -106,18 +116,30 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
             return;
         }
 
+        // Seguridad: si el detalle no cargó, NO guardamos.
+        // Evita sobrescribir companions reales por [].
+        if (!detail_loaded) {
+            alert("No se pudieron cargar los detalles completos del invitado. Para evitar pérdida de datos, no se puede guardar en este momento. Intenta de nuevo.");
+            return;
+        }
+
         setIsLoading(true);
         try {
-            // Construir payload compatible con RSVPUpdateRequest
+            // Paridad con el flujo real del invitado:
+            // - Si NO asiste => companions = [] y allergies = null
+            // - Si asiste => se manda lo que está en UI
+            const normalized_allergies = attending ? (allergies || null) : null;
+            const normalized_companions = attending ? companions : [];
+
             const payload = {
                 attending: attending,
                 email: email || undefined,
                 phone: phone || undefined,
-                allergies: allergies || undefined,
+                allergies: normalized_allergies,
                 notes: notes || undefined,
-                companions: companions, 
+                companions: normalized_companions,
                 // needs_accommodation/transport no en form todavía
-                needs_accommodation: false, 
+                needs_accommodation: false,
                 needs_transport: false
             };
             
@@ -183,7 +205,7 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
                     </div>
                     <div>
                         <label style={{ fontSize: '0.75rem', color: '#8b7355', textTransform: 'uppercase', fontWeight: 700 }}>Tipo Invitación</label>
-                        <div>{ guest?.invite_type === 'ceremony' ? 'Solo Ceremonia' : 'Boda Completa' }</div>
+                        <div>{ guest?.invite_type === 'full' ? 'Ceremonia y Recepción' : 'Solo Recepción' }</div>
                     </div>
                     <div>
                         <label style={{ fontSize: '0.75rem', color: '#8b7355', textTransform: 'uppercase', fontWeight: 700 }}>Email</label>
@@ -372,6 +394,7 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
                                     <div style={{ marginBottom: '20px' }}>
                                         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#5d4e37', marginBottom: '6px' }}>Notas / Comentarios</label>
                                         <textarea 
+                                            data-testid="admin-assisted-notes-field"
                                             value={notes} 
                                             onChange={(e) => setNotes(e.target.value)}
                                             rows={3}
@@ -402,7 +425,7 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
                                         {companions.length === 0 && <p style={{ fontSize: '0.85rem', color: '#8b7355', fontStyle: 'italic' }}>Sin acompañantes añadidos.</p>}
 
                                         {companions.map((comp, idx) => (
-                                            <div key={idx} style={{ backgroundColor: '#ffffff', padding: '14px', borderRadius: '8px', marginBottom: '10px', border: '1px solid #e8dcc8' }}>
+                                            <div key={idx} data-testid="admin-assisted-companion-row" style={{ backgroundColor: '#ffffff', padding: '14px', borderRadius: '8px', marginBottom: '10px', border: '1px solid #e8dcc8' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8b7355', textTransform: 'uppercase' }}>Acompañante #{idx + 1}</span>
                                                     <button type="button" onClick={() => handleRemoveCompanion(idx)} style={{ fontSize: '0.75rem', color: '#a15c38', background: 'none', border: 'none', cursor: 'pointer' }}>Eliminar</button>
@@ -461,6 +484,7 @@ const AssistedRsvpModal: React.FC<AssistedRsvpModalProps> = ({ isOpen, onClose, 
                         </button>
                         {isEditing && (
                             <button 
+                                data-testid="admin-assisted-save-btn"
                                 type="submit"
                                 disabled={isLoading}
                                 style={{ 

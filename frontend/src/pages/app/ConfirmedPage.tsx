@@ -183,6 +183,16 @@ const ConfirmedPage: React.FC = () => {
           <div className="rsvp-section mb-8">
             <h3 className="rsvp-section__title text-left">{t('summary.title')}</h3>
 
+            <div className="mb-4 mt-2 text-left text-[var(--color-text-main)]">
+                 <p className="text-md">
+                    {guest.invited_to_ceremony 
+                        ? t('invite.scope.full').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+                        : t('invite.scope.reception').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+                    }
+                 </p>
+                 <hr className="mt-3 border-gray-200" />
+            </div>
+
             <div className="space-y-2 mt-4 text-left">
               <p>
                 <strong>{t('summary.main_guest_label')}:</strong>{' '}

@@ -11,12 +11,61 @@ type I18nContextType = {
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLangState] = useState<Lang>('es');
-  const [translations, setTranslations] = useState<Record<string, string>>(() => FALLBACK_I18N.es);
+  // Helper to determine initial language with priority: URL > LocalStorage > Default
+  const getInitialLang = (): Lang => {
+    try {
+      // 1. Check URL param
+      const params = new URLSearchParams(window.location.search);
+      const urlLang = params.get('lang');
+      
+      if (urlLang) {
+        // Normalize: 'ro-RO' -> 'ro'
+        const normalized = urlLang.split('-')[0].toLowerCase();
+        if (FALLBACK_I18N[normalized as Lang]) {
+          return normalized as Lang;
+        }
+      }
+
+      // 2. Check LocalStorage
+      const localLang = localStorage.getItem('rsvp_lang');
+      if (localLang) {
+        const normalized = localLang.split('-')[0].toLowerCase();
+        if (FALLBACK_I18N[normalized as Lang]) {
+          return normalized as Lang;
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading language preferences:', e);
+    }
+    
+    // 3. Fallback
+    return 'es';
+  };
+
+  const [lang, setLangState] = useState<Lang>(getInitialLang);
+  const [translations, setTranslations] = useState<Record<string, string>>(() => FALLBACK_I18N[lang]);
+
+  // Sync lang to LocalStorage whenever it changes (including initial load from URL)
+  useEffect(() => {
+    try {
+      localStorage.setItem('rsvp_lang', lang);
+    } catch (e) {
+      console.warn('Could not persist language to localStorage:', e);
+    }
+  }, [lang]);
 
   const setLang = useCallback((newLang: Lang) => {
     if (FALLBACK_I18N[newLang]) {
       setLangState(newLang);
+      
+      // Update URL without reloading (replaceState) to persist if user copies link or refreshes
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', newLang);
+        window.history.replaceState({}, '', url.toString());
+      } catch (e) {
+        console.warn('Could not update URL params:', e);
+      }
     }
   }, []);
 

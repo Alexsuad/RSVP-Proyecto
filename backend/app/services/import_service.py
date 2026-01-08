@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple, Set
 from sqlalchemy.orm import Session
 
 from app.utils.phone import normalize_phone
+from utils.invite import normalize_invite_type
 from app.models import Guest, InviteTypeEnum, LanguageEnum, SideEnum
 
 class import_mode(str, Enum):
@@ -271,11 +272,12 @@ def _resolve_enums(data: Dict[str, Any]):
         lang_enum = LanguageEnum.en
     
     # Invite Type
-    type_str = (data["invite_type"] or "full").lower()
+    raw_type = data["invite_type"]
+    norm_type_str = normalize_invite_type(raw_type) # "full" o "party" (ceremony mapea a party)
     try:
-        type_enum = InviteTypeEnum(type_str)
+        type_enum = InviteTypeEnum(norm_type_str)
     except ValueError:
-        type_enum = InviteTypeEnum.full
+        type_enum = InviteTypeEnum.full # Fallback si fallara algo drásticamente
         
     # Side
     side_val = None

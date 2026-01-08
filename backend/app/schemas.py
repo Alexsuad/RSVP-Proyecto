@@ -186,7 +186,7 @@ class RSVPUpdateRequest(BaseModel):                                             
     needs_transport: bool = False                                                             # Bandera: necesita transporte.
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    companions: List[CompanionIn] = Field(default_factory=list)                               # Lista de acompañantes (vacía por defecto).
+    companions: Optional[List[CompanionIn]] = None                                             # Acompañantes (opcional para permitir updates parciales).
 
     @model_validator(mode="after")                                                            # Validador post-parsing.
     def _sanitize_fields(self):                                                               # Limpia/trunca campos libres para evitar excesos.

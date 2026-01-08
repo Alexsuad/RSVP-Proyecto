@@ -66,29 +66,27 @@ else:
         version="6.0.0",                                                                            # Versión de la API (para control de cambios).
     )                                                                                                # Cierra la creación de la app.
 
+    # =================================================================================
+    # 🌐 CONFIGURACIÓN DINÁMICA DE CORS (Soporte Railway)
+    # ---------------------------------------------------------------------------------
+    # Se lee la variable ALLOWED_ORIGINS del entorno. Si viene como lista separada
+    # por comas, se procesa. Si no existe, se usan los dominios por defecto.
+    # =================================================================================
+    _origins_env = os.getenv("ALLOWED_ORIGINS", "")
+    origins = [o.strip() for o in _origins_env.split(",") if o.strip()]
+
+    if not origins:
+        origins = [
+            "https://suarezsiicawedding.com",
+            "https://www.suarezsiicawedding.com",
+            "https://rsvp.suarezsiicawedding.com",
+            "http://localhost:5173",
+            "http://localhost:8000"
+        ]
+
     app.add_middleware(                                                                             # Registra el middleware de CORS en la app.
         CORSMiddleware,                                                                              # Especifica el tipo de middleware (CORS).
-        allow_origins=[                                                                              # Lista de orígenes permitidos (frontends conocidos).
-            # 🔹 Producción (WordPress + antiguo Streamlit)
-            "https://suarezsiicawedding.com",
-            "https://rsvp.suarezsiicawedding.com",
-
-            # 🔹 Frontend React/Vite (dev)
-            "http://127.0.0.1:5173",
-            "http://localhost:5173",
-
-            # 🔹 Otros frontends locales posibles (por si los usas)
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:5500",
-            "http://127.0.0.1:5500",
-            "http://localhost:5501",
-            "http://127.0.0.1:5501",
-
-            # 🔹 Antiguo Streamlit local (por compatibilidad)
-            "http://localhost:8501",
-            "http://127.0.0.1:8501",
-        ],                                                                                           # Cierra la lista de orígenes permitidos.
+        allow_origins=origins,                                                                       # Usa la lista dinámica de orígenes.
         allow_credentials=True,                                                                      # Permite el envío de credenciales (cookies/autenticación).
         allow_methods=["*"],                                                                         # Permite todos los métodos HTTP (GET/POST/etc.).
         allow_headers=["*"],                                                                         # Permite todos los headers (autenticación personalizados, etc.).

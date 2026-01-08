@@ -368,6 +368,7 @@ const AdminGuestsPage: React.FC = () => {
                         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#5d4e37', marginBottom: '6px' }}>Buscar invitado</label>
                         <input
                             id="search-guests"
+                            data-testid="search-guests-input"
                             placeholder="Nombre, email o teléfono..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -528,11 +529,9 @@ const AdminGuestsPage: React.FC = () => {
                                         onChange={(e) => setEditorData({...editorData, max_accomp: parseInt(e.target.value) || 0})} />
                                     
                                     <div>
-                                        <label className="block text-sm font-bold mb-1">Tipo Invitación</label>
                                         <select value={editorData.invite_type || 'full'} onChange={(e) => setEditorData({...editorData, invite_type: e.target.value})} className="w-full p-2 border rounded">
-                                            <option value="full">Ceremonia + Recepción</option>
-                                            <option value="party">Solo Fiesta</option>
-                                            <option value="ceremony">Solo Ceremonia</option>
+                                            <option value="full">Ceremonia y Recepción</option>
+                                            <option value="party">Solo Recepción</option>
                                         </select>
                                     </div>
                                 </div>

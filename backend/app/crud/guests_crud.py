@@ -362,33 +362,32 @@ def update_rsvp(db: Session, guest: Guest, attending: bool, payload) -> Guest:
         if payload.phone:
             guest.phone = payload.phone
             
-        # Reemplazo de Acompañantes
-        guest.companions.clear()
-        
-        # Contadores
-        titular_adult = 1 # El invitado principal cuenta como adulto por defecto (o lógica de negocio)
-        # Ajuste: Si el invitado principal es niño? Normalmente no.
-        
-        adults_count = titular_adult
-        children_count = 0
-        
-        for c in payload.companions:
-            comp = Companion(
-                guest_id=guest.id,
-                name=c.name.strip(),
-                is_child=bool(c.is_child),
-                menu_choice=c.menu_choice,
-                allergies=(c.allergies or None)
-            )
-            guest.companions.append(comp)
+        # Reemplazo de Acompañantes (solo si se provee la lista explícitamente)
+        if payload.companions is not None:
+            guest.companions.clear()
             
-            if c.is_child:
-                children_count += 1
-            else:
-                adults_count += 1
+            # Contadores
+            titular_adult = 1 # El invitado principal cuenta como adulto por defecto
+            adults_count = titular_adult
+            children_count = 0
+            
+            for c in payload.companions:
+                comp = Companion(
+                    guest_id=guest.id,
+                    name=c.name.strip(),
+                    is_child=bool(c.is_child),
+                    menu_choice=c.menu_choice,
+                    allergies=(c.allergies or None)
+                )
+                guest.companions.append(comp)
                 
-        guest.num_adults = adults_count
-        guest.num_children = children_count
+                if c.is_child:
+                    children_count += 1
+                else:
+                    adults_count += 1
+                    
+            guest.num_adults = adults_count
+            guest.num_children = children_count
 
     try:
         db.add(guest)
@@ -436,7 +435,8 @@ def process_rsvp_submission(
     4. Envío de Email.
     """
     # 1. Validación de cupo máximo (Solo si asiste)
-    if payload.attending:
+    # 1. Validación de cupo máximo (Solo si asiste y si se envían acompañantes)
+    if payload.attending and payload.companions is not None:
         if len(payload.companions) > (guest.max_accomp or 0):
             # Excepción genérica, el router la convertirá a HTTP 400
             raise ValueError("Has superado el número máximo de acompañantes permitido.")

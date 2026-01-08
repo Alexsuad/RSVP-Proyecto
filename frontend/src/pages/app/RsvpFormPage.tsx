@@ -342,7 +342,7 @@ const RsvpFormPage: React.FC = () => {
                                 }
                              </p>
                              <p className="text-sm text-[var(--color-text-muted)]">
-                                {t('form.companions_db_note')} <strong>{guest.max_accomp} {t('form.companions_suffix')}</strong>
+                                {t('form.companions_db_note')} <strong>{guest.max_accomp} {t('form.companions_suffix').replace('{plural}', guest.max_accomp > 1 ? 's' : '')}</strong>
                              </p>
                         </div>
                     </div>

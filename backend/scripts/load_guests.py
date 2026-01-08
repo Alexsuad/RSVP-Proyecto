@@ -113,7 +113,7 @@ def load_and_validate_guest_list(
 
         full_name = row.get("full_name", "").strip()
         language = (row.get("language", "") or "").strip().lower()
-        invite_type = "full" if normalize_invite_type(row.get("invite_type")) == "full" else "ceremony"
+        invite_type = "full" if normalize_invite_type(row.get("invite_type")) == "full" else "party"
         
         email = (row.get("email", "") or "").strip()
         if not email:

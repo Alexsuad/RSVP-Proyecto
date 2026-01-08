@@ -90,7 +90,7 @@ const GuestDetailModal: React.FC<GuestDetailModalProps> = ({ isOpen, onClose, gu
                                     </div>
                                     <div>
                                         <label style={{ fontSize: '0.75rem', color: '#8b7355', textTransform: 'uppercase', fontWeight: 700 }}>Tipo Invitación</label>
-                                        <div>{ fullGuest.invite_type === 'ceremony' ? 'Solo Ceremonia' : 'Boda Completa' }</div>
+                                        <div>{ fullGuest.invite_type === 'full' ? 'Ceremonia y Recepción' : 'Solo Recepción' }</div>
                                     </div>
                                     <div>
                                         <label style={{ fontSize: '0.75rem', color: '#8b7355', textTransform: 'uppercase', fontWeight: 700 }}>Email</label>

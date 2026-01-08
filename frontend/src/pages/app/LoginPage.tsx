@@ -90,8 +90,13 @@ const LoginPage: React.FC = () => {
       const response = await guestService.login(payload);
 
       // 5. Éxito: guardar el token y redirigir al formulario principal
+      // 5. Éxito: guardar el token y redirigir al formulario principal
       auth.login(response.access_token);
-      window.location.href = '/app/rsvp-form.html';
+      
+      // Preservar el idioma en la redirección
+      const params = new URLSearchParams(window.location.search);
+      const currentLang = params.get('lang') || localStorage.getItem('rsvp_lang') || 'es';
+      window.location.href = `/app/rsvp-form.html?lang=${currentLang}`;
     } catch (err: any) {
       // 6. Manejo de errores HTTP más frecuentes (401, 429)
       const status = err?.status || err?.response?.status || 500;

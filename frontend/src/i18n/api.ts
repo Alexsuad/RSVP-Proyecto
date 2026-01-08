@@ -96,6 +96,7 @@ en: {
   "form.companion_allergies_label": "Companion’s allergies and intolerances (optional)",
   "form.companions_title": "Companions",
   "form.companions_db_note": "The number of companions allowed depends on your invitation.",
+  "form.companions_suffix": "additional companion{plural}.",
   "form.no_companions_info": "Your invitation does not include companions.",
 
   // Resumen de confirmación (página confirmed)
@@ -537,6 +538,7 @@ en: {
   "form.companion_allergies_label": "Alergii și intoleranțe ale însoțitorului (opțional)",
   "form.companions_title": "Însoțitori",
   "form.companions_db_note": "Numărul de însoțitori permiși depinde de invitația ta.",
+  "form.companions_suffix": "însoțitor(i) suplimentari.",
   "form.no_companions_info": "Invitația ta nu include însoțitori.",
 
   // Resumen de confirmación (página confirmed)

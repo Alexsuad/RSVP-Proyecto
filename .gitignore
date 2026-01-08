@@ -95,3 +95,8 @@ ehthumbs.db
 Desktop.ini
 
 docs/
+
+# Artefactos de pruebas E2E (Playwright/Cypress/etc.)
+frontend/test-results/
+frontend/playwright-report/
+frontend/.playwright/

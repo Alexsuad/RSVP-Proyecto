@@ -38,7 +38,7 @@ except Exception:                   # Si no está disponible requests, no querem
 # =========================
 # Configuración por defecto
 # =========================
-ENTRY_URL = os.getenv("ENTRY_URL", "http://localhost:8501")              # URL base de la UI
+ENTRY_URL = os.getenv("ENTRY_URL", "http://localhost:5173")              # URL base de la UI (Vite)
 API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")        # URL base de la API
 SMOKE_PATHS = ["/", "/Solicitar_Acceso", "/Login"]                       # Rutas mínimas para probar UI
 PREFLIGHT_TIMEOUT = int(os.getenv("PYTEST_PREFLIGHT_TIMEOUT", "120"))    # Tiempo máximo esperando UI

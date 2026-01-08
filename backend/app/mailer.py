@@ -444,6 +444,15 @@ def send_email(to_email: str, subject: str, body: str, to_name: str = "") -> boo
 # =================================================================================
 # 🧩 Helpers de alto nivel (API simple para el resto del backend)
 # =================================================================================
+
+def _append_lang_to_url(url: str, lang: str) -> str:
+    """Helper to append ?lang=xx or &lang=xx to a URL safely."""
+    if not url or not lang:
+        return url
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}lang={lang}"
+
+
 def send_rsvp_reminder_email(
     to_email: str,
     guest_name: str,
@@ -458,8 +467,9 @@ def send_rsvp_reminder_email(
 
     cta_line = ""
     if RSVP_URL:
+        final_url = _append_lang_to_url(RSVP_URL, safe_lang)
         cta_template = t("email.cta_rsvp", safe_lang)
-        cta_line = cta_template.format(url=RSVP_URL)
+        cta_line = cta_template.format(url=final_url)
 
     body_key = (
         "email.reminder_both" if invited_to_ceremony else "email.reminder_reception"
@@ -493,8 +503,9 @@ def send_recovery_email(
 
     cta_line = ""
     if RSVP_URL:
+        final_url = _append_lang_to_url(RSVP_URL, safe_lang)
         cta_template = t("email.cta_rsvp", safe_lang)
-        cta_line = cta_template.format(url=RSVP_URL)
+        cta_line = cta_template.format(url=final_url)
 
     body_template = t("email.recovery", safe_lang)
 
@@ -539,6 +550,10 @@ def send_magic_link_email(to_email: str, language: str | Enum, magic_url: str) -
             _lang = "en"
 
     lang_code = _lang
+    
+    # Agregar ?lang=xx a la URL mágica para continuidad
+    magic_url = _append_lang_to_url(magic_url, lang_code)
+
     logger.info(
         f"[MAILER] Preparando envío de Magic Link → to={to_email} lang={lang_code}"
     )

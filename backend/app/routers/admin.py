@@ -24,6 +24,7 @@ from app.db import get_db
 from app.models import Guest, InviteTypeEnum, Companion, RsvpLog  # Incorpora modelos para eliminación en cascada manual.
 from app.crud import guests_crud
 from app.utils.phone import normalize_phone # Utilidad centralizada
+from utils.invite import normalize_invite_type
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -440,7 +441,7 @@ def export_guests_csv(db: Session = Depends(get_db)):
 
     for g in guests:
         lang_val = g.language.value if g.language else ""
-        invite_val = g.invite_type.value if g.invite_type else ""
+        invite_val = normalize_invite_type(g.invite_type.value if g.invite_type else "")
         side_val = g.side.value if g.side else ""
 
         writer.writerow({
@@ -646,7 +647,7 @@ def export_rsvp_detailed_csv(db: Session = Depends(get_db)):
             "Nombre Titular": g.full_name,
             "Email": g.email or "",
             "Teléfono": normalize_phone(g.phone) or "",
-            "Tipo Invitación": g.invite_type.value if g.invite_type else "",
+            "Tipo Invitación": normalize_invite_type(g.invite_type.value if g.invite_type else ""),
             "Estado RSVP": status_str,
             "Asisten (Total Pax)": total_pax,
             "Alergias (Resumen)": " | ".join(allergy_summary),
