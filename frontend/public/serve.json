@@ -1,15 +1,9 @@
 {
   "cleanUrls": false,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "**/*.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    }
+  "trailingSlash": true,
+  "rewrites": [
+    { "source": "/app", "destination": "/app/index.html" },
+    { "source": "/app/", "destination": "/app/index.html" },
+    { "source": "/", "destination": "/index.html" }
   ]
 }
