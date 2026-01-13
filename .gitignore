@@ -100,3 +100,10 @@ docs/
 frontend/test-results/
 frontend/playwright-report/
 frontend/.playwright/
+
+
+# Antigravity / Gemini IDE
+.agent/
+agent_rules/
+
+*.csv
