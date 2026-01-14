@@ -12,7 +12,7 @@ SHELL := /bin/bash                                                              
 # =========================
 PROJECT_DIR ?= /home/nalex/Proyectos/backend_starter                                                 # Ruta raíz del proyecto (ajústala si el proyecto se mueve)
 VENV_ACT := $$( [ -f "$(PROJECT_DIR)/.venv/bin/activate" ] && echo ". $(PROJECT_DIR)/.venv/bin/activate" || echo "true")  # Activa venv si existe; si no, no falla
-DB_FILE := $(PROJECT_DIR)/wedding.db                                                                 # Ruta absoluta a la base de datos SQLite
+DB_FILE := $(PROJECT_DIR)/data/wedding_academico.db                                                      # Ruta absoluta a la base de datos SQLite
 DATABASE_URL := sqlite:///${DB_FILE}                                                                 # URL de conexión usada por backend/scripts apuntando a la misma DB
 API_HOST := 127.0.0.1                                                                                # Host local para la API FastAPI
 API_PORT := 8000                                                                                     # Puerto de la API (Uvicorn/FastAPI)

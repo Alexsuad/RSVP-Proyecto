@@ -42,7 +42,7 @@ if not DATABASE_URL:
         logger.warning("DATABASE_URL está vacía. Usando fallback a SQLite local.")
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.abspath(os.path.join(current_dir, ".."))
-        db_path = os.path.join(project_root, "wedding.db")
+        db_path = os.path.join(project_root, "data", "wedding_academico.db")
         DATABASE_URL = f"sqlite:///{db_path}"
 # #####################################################################################
 # ### FIN DEL AJUSTE QUIRÚRGICO                                                     ###
