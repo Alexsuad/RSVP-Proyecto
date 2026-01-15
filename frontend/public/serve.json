@@ -1,6 +1,9 @@
 {
   "public": "dist",
+  "cleanUrls": false,
+  "trailingSlash": true,
   "rewrites": [
+    { "source": "/admin/", "destination": "/admin/index.html" },
     { "source": "/admin/**", "destination": "/admin/index.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/app/**", "destination": "/index.html" },
@@ -16,6 +19,5 @@
         }
       ]
     }
-  ],
-  "cleanUrls": true
+  ]
 }
