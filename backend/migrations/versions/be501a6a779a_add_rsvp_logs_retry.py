@@ -34,7 +34,21 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_rsvp_logs_guest_id'), 'rsvp_logs', ['guest_id'], unique=False)
     op.create_index(op.f('ix_rsvp_logs_id'), 'rsvp_logs', ['id'], unique=False)
-    op.drop_column('guests', 'phone_last4')
+    
+    # Safe drop: only if column exists (prevents migration failure in DBs without phone_last4)
+    conn = op.get_bind()
+    result = conn.execute(
+        sa.text("""
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'guests'
+              AND column_name = 'phone_last4'
+            LIMIT 1;
+        """)
+    ).scalar()
+    
+    if result:
+        op.drop_column('guests', 'phone_last4')
     # ### end Alembic commands ###
 
 
