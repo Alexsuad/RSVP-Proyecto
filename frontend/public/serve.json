@@ -2,11 +2,13 @@
   "cleanUrls": false,
   "trailingSlash": true,
   "rewrites": [
-    { "source": "/admin/", "destination": "/admin/index.html" },
-    { "source": "/admin/**", "destination": "/admin/index.html" },
-    { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/app/**", "destination": "/index.html" },
-    { "source": "/**", "destination": "/index.html" }
+    { "source": "/admin", "destination": "/admin/login.html" },
+    { "source": "/admin/", "destination": "/admin/login.html" },
+
+    { "source": "/app", "destination": "/app/request-access.html" },
+    { "source": "/app/", "destination": "/app/request-access.html" },
+
+    { "source": "/", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -20,3 +22,4 @@
     }
   ]
 }
+
