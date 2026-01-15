@@ -6,7 +6,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext'; // Contexto de internacionalización
-import { Card, Button, Loader } from '@/components/common'; // Componentes reutilizables de UI
+import { Card, Button, Loader, Alert } from '@/components/common'; // Componentes reutilizables de UI
 import PageLayout from '@/components/PageLayout'; // Layout principal con imagen de fondo
 import { guestService } from '@/services/guestService'; // Servicio para gestionar datos del invitado
 import { GuestData, Companion } from '@/types'; // Definiciones de tipos TypeScript
@@ -45,7 +45,7 @@ const ConfirmedPage: React.FC = () => {
   // --- Estado Local ---
   const [guest, setGuest] = useState<GuestData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // Clave i18n, no texto traducido
 
   // --- Función: Recuperar datos del invitado ---
   const fetch_guest_data = useCallback(async () => {
@@ -65,14 +65,14 @@ const ConfirmedPage: React.FC = () => {
       }
 
       if (status === 429) {
-        setError(t('login.errors_rate_limit'));
+        setError('login.errors_rate_limit'); // Guardamos la clave
       } else {
-        setError(t('ok.load_error'));
+        setError('ok.load_error'); // Guardamos la clave
       }
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []); // t no es necesario en las dependencias si solo se usa en setError para una clave
 
   // --- Efecto: Verificación de token y carga inicial ---
   useEffect(() => {
@@ -90,9 +90,9 @@ const ConfirmedPage: React.FC = () => {
   if (error) {
     return (
       <PageLayout>
-        <Card className="form-card text-center">
-          <h1 className="mt-4 form-title h1-small">{t('ok.title')}</h1>
-          <p className="mt-2 form-subtitle">{error}</p>
+        <Card className="max-w-md mx-auto mt-20 p-8">
+          <h1 className="form-title h1-small text-center mb-4">{t('ok.title')}</h1>
+          <Alert message={t(error)} variant="danger" />
         </Card>
       </PageLayout>
     );

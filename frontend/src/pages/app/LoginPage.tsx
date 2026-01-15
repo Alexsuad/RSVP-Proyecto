@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
   // -------------------------------------------------------------------------------
   const [guestCode, setGuestCode] = useState('');
   const [contactInput, setContactInput] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // Ahora guarda claves i18n, no textos traducidos
   const [loading, setLoading] = useState(false);
 
   const auth = useAuth();
@@ -69,7 +69,7 @@ const LoginPage: React.FC = () => {
 
     // 1. Validación mínima: ambos campos deben tener contenido
     if (!guestCode.trim() || !contactInput.trim()) {
-      setError(t('login.errors_empty'));
+      setError('login.errors_empty'); // Guardamos la clave, no el texto traducido
       return;
     }
 
@@ -103,13 +103,13 @@ const LoginPage: React.FC = () => {
 
       if (status === 401) {
         // Credenciales incorrectas
-        setError(t('login.errors_auth'));
+        setError('login.errors_auth'); // Guardamos la clave
       } else if (status === 429) {
         // Demasiados intentos en poco tiempo
-        setError(t('login.errors_rate_limit'));
+        setError('login.errors_rate_limit'); // Guardamos la clave
       } else {
         // Errores de red o servidor no previstos
-        setError(t('login.server_err'));
+        setError('login.server_err'); // Guardamos la clave
       }
     } finally {
       setLoading(false);
@@ -174,7 +174,7 @@ const LoginPage: React.FC = () => {
           {/* Nuevo lugar para el error con margen superior */}
           {error && (
             <div className="form-error-container">
-              <Alert message={error} variant="danger" />
+              <Alert message={t(error)} variant="danger" />
             </div>
           )}
 

@@ -56,7 +56,7 @@ const RsvpFormPage: React.FC = () => {
     // Estados de UI
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null); // Ahora guarda claves i18n, no textos traducidos
 
     // Campos del Formulario (Estado mutable)
     const [attending, setAttending] = useState<boolean | null>(null);
@@ -124,7 +124,7 @@ const RsvpFormPage: React.FC = () => {
             } catch (err: any) {
                 console.error('Error cargando datos RSVP', err);
                 // Si falla loading, error fatal
-                setError(t('form.generic_error')); // O "Código inválido" si status 404
+                setError('form.generic_error'); // O "Código inválido" si status 404
             } finally {
                 setLoading(false);
                 setSubmitting(false);
@@ -196,9 +196,9 @@ const RsvpFormPage: React.FC = () => {
         e.preventDefault();
         setError(null);
 
-        // Validación A: ¿Asiste o no?
+        // Validación A: Verificar que el usuario ha seleccionado Sí/No
         if (attending === null) {
-            setError(t('form.select_option'));
+            setError('form.select_option'); // Guardamos la clave
             return;
         }
 
@@ -207,15 +207,15 @@ const RsvpFormPage: React.FC = () => {
         const phoneClean = normalize_phone_for_frontend(phone);
 
         if (!emailClean && !phoneClean) {
-            setError(t('form.contact_required_one'));
+            setError('form.contact_required_one'); // Guardamos la clave
             return;
         }
         if (emailClean && !isValidEmail(emailClean)) {
-            setError(t('form.contact_invalid_email'));
+            setError('form.contact_invalid_email'); // Guardamos la clave
             return;
         }
         if (phoneClean && !isValidPhone(phoneClean)) {
-            setError(t('form.contact_invalid_phone'));
+            setError('form.contact_invalid_phone'); // Guardamos la clave
             return;
         }
 
@@ -223,7 +223,7 @@ const RsvpFormPage: React.FC = () => {
         if (attending) {
             const emptyName = companions.some(c => !c.name.trim());
             if (emptyName) {
-                setError(t('form.companion_name_required'));
+                setError('form.companion_name_required'); // Guardamos la clave
                 return;
             }
         }
@@ -285,7 +285,7 @@ const RsvpFormPage: React.FC = () => {
                 key = 'form.generic_error';
             }
 
-            setError(t(key));
+            setError(key); // Guardamos la clave, no el texto
         } finally {
             setSubmitting(false);
         }
@@ -308,7 +308,7 @@ const RsvpFormPage: React.FC = () => {
                 <Card className="rsvp-card w-full max-w-3xl mx-auto">
                     <div className="p-6">
                         <Alert
-                            message={error ?? t('form.generic_error')}
+                            message={t(error ?? 'form.generic_error')}
                             variant="danger"
                         />
                     </div>
@@ -336,7 +336,7 @@ const RsvpFormPage: React.FC = () => {
                         {/* Invitation Details Section (Restored) */}
                         <div className="mt-6 p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-[var(--color-border)] inline-block">
                              <p className="text-lg text-[var(--color-text-main)] mb-1">
-                                {guest.invited_to_ceremony 
+                                {(guest.invite_type === 'full' || guest.invite_type === 'ceremony')
                                     ? t('invite.scope.full').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
                                     : t('invite.scope.reception').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
                                 }
@@ -593,7 +593,7 @@ const RsvpFormPage: React.FC = () => {
                              {/* Error Alert moved below submit button */}
                              {error && (
                                 <div className="rsvp-error-container">
-                                     <Alert message={error} variant="danger" />
+                                     <Alert message={t(error)} variant="danger" />
                                 </div>
                              )}
                         </div>
