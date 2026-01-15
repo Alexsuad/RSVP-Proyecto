@@ -35,7 +35,7 @@ export interface GuestData {
   
   // Lógica de invitación (calculada en backend, define qué textos ve el usuario)
   invited_to_ceremony: boolean;
-  invited_to_reception?: boolean; // Añadido opcional por uso en ConfirmedPage
+  invite_type: 'full' | 'ceremony' | 'party'; // Canon normalizado
   
   // Datos guardados previamente en la BD
   allergies: string | null;

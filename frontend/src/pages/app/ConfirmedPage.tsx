@@ -167,87 +167,95 @@ const ConfirmedPage: React.FC = () => {
             <h1 className="form-title font-serif text-3xl text-[var(--color-gold-primary)] mb-2">{t('ok.title')}</h1>
             <p className="form-subtitle text-[var(--color-text-muted)] italic">{message}</p>
 
-            {/* Resumen de eventos a los que se asiste */}
-            {guest && (
+            {/* Resumen de eventos a los que se asiste - SOLO SI ASISTE */}
+            {guest && is_attending && (
               <div className="mt-6 p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-[var(--color-border)] inline-block">
                 <p className="page-subtitle mt-0 text-lg text-[var(--color-text-main)] mb-1">
-                  {guest.invited_to_ceremony && guest.invited_to_reception && t('summary.events_both_confirmed')}
-                  {guest.invited_to_ceremony && !guest.invited_to_reception && t('summary.events_ceremony_only_confirmed')}
-                  {!guest.invited_to_ceremony && guest.invited_to_reception && t('summary.events_reception_only_confirmed')}
+                  {(guest.invite_type === 'full' || guest.invite_type === 'ceremony') 
+                    ? t('summary.events_both_confirmed') 
+                    : t('summary.events_reception_only_confirmed')}
                  </p>
               </div>
             )}
           </header>
 
-          {/* Sección: Resumen de datos */}
-          <div className="rsvp-section mb-8">
-            <h3 className="rsvp-section__title text-left">{t('summary.title')}</h3>
+          {/* Sección: Resumen de datos - SOLO SI ASISTE Y NO DECLINADO */}
+          {is_attending ? (
+            <div className="rsvp-section mb-8">
+              <h3 className="rsvp-section__title text-left">{t('summary.title')}</h3>
 
-            <div className="mb-4 mt-2 text-left text-[var(--color-text-main)]">
-                 <p className="text-md">
-                    {guest.invited_to_ceremony 
-                        ? t('invite.scope.full').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
-                        : t('invite.scope.reception').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
-                    }
-                 </p>
-                 <hr className="mt-3 border-gray-200" />
-            </div>
+              <div className="mb-4 mt-2 text-left text-[var(--color-text-main)]">
+                   <p className="text-md">
+                      {(guest.invite_type === 'full' || guest.invite_type === 'ceremony')
+                          ? t('invite.scope.full').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+                          : t('invite.scope.reception').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+                      }
+                   </p>
+                   <hr className="mt-3 border-gray-200" />
+              </div>
 
-            <div className="space-y-2 mt-4 text-left">
-              <p>
-                <strong>{t('summary.main_guest_label')}:</strong>{' '}
-                {guest.full_name}
-              </p>
-
-              {/* Email y Teléfono */}
-              {guest.email && guest.email.trim() && (
+              <div className="space-y-2 mt-4 text-left">
                 <p>
-                  <strong>{t('summary.email_label')}:</strong>{' '}
-                  {guest.email}
+                  <strong>{t('summary.main_guest_label')}:</strong>{' '}
+                  {guest.full_name}
                 </p>
-              )}
-              {guest.phone && guest.phone.trim() && (
+
+                {/* Email y Teléfono */}
+                {guest.email && guest.email.trim() && (
+                  <p>
+                    <strong>{t('summary.email_label')}:</strong>{' '}
+                    {guest.email}
+                  </p>
+                )}
+                {guest.phone && guest.phone.trim() && (
+                  <p>
+                    <strong>{t('summary.phone_label')}:</strong>{' '}
+                    {guest.phone}
+                  </p>
+                )}
+
                 <p>
-                  <strong>{t('summary.phone_label')}:</strong>{' '}
-                  {guest.phone}
+                  <strong>{t('summary.adults_label')}:</strong>{' '}
+                  {num_adults}
                 </p>
-              )}
+                <p>
+                  <strong>{t('summary.children_label')}:</strong>{' '}
+                  {num_children}
+                </p>
 
-              {is_attending && (
-                <>
+                <p>
+                  <strong>{t('summary.companions_label')}:</strong>{' '}
+                  {companions_count}
+                </p>
+                
+                {/* Alergias */}
+                {allergies_text && (
                   <p>
-                    <strong>{t('summary.adults_label')}:</strong>{' '}
-                    {num_adults}
+                    <strong>{t('summary.allergies_main_label')}:</strong>{' '}
+                    {allergies_text}
                   </p>
-                  <p>
-                    <strong>{t('summary.children_label')}:</strong>{' '}
-                    {num_children}
-                  </p>
-
-                  <p>
-                    <strong>{t('summary.companions_label')}:</strong>{' '}
-                    {companions_count}
-                  </p>
-                  
-                  {/* Alergias */}
-                  {allergies_text && (
-                    <p>
-                      <strong>{t('summary.allergies_main_label')}:</strong>{' '}
-                      {allergies_text}
-                    </p>
-                  )}
-                </>
-              )}
-              
-              {/* Notas del invitado */}
-              {guest.notes && guest.notes.trim() && (
-                 <div className="summary-item !block text-left pt-2 border-t border-dashed border-gray-200 mt-2">
-                    <span className="summary-item__label block mb-1">{t('form.notes.expander_label')}:</span>
-                    <span className="summary-item__value text-sm block whitespace-pre-wrap">{guest.notes}</span>
-                 </div>
-              )}
+                )}
+                
+                {/* Notas del invitado (Lectura) */}
+                {guest.notes && guest.notes.trim() && (
+                   <div className="summary-item !block text-left pt-2 border-t border-dashed border-gray-200 mt-2">
+                      <span className="summary-item__label block mb-1">{t('form.notes.expander_label')}:</span>
+                      <span className="summary-item__value text-sm block whitespace-pre-wrap">{guest.notes}</span>
+                   </div>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            // SI NO ASISTE: Solo mostrar notas si existen (lectura)
+            guest.notes && guest.notes.trim() ? (
+               <div className="rsvp-section mb-8 text-left">
+                   <div className="summary-item !block pt-2 border-dashed border-gray-200 mt-2">
+                      <span className="summary-item__label block mb-1">{t('form.notes.expander_label')}:</span>
+                      <span className="summary-item__value text-sm block whitespace-pre-wrap">{guest.notes}</span>
+                   </div>
+               </div>
+            ) : null
+          )}
 
           {/* Sección: Detalle de Acompañantes */}
           {is_attending && companions_count > 0 && (

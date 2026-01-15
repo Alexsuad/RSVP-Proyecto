@@ -561,24 +561,25 @@ const RsvpFormPage: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* Notas / Mensaje - Wrapped in Section for spacing */}
-                                <div className="rsvp-section mt-8">
-                                    <h3 className="rsvp-subsection-title mb-4">
-                                        {t('form.notes.expander_label')}
-                                    </h3>
-                                    <FormField 
-                                        as="textarea" 
-                                        id="notes" 
-                                        label="" 
-                                        value={notes} 
-                                        onChange={e => setNotes(e.target.value)} 
-                                        placeholder={t('form.notes.placeholder')} 
-                                        className="form-control"
-                                        rows={4}
-                                    />
-                                </div>
                             </>
                         )}
+
+                        {/* Notas / Mensaje - Siempre visible */}
+                        <div className="rsvp-section mt-8">
+                            <h3 className="rsvp-subsection-title mb-4">
+                                {t('form.notes.expander_label')}
+                            </h3>
+                            <FormField 
+                                as="textarea" 
+                                id="notes" 
+                                label="" 
+                                value={notes} 
+                                onChange={e => setNotes(e.target.value)} 
+                                placeholder={t('form.notes.placeholder')} 
+                                className="form-control" 
+                                rows={4}
+                            />
+                        </div>
                         
                         <div className="rsvp-footer-actions">
                             <Button 
