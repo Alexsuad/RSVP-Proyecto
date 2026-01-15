@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode, useMemo } from 'react';
+import { createContext, useState, useContext, ReactNode, useMemo, useEffect } from 'react';
 import { 
   getToken, setToken, clearToken, 
   getAdminToken, setAdminToken, clearAdminToken 
@@ -16,6 +16,9 @@ interface AuthContextType {
   isAdmin: boolean;
   adminLogin: (token: string) => void;
   adminLogout: () => void;
+  
+  // Loading
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,8 +38,11 @@ const getJwtRole = (token: string | null): string | null => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // Loading State
+  const [isLoading, setIsLoading] = useState(true);
+
   // --- Guest State ---
-  const [token, setGuestState] = useState<string | null>(getToken());
+  const [token, setGuestState] = useState<string | null>(null);
   
   const login = (newToken: string) => {
     setToken(newToken);
@@ -51,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = !!token;
 
   // --- Admin State ---
-  const [adminToken, setAdminState] = useState<string | null>(getAdminToken());
+  const [adminToken, setAdminState] = useState<string | null>(null);
 
   const adminLogin = (newToken: string) => {
     setAdminToken(newToken);
@@ -70,10 +76,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return role === 'admin';
   }, [adminToken]);
 
+  // Initial Auth Check (Effect)
+  useEffect(() => {
+    const initAuth = () => {
+        const storedToken = getToken();
+        const storedAdminToken = getAdminToken();
+        
+        if (storedToken) setGuestState(storedToken);
+        if (storedAdminToken) setAdminState(storedAdminToken);
+        
+        setIsLoading(false);
+    };
+    initAuth();
+  }, []);
+
   return (
     <AuthContext.Provider value={{ 
       token, isAuthenticated, login, logout,
-      adminToken, isAdmin, adminLogin, adminLogout
+      adminToken, isAdmin, adminLogin, adminLogout,
+      isLoading
     }}>
       {children}
     </AuthContext.Provider>
