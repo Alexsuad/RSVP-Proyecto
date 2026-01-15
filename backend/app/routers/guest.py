@@ -222,10 +222,22 @@ def _check_deadline():
         )
 
 def _format_response(guest: models.Guest) -> schemas.GuestWithCompanionsResponse:
-    is_full_invite = (guest.invite_type == InviteTypeEnum.full)
+    # Normalización Canon: 'ceremony' (legacy) se trata como 'full'
+    canonical_type = guest.invite_type
+    if canonical_type == InviteTypeEnum.ceremony:
+        canonical_type = InviteTypeEnum.full
+    
+    # Construir respuesta base
     resp = schemas.GuestWithCompanionsResponse.model_validate(guest)
+    
+    # Forzar valores canon en la respuesta
+    resp.invite_type = canonical_type
+    
+    # Flags de compatibilidad y texto de alcance
+    is_full_invite = (canonical_type == InviteTypeEnum.full)
     resp.invited_to_ceremony = is_full_invite
     resp.invite_scope = "ceremony+reception" if is_full_invite else "reception-only"
+    
     return resp
 
 def _send_rsvp_email(guest: models.Guest):
