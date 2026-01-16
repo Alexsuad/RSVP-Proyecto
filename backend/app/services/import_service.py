@@ -326,12 +326,12 @@ def _apply_add_only(db: Session, plan: List[Dict[str, Any]], report: import_repo
             full_name=data["full_name"],
             email=data["email"] or None,
             phone=data["phone"],
-            language=lang_enum,
-            side=side_enum,
+            language=lang_enum.value,
+            side=side_enum.value if side_enum else None,
             relationship=data["relationship"] or None,
             group_id=data["group_id"] or None,
             max_accomp=data["max_accomp"],
-            invite_type=type_enum,
+            invite_type=type_enum.value,
             guest_code=final_code
         )
         db.add(guest)
@@ -392,12 +392,12 @@ def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report
                 full_name=data["full_name"],
                 email=data["email"] or None,
                 phone=data["phone"],
-                language=lang_enum,
-                side=side_enum,
+                language=lang_enum.value,
+                side=side_enum.value if side_enum else None,
                 relationship=data["relationship"] or None,
                 group_id=data["group_id"] or None,
                 max_accomp=data["max_accomp"],
-                invite_type=type_enum,
+                invite_type=type_enum.value,
                 guest_code=final_code
             )
             db.add(guest)
@@ -415,13 +415,13 @@ def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report
             
             # guest.phone ya coincide (es la llave)
             
-            guest.language = lang_enum
-            if side_enum: guest.side = side_enum
+            guest.language = lang_enum.value
+            if side_enum: guest.side = side_enum.value
             if data["relationship"]: guest.relationship = data["relationship"]
             if data["group_id"]: guest.group_id = data["group_id"]
             
             guest.max_accomp = data["max_accomp"]
-            guest.invite_type = type_enum
+            guest.invite_type = type_enum.value
             
             # guest_code: normalmente no se cambia por CSV salvo que venga explícito y queramos forzarlo
             # Aquí lo ignoramos para estabilidad.
