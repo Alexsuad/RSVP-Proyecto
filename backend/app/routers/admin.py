@@ -344,8 +344,22 @@ def update_guest(
             filtered_data["phone"] = None
 
     # 3. Actualizar
-    updated_guest = guests_crud.update(db, db_guest, filtered_data)
-    return updated_guest
+    # Asegurar que los Enums se pasen como valores simples (str) para evitar conflictos ORM
+    if "invite_type" in filtered_data and hasattr(filtered_data["invite_type"], "value"):
+        filtered_data["invite_type"] = filtered_data["invite_type"].value
+        
+    if "language" in filtered_data and hasattr(filtered_data["language"], "value"):
+        filtered_data["language"] = filtered_data["language"].value
+        
+    if "side" in filtered_data and hasattr(filtered_data["side"], "value"):
+        filtered_data["side"] = filtered_data["side"].value
+
+    try:
+        updated_guest = guests_crud.update(db, db_guest, filtered_data)
+        return updated_guest
+    except Exception as e:
+        logger.error(f"Error updating guest {guest_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error interno DB: {str(e)}")
 
 
 @router.get("/guests/{guest_id}", response_model=schemas.GuestWithCompanionsResponse, dependencies=[Depends(require_admin_access)])
