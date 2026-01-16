@@ -336,9 +336,9 @@ const RsvpFormPage: React.FC = () => {
                         {/* Invitation Details Section (Restored) */}
                         <div className="mt-6 p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-[var(--color-border)] inline-block">
                              <p className="text-lg text-[var(--color-text-main)] mb-1">
-                                {(guest.invite_type === 'full' || guest.invite_type === 'ceremony')
-                                    ? t('invite.scope.full').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
-                                    : t('invite.scope.reception').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+                                {(guest.invite_type === 'party')
+                                    ? t('invite.scope.reception').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+                                    : t('invite.scope.full').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
                                 }
                              </p>
                              <p className="text-sm text-[var(--color-text-muted)]">

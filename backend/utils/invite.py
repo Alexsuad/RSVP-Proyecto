@@ -13,11 +13,16 @@ def normalize_invite_type(raw: str | None) -> str:                              
     Cualquier otro valor/None -> "party" (fail-safe)                                          # Aclara el fallback seguro.
     """                                                                                        # Cierra docstring.
     val = (raw or "").strip().lower()                                                         # Limpia el valor de entrada (None/espacios/mayúsculas).
-    if val == "full":                                                                         # Comprueba si es "full".
-        return "full"                                                                         # Devuelve "full" sin cambios.
-    if val == "party":                                                                        # Comprueba si es "party".
-        return "party"                                                                        # Devuelve "party" sin cambios.
-    return "party"                                                                            # Fallback y mapeo de "ceremony" -> "party".
+    if val == "full":
+        return "full"
+    if val == "party":
+        return "party"
+    if val == "ceremony":
+        # Según Playbook: ceremony implica acceso full (legacy)
+        return "full"
+    
+    # Fallback seguro
+    return "party"
 
 
 def is_invited_to_ceremony(raw: str | None) -> bool:                                          # Define helper booleano para "invita a ceremonia".
