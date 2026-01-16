@@ -30,7 +30,7 @@ const RecoverCodePage: React.FC = () => {
         const phoneClean = phone.trim();
 
         if (!emailClean && !phoneClean) {
-            setErrors({ form: t('recover.invalid') });
+            setErrors({ form: 'recover.invalid' });
             return;
         }
         
@@ -41,7 +41,7 @@ const RecoverCodePage: React.FC = () => {
                 email: emailClean || undefined, 
                 phone: phoneClean || undefined 
             });
-            setMessage(t('recover.success'));
+            setMessage('recover.success');
 
         } catch (err: any) {
             console.error('Recover error:', err);
@@ -53,7 +53,7 @@ const RecoverCodePage: React.FC = () => {
             } else if (status === 400) {
                 errorKey = 'recover.invalid';
             }
-            setErrors({ form: t(errorKey) });
+            setErrors({ form: errorKey });
         } finally {
             setLoading(false);
         }
@@ -74,7 +74,7 @@ const RecoverCodePage: React.FC = () => {
 
                 {message ? (
                     <div className="form-body text-center animate-fade-in">
-                        <Alert message={message} variant="success" />
+                        <Alert message={t(message)} variant="success" />
                         
                         <div className="auth-card__footer mt-6">
                             <ActionRow 
@@ -118,7 +118,7 @@ const RecoverCodePage: React.FC = () => {
                         {/* Error Global */}
                         {errors.form && (
                             <div style={{ marginTop: '1.5rem', color: '#dc3545', textAlign: 'center' }}>
-                                <Alert message={errors.form} variant="danger" />
+                                <Alert message={t(errors.form)} variant="danger" />
                             </div>
                         )}
                     </form>
