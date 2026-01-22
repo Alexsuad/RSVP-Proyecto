@@ -8,6 +8,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
     <title>Boda Jenny & Cristian</title>
     <!--[if mso]>
     <style type="text/css">
@@ -16,43 +18,152 @@
     <![endif]-->
     <style>
       /* Reset y bases */
-      body { margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0; padding: 0; 
+        background-color: #f0f0f0 !important; 
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+        -webkit-font-smoothing: antialiased; 
+        color: #333333;
+      }
       table { border-spacing: 0; border-collapse: collapse; }
       td { padding: 0; }
-      img { border: 0; }
+      img { border: 0; display: block; }
       
       /* Contenedor principal responsive */
-      .wrapper { width: 100%; table-layout: fixed; background-color: #f9f9f9; padding-bottom: 40px; }
-      .main-table { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-
-      /* Elementos visuales */
-      .header-bg { background-color: #D4C4A8; background-image: url('https://i.ibb.co/1L9m0fM/flowers-header.jpg'); background-size: cover; background-position: center; height: 160px; text-align: center; }
-      .header-title-box { background-color: rgba(255, 255, 255, 0.9); padding: 15px 30px; display: inline-block; margin-top: 55px; border-radius: 4px; }
-      .header-title { color: #8C7B5D; font-size: 20px; font-weight: 600; letter-spacing: 2px; margin: 0; text-transform: uppercase; }
-
-      .content-cell { padding: 40px 30px; text-align: center; color: #4A4A4A; }
+      .wrapper { 
+        width: 100%; 
+        table-layout: fixed; 
+        background-color: #f0f0f0 !important; 
+        padding-bottom: 40px; 
+      }
       
-      h1 { font-size: 24px; color: #2C2C2C; margin: 0 0 20px 0; font-weight: normal; }
-      p { font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #555555; }
-      
-      /* Caja del código */
-      .code-box { background-color: #F7F5F0; border: 1px dashed #C0B298; padding: 20px; margin: 25px 0; border-radius: 6px; display: inline-block; min-width: 200px; }
-      .code-text { font-size: 28px; font-weight: bold; font-family: 'Courier New', monospace; color: #2C2C2C; letter-spacing: 2px; margin: 0; }
-      .code-subtext { font-size: 13px; color: #888888; margin-top: 8px; margin-bottom: 0; }
+      /* Tarjeta principal: Forzamos blanco para simular papel incluso en Dark Mode */
+      .main-table { 
+        background-color: #ffffff !important; 
+        margin: 0 auto; 
+        width: 100%; 
+        max-width: 600px; 
+        border-radius: 8px; 
+        overflow: hidden; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+        border: 1px solid #e0e0e0; /* Borde sutil para definición */
+      }
 
-      /* Botón (VML hack en layout si fuera necesario, aquí CSS puro funciona bien en móviles) */
-      .btn { background-color: #A68D65; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; margin-top: 10px; transition: background-color 0.3s; }
-      .btn:hover { background-color: #8C7650; }
+      /* Elementos visuales - Imagen robusta */
+      .header-bg { 
+        background-color: #D4C4A8 !important; /* Fallback dorado seguro */
+        /* Imagen de alta calidad de Unsplash (Flores boda neutras) */
+        background-image: url('https://images.unsplash.com/photo-1520013577317-915479be96f1?q=80&w=800&auto=format&fit=crop'); 
+        background-size: cover; 
+        background-position: center; 
+        height: 180px; 
+        text-align: center; 
+        vertical-align: middle;
+      }
+      .header-title-box { 
+        background-color: rgba(255, 255, 255, 0.95) !important; 
+        padding: 12px 25px; 
+        display: inline-block; 
+        border-radius: 4px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-top: 60px; /* Ajuste visual */
+      }
+      .header-title { 
+        color: #8C7B5D !important; 
+        font-size: 18px; 
+        font-weight: 600; 
+        letter-spacing: 3px; 
+        margin: 0; 
+        text-transform: uppercase; 
+      }
+
+      .content-cell { 
+        padding: 40px 30px; 
+        text-align: center; 
+        color: #4A4A4A !important; 
+        background-color: #ffffff !important;
+      }
+      
+      h1 { 
+        font-size: 24px; 
+        color: #2C2C2C !important; 
+        margin: 0 0 20px 0; 
+        font-weight: normal; 
+      }
+      p { 
+        font-size: 16px; 
+        line-height: 1.6; 
+        margin: 0 0 20px 0; 
+        color: #555555 !important; 
+      }
+      
+      /* Caja del código (Fix UX Mobile) */
+      .code-box { 
+        background-color: #F9F7F2 !important; 
+        border: 1px dashed #C0B298; 
+        padding: 20px 10px; /* Menos padding lateral para dar espacio al texto */
+        margin: 25px 0; 
+        border-radius: 6px; 
+        display: inline-block; 
+        min-width: 220px;
+        max-width: 100%; /* Evita desborde */
+      }
+      .code-text { 
+        font-size: 28px; 
+        font-weight: bold; 
+        font-family: 'Courier New', monospace; 
+        color: #2C2C2C !important; 
+        letter-spacing: 1px; 
+        margin: 0;
+        
+        /* FIX UX: Evitar ruptura de línea en el código */
+        white-space: nowrap; 
+      }
+      .code-subtext { 
+        font-size: 13px; 
+        color: #888888 !important; 
+        margin-top: 8px; 
+        margin-bottom: 0; 
+      }
+
+      .btn { 
+        background-color: #A68D65 !important; 
+        color: #ffffff !important; 
+        padding: 14px 28px; 
+        text-decoration: none; 
+        border-radius: 50px; 
+        font-weight: bold; 
+        font-size: 16px; 
+        display: inline-block; 
+        margin-top: 10px; 
+      }
+      .btn:hover { background-color: #8C7650 !important; }
 
       /* Footer */
-      .footer-cell { background-color: #F2F2F2; padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee; }
-      .footer-link { color: #999999; text-decoration: underline; }
+      .footer-cell { 
+        background-color: #F9F9F9 !important; 
+        padding: 20px; 
+        text-align: center; 
+        font-size: 12px; 
+        color: #999999 !important; 
+        border-top: 1px solid #eeeeee; 
+      }
 
       /* Móvil */
       @media screen and (max-width: 600px) {
-        .content-cell { padding: 30px 20px; }
-        .header-title { font-size: 18px; }
-        .code-text { font-size: 24px; }
+        .content-cell { padding: 30px 15px !important; }
+        .header-title { font-size: 16px !important; }
+        .header-bg { height: 140px !important; }
+        .header-title-box { margin-top: 45px !important; }
+        
+        /* AJUSTE CLAVE: Reducir fuente en móvil para que quepa */
+        .code-text { 
+          font-size: 22px !important; 
+          letter-spacing: 0.5px !important;
+        }
       }
     </style>
   </head>
@@ -61,8 +172,7 @@
       <table class="main-table" role="presentation">
         <!-- HEADER -->
         <tr>
-          <td class="header-bg" style="background-color: #D4C4A8; text-align: center;">
-            <!-- Fallback texto si imagen falla -->
+          <td class="header-bg">
              <div class="header-title-box">
                <h2 class="header-title">Jenny & Cristian</h2>
              </div>
@@ -82,11 +192,14 @@
               <p class="code-subtext">{{code_instruction_text}}</p>
             </div>
 
+            {% if next_step_text %}
             <p style="margin-top: 20px;">
               {{next_step_text}}
             </p>
+            {% endif %}
 
             <!-- BOTÓN CTA -->
+            <div style="margin-top: 20px;">
             <!--[if mso]>
               <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{cta_url}}" style="height:48px;v-text-anchor:middle;width:200px;" arcsize="50%" stroke="f" fillcolor="#A68D65">
                 <w:anchorlock/>
@@ -97,6 +210,7 @@
                 </center>
               </v:roundrect>
             <![endif]-->
+            </div>
 
             <p style="margin-top: 30px; font-size: 14px; font-style: italic; color: #888;">
               {{closing_text}}<br/>
