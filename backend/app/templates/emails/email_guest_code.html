@@ -1,0 +1,117 @@
+<!-- File: backend/app/templates/emails/email_guest_code.html
+     ──────────────────────────────────────────────────────────────────────
+     Propósito: Plantilla HTML para enviar el código de acceso (Guest Code).
+     Rol: Proporciona el código de invitación y un enlace directo al login.
+     ────────────────────────────────────────────────────────────────────── -->
+<!DOCTYPE html>
+<html lang="{{lang_code}}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boda Jenny & Cristian</title>
+    <!--[if mso]>
+    <style type="text/css">
+      body, table, td, p, a {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <style>
+      /* Reset y bases */
+      body { margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      table { border-spacing: 0; border-collapse: collapse; }
+      td { padding: 0; }
+      img { border: 0; }
+      
+      /* Contenedor principal responsive */
+      .wrapper { width: 100%; table-layout: fixed; background-color: #f9f9f9; padding-bottom: 40px; }
+      .main-table { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+      /* Elementos visuales */
+      .header-bg { background-color: #D4C4A8; background-image: url('https://i.ibb.co/1L9m0fM/flowers-header.jpg'); background-size: cover; background-position: center; height: 160px; text-align: center; }
+      .header-title-box { background-color: rgba(255, 255, 255, 0.9); padding: 15px 30px; display: inline-block; margin-top: 55px; border-radius: 4px; }
+      .header-title { color: #8C7B5D; font-size: 20px; font-weight: 600; letter-spacing: 2px; margin: 0; text-transform: uppercase; }
+
+      .content-cell { padding: 40px 30px; text-align: center; color: #4A4A4A; }
+      
+      h1 { font-size: 24px; color: #2C2C2C; margin: 0 0 20px 0; font-weight: normal; }
+      p { font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #555555; }
+      
+      /* Caja del código */
+      .code-box { background-color: #F7F5F0; border: 1px dashed #C0B298; padding: 20px; margin: 25px 0; border-radius: 6px; display: inline-block; min-width: 200px; }
+      .code-text { font-size: 28px; font-weight: bold; font-family: 'Courier New', monospace; color: #2C2C2C; letter-spacing: 2px; margin: 0; }
+      .code-subtext { font-size: 13px; color: #888888; margin-top: 8px; margin-bottom: 0; }
+
+      /* Botón (VML hack en layout si fuera necesario, aquí CSS puro funciona bien en móviles) */
+      .btn { background-color: #A68D65; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; margin-top: 10px; transition: background-color 0.3s; }
+      .btn:hover { background-color: #8C7650; }
+
+      /* Footer */
+      .footer-cell { background-color: #F2F2F2; padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee; }
+      .footer-link { color: #999999; text-decoration: underline; }
+
+      /* Móvil */
+      @media screen and (max-width: 600px) {
+        .content-cell { padding: 30px 20px; }
+        .header-title { font-size: 18px; }
+        .code-text { font-size: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <table class="main-table" role="presentation">
+        <!-- HEADER -->
+        <tr>
+          <td class="header-bg" style="background-color: #D4C4A8; text-align: center;">
+            <!-- Fallback texto si imagen falla -->
+             <div class="header-title-box">
+               <h2 class="header-title">Jenny & Cristian</h2>
+             </div>
+          </td>
+        </tr>
+
+        <!-- CONTENIDO -->
+        <tr>
+          <td class="content-cell">
+            <h1>{{greet}}, {{guest_name}}!</h1>
+            
+            <p>{{intro_text}}</p>
+
+            <!-- CAJA CÓDIGO -->
+            <div class="code-box">
+              <p class="code-text">{{guest_code}}</p>
+              <p class="code-subtext">{{code_instruction_text}}</p>
+            </div>
+
+            <p style="margin-top: 20px;">
+              {{next_step_text}}
+            </p>
+
+            <!-- BOTÓN CTA -->
+            <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{cta_url}}" style="height:48px;v-text-anchor:middle;width:200px;" arcsize="50%" stroke="f" fillcolor="#A68D65">
+                <w:anchorlock/>
+                <center>
+              <![endif]-->
+                  <a href="{{cta_url}}" class="btn">{{cta_label}}</a>
+              <!--[if mso]>
+                </center>
+              </v:roundrect>
+            <![endif]-->
+
+            <p style="margin-top: 30px; font-size: 14px; font-style: italic; color: #888;">
+              {{closing_text}}<br/>
+              Jenny & Cristian
+            </p>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td class="footer-cell">
+            <p style="margin: 0;">{{footer_text}}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,97 @@
+<!-- File: backend/app/templates/emails/email_reminder.html
+     ──────────────────────────────────────────────────────────────────────
+     Propósito: Plantilla HTML para enviar recordatorios de RSVP pendientes.
+     Rol: Urge al invitado a confirmar antes de la fecha límite (Deadline).
+     ────────────────────────────────────────────────────────────────────── -->
+<!DOCTYPE html>
+<html lang="{{lang_code}}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{subject}}</title>
+    <!--[if mso]>
+    <style type="text/css">
+      body, table, td, p, h1, h2, h3, a {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <style>
+      body { margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      table { border-spacing: 0; border-collapse: collapse; }
+      td { padding: 0; }
+      img { border: 0; }
+      
+      .wrapper { width: 100%; table-layout: fixed; background-color: #f9f9f9; padding-bottom: 40px; }
+      .main-table { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+      .header-bg { background-color: #D4C4A8; background-image: url('https://i.ibb.co/1L9m0fM/flowers-header.jpg'); background-size: cover; background-position: center; height: 160px; text-align: center; }
+      .header-title-box { background-color: rgba(255, 255, 255, 0.9); padding: 15px 30px; display: inline-block; margin-top: 55px; border-radius: 4px; }
+      .header-title { color: #8C7B5D; font-size: 20px; font-weight: 600; letter-spacing: 2px; margin: 0; text-transform: uppercase; }
+
+      .content-cell { padding: 40px 30px; text-align: center; color: #4A4A4A; }
+      
+      h1 { font-size: 24px; color: #b48a50; margin: 0 0 20px 0; font-weight: normal; }
+      p { font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #555555; }
+      
+      /* Caja de Deadline */
+      .deadline-box { background-color: #FFF8E1; border: 1px solid #FFE082; color: #B98E0A; padding: 15px; margin: 20px 0; border-radius: 6px; font-weight: bold; display: inline-block; }
+
+      .btn { background-color: #A68D65; color: #ffffff !important; padding: 14px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; margin-top: 10px; transition: background-color 0.3s; }
+      .btn:hover { background-color: #8C7650; }
+
+      .footer-cell { background-color: #F2F2F2; padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee; }
+
+      @media screen and (max-width: 600px) {
+        .content-cell { padding: 30px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <table class="main-table" role="presentation">
+        <tr>
+          <td class="header-bg">
+             <div class="header-title-box">
+               <h2 class="header-title">Jenny & Cristian</h2>
+             </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="content-cell">
+            <h1>{{ title }}</h1>
+            <p>{{ intro_text }}</p>
+            
+            {% if deadline_text %}
+            <div class="deadline-box">
+              📅 {{ deadline_label }}: {{ deadline_text }}
+            </div>
+            {% endif %}
+
+            <p>{{ instruction_text }}</p>
+
+            <!-- BOTÓN CTA -->
+            <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{cta_url}}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="50%" stroke="f" fillcolor="#A68D65">
+                <w:anchorlock/>
+                <center>
+              <![endif]-->
+                  <a href="{{cta_url}}" class="btn">{{cta_label}}</a>
+              <!--[if mso]>
+                </center>
+              </v:roundrect>
+            <![endif]-->
+
+            <p style="margin-top: 30px; font-size: 14px; font-style: italic; color: #888;">
+              {{ closing_text }}<br/>
+              Jenny & Cristian
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="footer-cell">
+            <p>{{ footer_text }}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

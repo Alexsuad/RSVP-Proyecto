@@ -1,0 +1,166 @@
+<!-- File: backend/app/templates/emails/email_confirmation.html
+     ──────────────────────────────────────────────────────────────────────
+     Propósito: Plantilla HTML para confirmar la recepción del RSVP.
+     Rol: Muestra un resumen detallado de la asistencia, menú y acompañantes.
+     ────────────────────────────────────────────────────────────────────── -->
+<!DOCTYPE html>
+<html lang="{{lang_code}}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{subject}}</title>
+    <!--[if mso]>
+    <style type="text/css">
+      body, table, td, p, h1, h2, h3, a {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <style>
+      body { margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      table { border-spacing: 0; border-collapse: collapse; }
+      td { padding: 0; }
+      img { border: 0; }
+      
+      .wrapper { width: 100%; table-layout: fixed; background-color: #f9f9f9; padding-bottom: 40px; }
+      .main-table { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+      .header-bg { background-color: #D4C4A8; background-image: url('https://i.ibb.co/1L9m0fM/flowers-header.jpg'); background-size: cover; background-position: center; height: 160px; text-align: center; }
+      .header-title-box { background-color: rgba(255, 255, 255, 0.9); padding: 15px 30px; display: inline-block; margin-top: 55px; border-radius: 4px; }
+      .header-title { color: #8C7B5D; font-size: 20px; font-weight: 600; letter-spacing: 2px; margin: 0; text-transform: uppercase; }
+
+      .content-cell { padding: 40px 30px; text-align: left; color: #4A4A4A; }
+      
+      h1 { font-size: 22px; color: #b48a50; margin: 0 0 20px 0; font-weight: normal; text-align: center; }
+      p { font-size: 16px; line-height: 1.6; margin: 0 0 16px 0; color: #555555; }
+      
+      /* Caja de Resumen */
+      .summary-box { background-color: #FDFDFD; border: 1px solid #EEEEEE; border-radius: 8px; padding: 25px; margin-top: 20px; }
+      .summary-title { font-size: 18px; color: #2C2C2C; margin-bottom: 20px; font-weight: 600; text-align: center; border-bottom: 1px solid #EEE; padding-bottom: 10px; }
+      
+      .data-row { margin-bottom: 12px; font-size: 15px; }
+      .data-label { color: #888888; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+      .data-value { color: #2C2C2C; font-weight: normal; }
+      .data-value strong { font-weight: 600; }
+
+      .status-yes { color: #2E7D32; font-weight: bold; background: #E8F5E9; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+      .status-no { color: #C62828; font-weight: bold; background: #FFEBEE; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+
+      /* Lista de acompañantes */
+      .companion-list { margin: 10px 0 0 0; padding: 0; list-style: none; }
+      .companion-item { background: #FFFFFF; border: 1px dashed #DDD; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 14px; }
+      .comp-header { font-weight: 600; color: #333; display: block; }
+      .comp-meta { color: #999; font-size: 12px; }
+
+      .btn { background-color: #A68D65; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; display: inline-block; margin-top: 25px; text-align: center; }
+      
+      .footer-cell { background-color: #F2F2F2; padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee; }
+
+      @media screen and (max-width: 600px) {
+        .content-cell { padding: 30px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <table class="main-table" role="presentation">
+        <tr>
+          <td class="header-bg">
+             <div class="header-title-box">
+               <h2 class="header-title">Jenny & Cristian</h2>
+             </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="content-cell">
+            <h1>{{ title }}</h1>
+            <p>{{ intro_text }}</p>
+
+            <div class="summary-box">
+              <div class="summary-title">{{ summary_label }}</div>
+
+              <div class="data-row">
+                <span class="data-label">{{ label_invitation }}</span>
+                <span class="data-value">{{ invite_scope_text }}</span>
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">{{ label_status }}</span>
+                {% if attending %}
+                  <span class="status-yes">{{ text_attending_yes }}</span>
+                {% else %}
+                  <span class="status-no">{{ text_attending_no }}</span>
+                {% endif %}
+              </div>
+
+              {% if event_date %}
+              <div class="data-row">
+                <span class="data-label">{{ label_date }}</span>
+                <span class="data-value">{{ event_date }}</span>
+              </div>
+              {% endif %}
+
+              {% if headcount %}
+              <div class="data-row">
+                <span class="data-label">{{ label_guests }}</span>
+                <span class="data-value">{{ headcount }}</span>
+              </div>
+              {% endif %}
+
+              {% if menu_choice %}
+              <div class="data-row">
+                <span class="data-label">{{ label_menu }}</span>
+                <span class="data-value">{{ menu_choice }}</span>
+              </div>
+              {% endif %}
+
+              {% if companions %}
+              <div style="margin-top: 15px;">
+                <span class="data-label">{{ label_companions }}</span>
+                <ul class="companion-list">
+                  {% for c in companions %}
+                  <li class="companion-item">
+                    <span class="comp-header">👤 {{ c.name }}</span>
+                    <span class="comp-meta">{{ c.label }}</span>
+                    {% if c.allergens %}
+                      <div style="margin-top:4px; color:#D35400; font-size:12px;">⚠️ {{ c.allergens }}</div>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endif %}
+
+              {% if allergies %}
+              <div class="data-row" style="margin-top: 15px;">
+                <span class="data-label">{{ label_allergies_main }}</span>
+                <span class="data-value" style="color:#D35400;">{{ allergies }}</span>
+              </div>
+              {% endif %}
+
+              {% if notes %}
+              <div class="data-row" style="margin-top: 15px;">
+                <span class="data-label">{{ label_notes }}</span>
+                <span class="data-value" style="font-style: italic;">"{{ notes }}"</span>
+              </div>
+              {% endif %}
+            </div>
+
+            {% if cta_url %}
+            <div style="text-align: center;">
+              <a href="{{ cta_url }}" class="btn">{{ cta_label }}</a>
+            </div>
+            {% endif %}
+
+            <p style="text-align: center; margin-top: 30px; color: #888; font-size: 14px;">
+              {{ footer_more_details }}
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="footer-cell">
+            <p>Boda Jenny & Cristian • {{ event_year }}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
