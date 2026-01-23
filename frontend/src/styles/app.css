@@ -86,8 +86,8 @@
 .split-cover {
   display: none; /* Hidden on mobile by default */
   background-color: #ddd; /* Fallback */
-  /* Placeholder for actual image - can be set via inline style or class modifier */
-  background-image: url('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=2070&auto=format&fit=crop'); 
+  /* Imagen de pareja bailando bajo luces (boda romántica) */
+  background-image: url('/assets/images/email/imgBaile.jpg'); 
   background-size: cover;
   background-position: center;
 }

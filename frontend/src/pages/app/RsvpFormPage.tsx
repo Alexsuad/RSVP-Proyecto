@@ -42,8 +42,8 @@ const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
-// Imagen de fondo específica (Wedding Aisle/Matrimonio)
-const BG_IMAGE = 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?q=80&w=2070&auto=format&fit=crop';
+// Imagen de fondo: Pastel de bodas rosa con flores
+const BG_IMAGE = '/assets/images/email/imaPastel.jpg';
 
 const RsvpFormPage: React.FC = () => {
     // --- ESTADO LOCAL ---

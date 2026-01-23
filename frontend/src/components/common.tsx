@@ -212,6 +212,24 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 {item.label}
               </a>
             ))}
+            <button
+                onClick={() => {
+                  sessionStorage.removeItem('rsvp_admin_token');
+                  window.location.href = '/admin/login.html';
+                }}
+                className="admin-nav__link"
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  cursor: 'pointer', 
+                  marginLeft: '20px',
+                  fontSize: '0.9rem',
+                  color: '#c62828',
+                  textDecoration: 'underline'
+                }}
+            >
+              Cerrar Sesión
+            </button>
           </div>
         </nav>
       </header>

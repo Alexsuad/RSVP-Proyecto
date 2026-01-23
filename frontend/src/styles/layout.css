@@ -44,7 +44,7 @@
   height: 35vh;               /* Altura proporcional a la ventana */
   min-height: 300px;          /* Altura mínima para pantallas pequeñas */
   color: #fff;                /* Texto en blanco sobre fondo oscuro */
-  background-image: url('https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2070&auto=format&fit=crop'); /* Imagen de portada */
+  background-image: url('/assets/images/email/imgBoda.jpg'); /* Imagen ceremonia romántica */
   background-size: cover;     /* La imagen cubre todo el área del hero */
   background-position: center 45%; /* Ajusta el encuadre vertical de la imagen */
 }

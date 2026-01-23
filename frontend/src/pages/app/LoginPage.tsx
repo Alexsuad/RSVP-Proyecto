@@ -39,9 +39,8 @@ export const sanitizeContact = (
   return { phone: phone || undefined };
 };
 
-// Imagen de fondo específica (Rings/Love)
-// Imagen de fondo específica (Wedding Flowers/Soft)
-const BG_IMAGE = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop';
+// Imagen de fondo: Sitio de ceremonia con arco floral
+const BG_IMAGE = '/assets/images/email/imgSitio.jpg';
 
 const LoginPage: React.FC = () => {
   // -------------------------------------------------------------------------------

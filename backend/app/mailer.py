@@ -684,6 +684,7 @@ def send_guest_code_email(
     lang_code = _lang if _lang in SUPPORTED_LANGS else "en"
 
     logger.info(f"[MAILER] Preparando envío de Guest Code → to={to_email} lang={lang_code}")
+    logger.info(f"[GUEST_CODE] Código generado para '{guest_name}': {guest_code}")
 
     # Textos i18n
     subject = t("email.subject.guest_code", lang_code)
@@ -692,15 +693,15 @@ def send_guest_code_email(
     code_instruction = t("email.guest_code.instruction", lang_code)
     btn_label = t("email.guest_code.button_label", lang_code)
     
-    # CTA URL
+    # CTA URL: debe apuntar directamente a la página de login (/app/login)
     cta_url = "#"
     if PUBLIC_LOGIN_URL:
-        from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
+        from urllib.parse import urlparse, urlunparse, urlencode
         parts = list(urlparse(PUBLIC_LOGIN_URL))
-        q = dict(parse_qsl(parts[4]))
-        q["goto"] = "login"
-        q["lang"] = lang_code
-        parts[4] = urlencode(q)
+        # Forzar el path a /app/login (la página de login real)
+        parts[2] = "/app/login"  # parts[2] es el path
+        # Añadir solo el parámetro de idioma
+        parts[4] = urlencode({"lang": lang_code})  # parts[4] es la query string
         cta_url = urlunparse(parts)
 
     login_line = f"Login: {cta_url}" if PUBLIC_LOGIN_URL else ""

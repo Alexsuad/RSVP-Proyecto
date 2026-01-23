@@ -209,17 +209,29 @@ def submit_public_rsvp(
 # --- HELPERS INTERNOS ---
 
 def _check_deadline():
-    deadline_str = os.getenv("RSVP_DEADLINE", "2026-01-20")
+    deadline_str = os.getenv("RSVP_DEADLINE", "2026-12-31")
     try:
+        # Parsear la fecha del deadline (formato ISO: YYYY-MM-DD o YYYY-MM-DD HH:MM:SS)
         deadline = datetime.fromisoformat(deadline_str)
+        # Si no tiene hora, asumir fin del día (23:59:59)
+        if deadline.hour == 0 and deadline.minute == 0 and deadline.second == 0:
+            deadline = deadline.replace(hour=23, minute=59, second=59)
     except:
-        deadline = datetime(2099, 12, 31)
-        
-    if datetime.utcnow() > deadline:
+        deadline = datetime(2099, 12, 31, 23, 59, 59)
+    
+    now = datetime.utcnow()
+    
+    # Log para debugging
+    logger.info(f"[DEADLINE_CHECK] Ahora: {now.isoformat()} | Deadline: {deadline.isoformat()}")
+    
+    if now > deadline:
+        logger.warning(f"[DEADLINE_CHECK] ⚠️ Deadline pasado: {deadline_str}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="La fecha límite para confirmar la asistencia ya ha pasado."
         )
+    else:
+        logger.info(f"[DEADLINE_CHECK] ✅ Deadline válido (faltan {(deadline - now).days} días)")
 
 def _format_response(guest: models.Guest) -> schemas.GuestWithCompanionsResponse:
     # Normalización Canon: 'ceremony' (legacy) se trata como 'full'

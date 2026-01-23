@@ -1,0 +1,21 @@
+/* ----------------------------------------------------------------------- */
+/* PAGE-SPECIFIC BACKGROUND IMAGES */
+/* Clases para asignar imágenes de fondo únicas a cada página de invitado */
+/* ----------------------------------------------------------------------- */
+
+/* Página de RSVP Form: Sitio de ceremonia (contexto de asistencia) */
+.split-cover--rsvp-form {
+  background-image: url('/assets/images/email/imgSitio.jpg');
+}
+
+/* Página de Confirmación: Pastel de bodas (celebración) */
+.split-cover--confirmed {
+  background-image: url('/assets/images/email/imaPastel.jpg');
+}
+
+/* Páginas de Recuperación/Solicitud de Acceso: Anillos en madera (neutral) */
+.split-cover--auth {
+  background-image: url('/assets/images/email/imgArgollas2.jpg');
+}
+
+/* Landing/Login por defecto usa imgBaile (ya configurado en app.css) */
