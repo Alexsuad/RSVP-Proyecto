@@ -13,6 +13,143 @@ interface Guest extends ServiceGuest {}
 // Componente Principal: AdminGuestsPage
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// WhatsApp Integration Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+const WHATSAPP_TEMPLATES = {
+  invite: {
+    es: `*¡Hola {name}!* 👋\n\nQueremos celebrar este gran día contigo y tu familia. 💍\n\nEsta es una invitación grupal. Hemos preparado una App especial donde podrás confirmar tu asistencia y registrar a los acompañantes de tu grupo familiar fácilmente.\n\n👇 Gestiona la lista de tu familia aquí:\n{link}\n\n¡Esperamos contar con todos!`,
+    en: `*Hi {name}!* 👋\n\nWe want to celebrate this big day with you and your family. 💍\n\nThis is a group invitation. We have prepared a special App where you can easily RSVP and register your family group guests.\n\n👇 Manage your family list here:\n{link}\n\nWe hope to see you all!`,
+    ro: `*Salut {name}!* 👋\n\nVrem să sărbătorim această zi mare alături de tine și familia ta. 💍\n\nAceasta este o invitație de grup. Am pregătit o aplicație specială unde poți confirma prezența și înregistra însoțitorii grupului tău familial foarte ușor.\n\n👇 Gestionează lista familiei tale aici:\n{link}\n\nSperăm să fiți cu toții alături de noi!`
+  },
+  reminder: {
+    es: `*¡Hola de nuevo, {name}!* ⏳\n\nYa estamos en la recta final y afinando los últimos detalles para la boda.\n\nPara tener todo listo (y no dejar a nadie de tu grupo sin plato 🍽️), necesitamos que nos confirmes si podrán acompañarnos.\n\nPor favor, finaliza tu registro y el de tu familia hoy mismo aquí:\n👇 {link}\n\n¡Gracias por ayudarnos a organizarnos!`,
+    en: `*Hi again, {name}!* ⏳\n\nWe are in the final stretch and finalizing the details for the wedding.\n\nTo have everything ready (and not leave anyone in your group without a meal 🍽️), we need you to confirm if you can join us.\n\nPlease finalize your and your family's registration today here:\n👇 {link}\n\nThanks for helping us organize!`,
+    ro: `*Salut din nou, {name}!* ⏳\n\nSuntem pe ultima sută de metri și punem la punct ultimele detalii pentru nuntă.\n\nPentru a avea totul pregătit (și a nu lăsa pe nimeni din grupul tău fără meniu 🍽️), avem nevoie să ne confirmi dacă ne puteți fi alături.\n\nTe rugăm să finalizezi înregistrarea ta și a familiei tale chiar azi aici:\n👇 {link}\n\nVă mulțumim pentru ajutor!`
+  },
+  rescue: {
+    es: `*¡Entendido, {name}!* No te preocupes. 😌\n\nA veces la tecnología se pone difícil. Si la App no te carga, hagámoslo de forma manual por aquí.\n\nPor favor, respóndeme este mensaje con:\n1. Cuántos adultos asistirán (contigo).\n2. Nombres de tus acompañantes.\n\nYo me encargo de subirlos al sistema personalmente. 📝`,
+    en: `*Understood, {name}!* Don't worry. 😌\n\nSometimes technology gets tricky. If the App doesn't load, let's do it manually here.\n\nPlease reply to this message with:\n1. How many adults will attend (including you).\n2. Names of your guests.\n\nI will personally upload them to the system. 📝`,
+    ro: `*Am înțeles, {name}!* Nu-ți face griji. 😌\n\nUneori tehnologia ne dă bătăi de cap. Dacă aplicația nu se încarcă, hai să rezolvăm manual aici.\n\nTe rog răspunde-mi la acest mesaj cu:\n1. Câți adulți vor participa (inclusiv tu).\n2. Numele însoțitorilor tăi.\n\nMă ocup eu personal să îi introduc în sistem. 📝`
+  },
+  success: {
+    es: `*¡Todo listo, {name}!* ✅\n\nHemos recibido correctamente tu confirmación y la de tus acompañantes. Sus lugares ya están asegurados en nuestra lista. 📝\n\n¡Ahora solo queda preparar el outfit y las ganas de celebrar! 💃🕺\n\nNos vemos muy pronto.`,
+    en: `*All set, {name}!* ✅\n\nWe have correctly received your confirmation and that of your guests. Your spots are secured on our list. 📝\n\nNow just get your outfit and party mood ready! 💃🕺\n\nSee you very soon.`,
+    ro: `*Totul este pregătit, {name}!* ✅\n\nAm primit confirmarea ta și a însoțitorilor tăi. Locurile voastre sunt asigurate în lista noastră. 📝\n\nAcum rămâne doar să vă pregătiți ținutele și cheful de petrecere! 💃🕺\n\nNe vedem foarte curând.`
+  }
+};
+
+type WhatsAppMsgType = 'invite' | 'reminder' | 'rescue' | 'success';
+
+const getWhatsAppUrl = (guest: Guest, type: WhatsAppMsgType = 'invite'): string => {
+    // 1. Base URL
+    const baseUrl = (import.meta as any).env.VITE_APP_URL || 'https://rsvp.suarezsiicawedding.com';
+    
+    // 2. Magic Link construction
+    const code = guest.guest_code || '';
+    const link = `${baseUrl}/login?c=${code}`;
+    
+    // 3. Template selection (default 'es')
+    const lang = (guest.language || 'es') as 'es'|'en'|'ro';
+    
+    // Safety check for template existence
+    const msgTypeTemplates = WHATSAPP_TEMPLATES[type] || WHATSAPP_TEMPLATES['invite'];
+    const template = msgTypeTemplates[lang] || msgTypeTemplates['es'];
+    
+    // 4. Text replacement
+    // Note: If {link} is not present in the template (e.g. rescue/success), this replace call does nothing, which is correct.
+    const name = guest.full_name || 'Invitado';
+    const message = template.replace('{name}', name).replace('{link}', link);
+    
+    // 5. Phone cleaning
+    const phone = guest.phone || '';
+    const phoneClean = phone.replace(/[\s\-\(\)]/g, '');
+    
+    // 6. Encoding
+    const messageEncoded = encodeURIComponent(message);
+    
+    return `https://wa.me/${phoneClean}?text=${messageEncoded}`;
+};
+
+// --- Custom Dropdown Component for WhatsApp Actions ---
+const WhatsAppDropdown: React.FC<{ guest: Guest }> = ({ guest }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+
+    const handleAction = (type: WhatsAppMsgType) => {
+        window.open(getWhatsAppUrl(guest, type), '_blank');
+        setIsOpen(false);
+    };
+
+    return (
+        <div style={{ position: 'relative', display: 'inline-block' }} ref={dropdownRef}>
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                title="Menú WhatsApp"
+                style={{ 
+                    padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, 
+                    color: '#ffffff', backgroundColor: '#25D366', 
+                    border: 'none', borderRadius: '6px', 
+                    cursor: 'pointer', transition: 'all 0.15s ease',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#1ebc57'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#25D366'; }}
+            >
+                WhatsApp 
+                <span style={{ fontSize: '0.6rem' }}>▼</span>
+            </button>
+
+            {isOpen && (
+                <div style={{
+                    position: 'absolute', top: '100%', right: 0, marginTop: '4px',
+                    backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    zIndex: 50, minWidth: '160px', overflow: 'hidden'
+                }}>
+                    <div style={{ padding: '6px 12px', fontSize: '0.7rem', fontWeight: 700, color: '#64748b', backgroundColor: '#f8fafc', textTransform: 'uppercase' }}>
+                        Enviar mensaje
+                    </div>
+                    {[
+                        { type: 'invite', label: '💌 Invitación', color: '#334155' },
+                        { type: 'reminder', label: '⏰ Recordatorio', color: '#b45309' },
+                        { type: 'rescue', label: '🆘 Ayuda / Rescate', color: '#dc2626' },
+                        { type: 'success', label: '✅ Confirmación', color: '#15803d' }
+                    ].map((opt) => (
+                        <button
+                            key={opt.type}
+                            onClick={() => handleAction(opt.type as WhatsAppMsgType)}
+                            style={{
+                                display: 'block', width: '100%', textAlign: 'left',
+                                padding: '8px 12px', fontSize: '0.85rem',
+                                border: 'none', backgroundColor: 'transparent',
+                                cursor: 'pointer', color: opt.color,
+                                borderTop: '1px solid #f1f5f9'
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const AdminGuestsPage: React.FC = () => {
     // -------------------------------------------------------------------------
     // Estado
@@ -441,6 +578,9 @@ const AdminGuestsPage: React.FC = () => {
                                                         >
                                                             RSVP
                                                         </button>
+                                                        {guest.phone && (
+                                                            <WhatsAppDropdown guest={guest} />
+                                                        )}
                                                         <button 
                                                             onClick={() => openEdit(guest)} 
                                                             style={{ 
