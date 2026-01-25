@@ -699,7 +699,7 @@ def send_guest_code_email(
         from urllib.parse import urlparse, urlunparse, urlencode
         parts = list(urlparse(PUBLIC_LOGIN_URL))
         # Forzar el path a /app/login (la página de login real)
-        parts[2] = "/app/login"  # parts[2] es el path
+        parts[2] = "/app/login.html"  # parts[2] es el path
         # Añadir solo el parámetro de idioma
         parts[4] = urlencode({"lang": lang_code})  # parts[4] es la query string
         cta_url = urlunparse(parts)

@@ -5,6 +5,9 @@
     { "source": "/admin", "destination": "/admin/login.html" },
     { "source": "/admin/", "destination": "/admin/login.html" },
 
+    { "source": "/app/login", "destination": "/app/login.html" },
+    { "source": "/app/login/", "destination": "/app/login.html" },
+
     { "source": "/app", "destination": "/app/request-access.html" },
     { "source": "/app/", "destination": "/app/request-access.html" },
 
