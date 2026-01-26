@@ -46,27 +46,29 @@ const getWhatsAppUrl = (guest: Guest, type: WhatsAppMsgType = 'invite'): string 
     // 1. Base URL
     const baseUrl = (import.meta as any).env.VITE_APP_URL || 'https://rsvp.suarezsiicawedding.com';
     
-    // 2. Magic Link construction
-    const code = guest.guest_code || '';
-    const link = `${baseUrl}/login?c=${code}`;
-    
-    // 3. Template selection (default 'es')
+    // 2. Language selection (default 'es')
+    // Moved up so we can use it in the link
     const lang = (guest.language || 'es') as 'es'|'en'|'ro';
     
-    // Safety check for template existence
+    // 3. Magic Link construction
+    // FIXED: Point to /app/login.html and include lang param to match email links
+    const code = guest.guest_code || '';
+    const link = `${baseUrl}/app/login.html?lang=${lang}&c=${code}`;
+    
+    // 4. Template selection
     const msgTypeTemplates = WHATSAPP_TEMPLATES[type] || WHATSAPP_TEMPLATES['invite'];
     const template = msgTypeTemplates[lang] || msgTypeTemplates['es'];
     
-    // 4. Text replacement
+    // 5. Text replacement
     // Note: If {link} is not present in the template (e.g. rescue/success), this replace call does nothing, which is correct.
     const name = guest.full_name || 'Invitado';
     const message = template.replace('{name}', name).replace('{link}', link);
     
-    // 5. Phone cleaning
+    // 6. Phone cleaning
     const phone = guest.phone || '';
     const phoneClean = phone.replace(/[\s\-\(\)]/g, '');
     
-    // 6. Encoding
+    // 7. Encoding
     const messageEncoded = encodeURIComponent(message);
     
     return `https://wa.me/${phoneClean}?text=${messageEncoded}`;
