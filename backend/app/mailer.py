@@ -98,6 +98,13 @@ EMAIL_SENDER_NAME = os.getenv("EMAIL_SENDER_NAME", "Jenny & Cristian")
 TEMPLATES_DIR = (Path(__file__).parent / "templates" / "emails").resolve()
 PUBLIC_LOGIN_URL = os.getenv("PUBLIC_LOGIN_URL", "").strip()
 
+def _get_assets_base_url() -> str:
+    """Helper to get the base URL for assets, ensuring no trailing slash."""
+    url = RSVP_URL
+    if url.endswith("/"):
+        url = url[:-1]
+    return url
+
 # Valida configuración crítica solo si NO estamos en modo simulación.
 if not DRY_RUN:  # Si se quiere envío real...
     provider_now = os.getenv(
@@ -542,10 +549,11 @@ def send_rsvp_reminder_email(
         "instruction_text": t("email.guest_code.instruction", lang_code), # "Usa este código..." (quizás ajustar un texto mejor: "Por favor confirma antes de la fecha.")
         
         "cta_url": cta_url,
-        "cta_label": t("email.confirmation.btn_edit", lang_code).replace("✏️ ", "") or "RSVP", # Reusamos editar o similar
+        "cta_label": t("email.confirmation.btn_edit", lang_code).replace("✏️ ", "") or "RSVP",
         
         "closing_text": t("email.confirmation.footer.more_details", lang_code),
         "footer_text": "Jenny & Cristian Wedding 2026",
+        "assets_base_url": _get_assets_base_url(),
     }
     
     # Ajuste manual del instruction text si es el de Guest Code ("Usa este código...") que no pega aquí.
@@ -719,6 +727,7 @@ def send_guest_code_email(
         "cta_label": btn_label,
         "closing_text": t("email.confirmation.footer.more_details", lang_code),
         "footer_text": "Jenny & Cristian Wedding 2026",
+        "assets_base_url": _get_assets_base_url(),
     }
 
     html_body = _render_template("email_guest_code.html", context)
@@ -856,7 +865,8 @@ def send_confirmation_email(to_email: str, language: str | Enum, summary: dict) 
         "cta_label": "",
         
         "footer_more_details": t("email.confirmation.footer.more_details", lang_code),
-        "event_year": datetime.now().year
+        "event_year": datetime.now().year,
+        "assets_base_url": _get_assets_base_url(),
     }
 
     html_body = _render_template("email_confirmation.html", context)
