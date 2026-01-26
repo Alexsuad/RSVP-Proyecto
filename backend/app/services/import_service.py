@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.utils.phone import normalize_phone
 from utils.invite import normalize_invite_type
 from app.models import Guest, InviteTypeEnum, LanguageEnum, SideEnum
+from loguru import logger
 
 class import_mode(str, Enum):
     add_only = "ADD_ONLY"
@@ -134,17 +135,23 @@ def _map_row_fields(row: Dict[str, str]) -> Dict[str, Any]:
 # Lookup DB
 # ---------------------------
 
-def _build_db_indexes(db: Session) -> Tuple[Dict[str, int], Dict[str, int]]:
+def _build_db_indexes(db: Session) -> Tuple[Dict[str, int], Dict[str, int], Dict[str, int]]:
     """
     Devuelve:
+    - code_to_id: guest_code (uppercase) -> guest_id
     - phone_to_id: phone(normalizado) -> guest_id
     - email_to_id: email(minúsculas) -> guest_id
     """
+    code_to_id: Dict[str, int] = {}
     phone_to_id: Dict[str, int] = {}
     email_to_id: Dict[str, int] = {}
 
     guests = db.query(Guest).all()
     for g in guests:
+        # Índice por código (uppercase para matching insensible)
+        if g.guest_code:
+            code_to_id[g.guest_code.strip().upper()] = g.id
+        
         p = normalize_phone(getattr(g, "phone", "") or "")
         e = _normalize_email(getattr(g, "email", "") or "")
 
@@ -154,7 +161,7 @@ def _build_db_indexes(db: Session) -> Tuple[Dict[str, int], Dict[str, int]]:
         if e:
             email_to_id[e] = g.id
 
-    return phone_to_id, email_to_id
+    return code_to_id, phone_to_id, email_to_id
 
 # ---------------------------
 # Validación / planificación
@@ -288,13 +295,24 @@ def _resolve_enums(data: Dict[str, Any]):
     return lang_enum, type_enum, side_val
 
 def _apply_add_only(db: Session, plan: List[Dict[str, Any]], report: import_report) -> None:
-    phone_to_id, email_to_id = _build_db_indexes(db)
+    code_to_id, phone_to_id, email_to_id = _build_db_indexes(db)
 
     for item in plan:
         row_number = item["row_number"]
         data = item["data"]
-
-        if data["phone"] in phone_to_id:
+        
+        # Normalizar código del CSV
+        csv_code = (data.get("guest_code") or "").strip().upper()
+        
+        # Cascada de matching: código > teléfono
+        existing_id = None
+        if csv_code and csv_code in code_to_id:
+            existing_id = code_to_id[csv_code]
+        elif data["phone"] in phone_to_id:
+            existing_id = phone_to_id[data["phone"]]
+        
+        # ADD_ONLY: Si existe, skip
+        if existing_id is not None:
             report.skipped_count += 1
             continue
 
@@ -318,7 +336,7 @@ def _apply_add_only(db: Session, plan: List[Dict[str, Any]], report: import_repo
         # Importante: Guest code generation.
         from app.crud.guests_crud import _generate_guest_code, get_by_guest_code
         
-        final_code = data["guest_code"]
+        final_code = csv_code if csv_code else None
         if not final_code:
             final_code = _generate_guest_code(data["full_name"], lambda c: get_by_guest_code(db, c) is None)
 
@@ -335,20 +353,37 @@ def _apply_add_only(db: Session, plan: List[Dict[str, Any]], report: import_repo
             guest_code=final_code
         )
         db.add(guest)
+        
+        # Actualizar índices locales para evitar duplicados dentro del mismo batch
+        phone_to_id[data["phone"]] = -1  # Placeholder
+        if csv_code:
+            code_to_id[csv_code] = -1
+        
         report.created_count += 1
 
     db.commit()
 
 def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report) -> None:
-    phone_to_id, email_to_id = _build_db_indexes(db)
+    code_to_id, phone_to_id, email_to_id = _build_db_indexes(db)
     
     from app.crud.guests_crud import _generate_guest_code, get_by_guest_code
 
     for item in plan:
         row_number = item["row_number"]
         data = item["data"]
-
-        existing_id = phone_to_id.get(data["phone"])
+        
+        # Normalizar código del CSV
+        csv_code = (data.get("guest_code") or "").strip().upper()
+        
+        # Cascada de matching: código > teléfono
+        existing_id = None
+        matched_by_code = False
+        
+        if csv_code and csv_code in code_to_id:
+            existing_id = code_to_id[csv_code]
+            matched_by_code = True
+        elif data["phone"] in phone_to_id:
+            existing_id = phone_to_id[data["phone"]]
 
         # Conflicto email si email pertenece a otro registro ID distinto
         if data["email"] and data["email"] in email_to_id:
@@ -384,7 +419,7 @@ def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report
 
         if existing_id is None:
             # CREATE
-            final_code = data["guest_code"]
+            final_code = csv_code if csv_code else None
             if not final_code:
                  final_code = _generate_guest_code(data["full_name"], lambda c: get_by_guest_code(db, c) is None)
             
@@ -401,6 +436,12 @@ def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report
                 guest_code=final_code
             )
             db.add(guest)
+            
+            # Actualizar índices locales para evitar duplicados dentro del mismo batch
+            phone_to_id[data["phone"]] = -1
+            if final_code:
+                code_to_id[final_code.upper()] = -1
+            
             report.created_count += 1
         else:
             # UPDATE (Solo campos administrativos)
@@ -413,7 +454,17 @@ def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report
             if data["email"]: # Solo actualizamos email si viene dato
                 guest.email = data["email"]
             
-            # guest.phone ya coincide (es la llave)
+            # Si matcheó por código y el teléfono es diferente, actualizarlo y loguear
+            old_phone = guest.phone
+            new_phone = data["phone"]
+            if matched_by_code and old_phone != new_phone:
+                logger.info(
+                    f"Actualizando teléfono para invitado {guest.guest_code} (Match por Código). "
+                    f"Anterior: {old_phone} → Nuevo: {new_phone}"
+                )
+                guest.phone = new_phone
+                # Actualizar índice local
+                phone_to_id[new_phone] = existing_id
             
             guest.language = lang_enum.value
             if side_enum: guest.side = side_enum.value
@@ -423,8 +474,7 @@ def _apply_upsert(db: Session, plan: List[Dict[str, Any]], report: import_report
             guest.max_accomp = data["max_accomp"]
             guest.invite_type = type_enum.value
             
-            # guest_code: normalmente no se cambia por CSV salvo que venga explícito y queramos forzarlo
-            # Aquí lo ignoramos para estabilidad.
+            # guest_code: NUNCA se modifica por CSV para estabilidad de links.
             
             report.updated_count += 1
 
