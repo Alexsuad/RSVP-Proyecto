@@ -740,6 +740,40 @@ def send_guest_code_email(
     )
 
 
+def _translate_allergies(raw: str | list | None, lang_code: str) -> str:
+    """
+    Traduce una lista/string de alergias usando claves i18n 'options.allergen.<code>'.
+    Entrada: 'dairy, nuts' o ['dairy', 'nuts']
+    Salida: 'Lácteos, Frutos secos' (según idioma)
+    """
+    if not raw:
+        return ""
+
+    # 1. Normalizar entrada a lista de códigos limpios
+    if isinstance(raw, str):
+        # Normalizar separadores y dividir
+        codes = [c.strip() for c in raw.replace(";", ",").split(",") if c.strip()]
+    elif isinstance(raw, list):
+        codes = [str(c).strip() for c in raw if str(c).strip()]
+    else:
+        return ""
+
+    translated_list = []
+    for code in codes:
+        key = f"options.allergen.{code}"
+        # 2. Traducir
+        trans = t(key, lang_code)
+        
+        # 3. Fallback robusto: si devuelve la key, o es vacío, usar código original
+        # t() devuelve la key por defecto si no encuentra, así que chequeamos eso.
+        if not trans or trans == key:
+            translated_list.append(code)
+        else:
+            translated_list.append(trans)
+
+    return ", ".join(translated_list)
+
+
 def send_confirmation_email(to_email: str, language: str | Enum, summary: dict) -> bool:
     """Envía correo de confirmación de RSVP en HTML usando plantilla Jinja2."""
     
@@ -765,6 +799,23 @@ def send_confirmation_email(to_email: str, language: str | Enum, summary: dict) 
         attending_yes_text = ""
         attending_no_text = t("email.confirmation.attending.no", lang_code).replace("Asistencia: ", "").replace("Attendance: ", "")
         attending_text_plain = t("email.confirmation.attending.no", lang_code)
+
+    # Procesar alergias del titular (traducidas)
+    titular_allergies_raw = summary.get("allergies", "")
+    titular_allergies_translated = _translate_allergies(titular_allergies_raw, lang_code)
+
+    # Procesar acompañantes (crear copia segura y traducir alergias)
+    raw_companions = summary.get("companions", [])
+    processed_companions = []
+    if raw_companions and isinstance(raw_companions, list):
+        for c in raw_companions:
+            if not isinstance(c, dict): continue
+            # Copia del dict para no mutar original
+            new_c = dict(c)
+            # Traducir alergias de este acompañante
+            c_allergens_raw = new_c.get("allergens", "")
+            new_c["allergens"] = _translate_allergies(c_allergens_raw, lang_code)
+            processed_companions.append(new_c)
 
     # Contexto para Template
     context = {
@@ -792,10 +843,10 @@ def send_confirmation_email(to_email: str, language: str | Enum, summary: dict) 
         "menu_choice": str(summary.get("menu_choice", "")),
         "label_menu": t("email.confirmation.label.menu", lang_code),
         
-        "companions": summary.get("companions", []),
+        "companions": processed_companions,
         "label_companions": t("email.confirmation.label.companions", lang_code),
         
-        "allergies": summary.get("allergies", ""),
+        "allergies": titular_allergies_translated,
         "label_allergies_main": t("form.titular_allergies", lang_code),
         
         "notes": summary.get("notes", ""),
