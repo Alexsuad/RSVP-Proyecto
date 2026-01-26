@@ -52,8 +52,11 @@ const getWhatsAppUrl = (guest: Guest, type: WhatsAppMsgType = 'invite'): string 
     
     // 3. Magic Link construction
     // FIXED: Point to /app/login.html and include lang param to match email links
+    // NEW: Include phone param for auto-fill (Epica F)
     const code = guest.guest_code || '';
-    const link = `${baseUrl}/app/login.html?lang=${lang}&c=${code}`;
+    const phone = guest.phone || '';
+    const phoneClean = phone.replace(/[\s\-\(\)]/g, '');
+    const link = `${baseUrl}/app/login.html?lang=${lang}&c=${code}&p=${phoneClean}`;
     
     // 4. Template selection
     const msgTypeTemplates = WHATSAPP_TEMPLATES[type] || WHATSAPP_TEMPLATES['invite'];
@@ -64,11 +67,7 @@ const getWhatsAppUrl = (guest: Guest, type: WhatsAppMsgType = 'invite'): string 
     const name = guest.full_name || 'Invitado';
     const message = template.replace('{name}', name).replace('{link}', link);
     
-    // 6. Phone cleaning
-    const phone = guest.phone || '';
-    const phoneClean = phone.replace(/[\s\-\(\)]/g, '');
-    
-    // 7. Encoding
+    // 6. Encoding
     const messageEncoded = encodeURIComponent(message);
     
     return `https://wa.me/${phoneClean}?text=${messageEncoded}`;

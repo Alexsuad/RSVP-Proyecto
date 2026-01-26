@@ -54,6 +54,20 @@ const LoginPage: React.FC = () => {
   const auth = useAuth();
   const { t } = useI18n();
 
+  // Auto-fill from URL params (Epica F) - Vanilla implementation
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get('c');
+    const phoneParam = params.get('p');
+
+    if (codeParam) {
+      setGuestCode(codeParam.toUpperCase());
+    }
+    if (phoneParam) {
+      setContactInput(phoneParam);
+    }
+  }, []); // Run once on mount
+
   // Limpiar el mensaje de error cuando el usuario modifica los campos
   useEffect(() => {
     setError(null);
