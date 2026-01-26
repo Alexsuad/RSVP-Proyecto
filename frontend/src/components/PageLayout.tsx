@@ -47,7 +47,7 @@ const LanguageSwitcher: React.FC = () => {
 
   return (
     <div className="lang-switcher-pill">
-      <span className="text-xs text-white/90 font-medium uppercase tracking-wider hidden md:inline-block mr-1">
+      <span className="lang-switcher__label text-xs text-white/90 font-medium uppercase tracking-wider hidden md:inline-block mr-1">
         {useI18n().t('common.language')}:
       </span>
       {languages.map((l) => (

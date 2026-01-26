@@ -127,7 +127,7 @@
 /* --- Contenido principal de la página (zona de tarjeta/formulario) --- */
 .site-main {
   flex-grow: 1;              /* Expande el contenido para ocupar el espacio disponible */
-  padding: 3rem 0;           /* Margen interno superior e inferior del main */
+  padding: 0 0 3rem 0;       /* Elimina padding superior para permitir overlap (margen negativo) */
 }
 
 /* --- Pie de página general del sitio --- */
