@@ -924,3 +924,44 @@ def send_rsvp_reminder_email_html(
 def send_magic_link(email: str, url: str, lang: str = "en") -> bool:
     """Wrapper retrocompatible: firma antigua → nueva función HTML."""
     return send_magic_link_email(to_email=email, language=lang, magic_url=url)
+
+
+def send_admin_notification(
+    guest_name: str,
+    attending: bool,
+    guests_count: int,
+    guest_email: str | None,
+    guest_phone: str | None,
+) -> None:
+    """
+    Envía una notificación por correo al administrador sobre un nuevo RSVP.
+    """
+    admin_email = os.getenv("ADMIN_NOTIFY_EMAIL")
+    if not admin_email:
+        # Fallback a un log si no hay email configurado, o ignorar silenciosamente
+        logger.debug("No ADMIN_NOTIFY_EMAIL configured. Skipping admin alert.")
+        return
+
+    status_icon = "✅" if attending else "❌"
+    status_text = "SI Asiste" if attending else "NO Asiste"
+    
+    subject = f"[RSVP] {guest_name} ha respondido ({status_icon})"
+    
+    body = (
+        f"Nuevo RSVP recibido:\n\n"
+        f"👤 Invitado: {guest_name}\n"
+        f"{status_icon} Estado: {status_text}\n"
+        f"👥 Total personas: {guests_count}\n"
+        f"📧 Email: {guest_email or 'N/A'}\n"
+        f"📞 Teléfono: {guest_phone or 'N/A'}\n\n"
+        f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+    )
+
+    # Enviamos como texto plano usando el router genérico
+    # Usamos "System" como remitente visual si es posible
+    send_email(
+        to_email=admin_email,
+        subject=subject,
+        body=body,
+        to_name="Admin"
+    )

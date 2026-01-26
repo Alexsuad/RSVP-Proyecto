@@ -18,6 +18,7 @@ from loguru import logger           # ✅ Logger para trazas internas del CRUD (
 
 from app.models import Guest, Companion, RsvpLog, InviteTypeEnum        # Importa el modelo ORM.
 from app import mailer, schemas  # Importa mailer y schemas.
+from app.utils import telegram  # Importa utilidad de Telegram
 from app.utils.phone import normalize_phone # Utilidad centralizada
 import unicodedata                  # Para eliminar acentos/diacríticos de los nombres.
 
@@ -461,6 +462,37 @@ def process_rsvp_submission(
         action_type="update_rsvp",
         payload_json=payload_dict
     )
+
+    # 3b. Notificaciones (Telegram + Email Admin)
+    # ---------------------------------------------------------------
+    try:
+        # Preparamos datos comunes
+        guest_name = updated_guest.full_name or "Desconocido"
+        is_attending = bool(updated_guest.confirmed)
+        count_pax = (updated_guest.num_adults or 0) + (updated_guest.num_children or 0)
+        phone_txt = updated_guest.phone or "N/A"
+        
+        # --- Telegram ---
+        tg_status = "✅ Si" if is_attending else "❌ No"
+        tg_msg = (
+            f"💍 *Nueva Confirmación*\n\n"
+            f"👤 *Invitado:* {guest_name}\n"
+            f"✅ *Asiste:* {tg_status}\n"
+            f"🍽️ *Grupo:* {count_pax} personas\n"
+            f"📞 *Tel:* {phone_txt}"
+        )
+        telegram.send_telegram_notification(tg_msg)
+
+        # --- Email Admin ---
+        mailer.send_admin_notification(
+            guest_name=guest_name,
+            attending=is_attending,
+            guests_count=count_pax,
+            guest_email=updated_guest.email,
+            guest_phone=updated_guest.phone
+        )
+    except Exception as e:
+        logger.error(f"Error enviando notificaciones admin/telegram: {e}") 
 
     # 4. Envío de Email (Lógica reutilizada de guest.py)
     try:

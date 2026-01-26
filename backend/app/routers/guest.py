@@ -180,28 +180,27 @@ def submit_public_rsvp(
     # 1. Validación de fecha límite
     _check_deadline()
     
-    # 2. Validación de cupo máximo
-    if payload.attending:
-        if len(payload.companions) > (guest.max_accomp or 0):
-             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, 
-                detail="Has superado el número máximo de acompañantes permitido."
-            )
-            
-    # 3. Delegar Update al CRUD
+    # 2. Delegar a process_rsvp_submission (Centraliza logs, notificaciones y emails)
     try:
-        updated_guest = guests_crud.update_rsvp(db, guest, payload.attending, payload)
+        updated_guest = guests_crud.process_rsvp_submission(
+            db=db,
+            guest=guest,
+            payload=payload,
+            updated_by="guest (public)",
+            channel="web-public"
+        )
+    except ValueError as ve:
+        # Errores de validación de negocio (ej. cupo máximo)
+        raise HTTPException(status_code=400, detail=str(ve))
+    except IntegrityError:
+        # Conflictos de unicidad (email/phone)
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"error_code": "EMAIL_OR_PHONE_CONFLICT", "message_key": "form.email_or_phone_conflict"}
+        )
     except Exception as e:
-        if "IntegrityError" in str(type(e).__name__):
-             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"error_code": "EMAIL_OR_PHONE_CONFLICT", "message_key": "form.email_or_phone_conflict"}
-            )
         logger.error(f"Error procesando RSVP público: {e}")
         raise HTTPException(status_code=500, detail="Error interno procesando RSVP")
-        
-    # 4. Enviar Email
-    _send_rsvp_email(updated_guest)
     
     return _format_response(updated_guest)
 
