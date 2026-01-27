@@ -109,37 +109,34 @@ def update_my_rsvp(
 ):
     """
     Procesa y actualiza la confirmación de asistencia (RSVP) [Autenticado].
+    Incluye: Validación, Update BD, Logs, Telegram, Email Admin, Email Invitado.
     """
     # 1. Validación de fecha límite
     _check_deadline()
 
-    # 2. Validación de cupo máximo (Solo si asiste)
-    if payload.attending:
-        if len(payload.companions) > (current_guest.max_accomp or 0):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, 
-                detail="Has superado el número máximo de acompañantes permitido."
-            )
+    # 2. Delegar a process_rsvp_submission (Centraliza logs, notificaciones y emails)
+    from app.crud import guests_crud
 
-    # 3. Delegar Update al CRUD (Atómico)
-    # Llama a guests_crud.update_rsvp
-    # Maneja conflicto de email/phone si ocurre (IntegrityError en CRUD re-lanzado?)
     try:
-        from app.crud import guests_crud
-        updated_guest = guests_crud.update_rsvp(db, current_guest, payload.attending, payload)
+        updated_guest = guests_crud.process_rsvp_submission(
+            db=db,
+            guest=current_guest,
+            payload=payload,
+            updated_by="guest",
+            channel="web"
+        )
+    except ValueError as ve:
+        # Errores de validación de negocio (ej. cupo máximo)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except IntegrityError:
+        # Conflictos de unicidad (email/phone)
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"error_code": "EMAIL_OR_PHONE_CONFLICT", "message_key": "form.email_or_phone_conflict"}
+        )
     except Exception as e:
-        # Si es integridad (email duplicado), el CRUD debería manejarlo o lo capturamos
-        # Asumimos que guests_crud puede lanzar excepciones de integridad
-        if "IntegrityError" in str(type(e).__name__):
-             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"error_code": "EMAIL_OR_PHONE_CONFLICT", "message_key": "form.email_or_phone_conflict"}
-            )
-        logger.error(f"Error procesando RSVP: {e}")
+        logger.error(f"Error procesando RSVP autenticado: {e}")
         raise HTTPException(status_code=500, detail="Error interno procesando RSVP")
-
-    # 4. Enviar Email
-    _send_rsvp_email(updated_guest)
 
     return _format_response(updated_guest)
 
@@ -283,62 +280,3 @@ def _send_rsvp_email(guest: models.Guest):
             
     except Exception as e:
         logger.error(f"Excepción enviando email RSVP id={guest.id} err={e}")
-
-
-@router.post("/me/rsvp", response_model=schemas.GuestWithCompanionsResponse)
-def update_my_rsvp(
-    payload: schemas.RSVPUpdateRequest,
-    db: Session = Depends(get_db),
-    current_guest: models.Guest = Depends(get_current_guest),
-):
-    """
-    Procesa y actualiza la confirmación de asistencia (RSVP).
-
-    Realiza las siguientes acciones:
-    1. Valida la fecha límite de confirmación.
-    2. Si se declina: limpia datos de acompañantes y preferencias.
-    3. Si se acepta: valida cupos, actualiza acompañantes y contadores.
-    4. Envía un correo electrónico de confirmación con el resumen.
-    """
-    # 1. Validación de fecha límite
-    deadline_str = os.getenv("RSVP_DEADLINE", "2026-01-20")
-    try:
-        deadline = datetime.fromisoformat(deadline_str)
-    except Exception:
-        # Fallback seguro en caso de error de configuración
-        deadline = datetime.fromisoformat("2099-12-31")
-
-    if datetime.utcnow() > deadline:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="La fecha límite para confirmar la asistencia ya ha pasado.",
-        )
-
-    # 2. Delegar a process_rsvp_submission en CRUD
-    from app.crud import guests_crud
-    
-    try:
-        updated_guest = guests_crud.process_rsvp_submission(
-            db=db,
-            guest=current_guest,
-            payload=payload,
-            updated_by="guest",
-            channel="web"
-        )
-    except ValueError as ve:
-        # Errores de validación de negocio (ej. cupo máximo)
-        raise HTTPException(status_code=400, detail=str(ve))
-    except IntegrityError:
-        # Conflictos de unicidad (email/phone)
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail={
-                "error_code": "EMAIL_OR_PHONE_CONFLICT",
-                "message_key": "form.email_or_phone_conflict"
-            }
-        )
-    except Exception as e:
-        logger.error(f"Error procesando RSVP guest: {e}")
-        raise HTTPException(status_code=500, detail="Error interno procesando RSVP")
-
-    return _format_response(updated_guest)
