@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------------
 
 import React from 'react';
+import Footer from './Footer';
 
 // -----------------------------------------------------------------------------
 // Props del layout
@@ -103,9 +104,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, variant = 'default', 
               {children}
             </main>
 
-            <footer className="mt-8 text-center lg:text-left text-xs text-gray-400">
-               Proyecto académico – Sistema RSVP
-            </footer>
+            <Footer />
           </div>
         </div>
       </div>
@@ -142,18 +141,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, variant = 'default', 
       </header>
 
       <main className="site-main flex-grow">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-16">
           {children}
         </div>
       </main>
 
-      <footer className="site-footer py-6 text-center">
-        <div className="container mx-auto">
-          <small className="site-footer__text text-gray-500">
-            Proyecto académico – Sistema RSVP para bodas
-          </small>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
