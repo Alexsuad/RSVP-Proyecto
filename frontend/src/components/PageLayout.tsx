@@ -141,7 +141,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, variant = 'default', 
       </header>
 
       <main className="site-main flex-grow">
-        <div className="container mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 pt-32 pb-12">
           {children}
         </div>
       </main>
