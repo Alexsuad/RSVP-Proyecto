@@ -17,32 +17,44 @@ interface Guest extends ServiceGuest {}
 // WhatsApp Integration Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-const WHATSAPP_TEMPLATES = {
-  invite: {
-    es: `*¡Hola {name}!* 👋\n\nQueremos celebrar este gran día contigo y tu familia. 💍\n\nEsta es una *invitación grupal*. Hemos preparado una App especial donde podrás confirmar tu asistencia y registrar a los acompañantes de tu grupo familiar fácilmente.\n\n👇 *Gestiona la lista de tu familia aquí:*\n{link}\n\n¡Esperamos contar con todos!`,
-    en: `*Hi {name}!* 👋\n\nWe want to celebrate this big day with you and your family. 💍\n\nThis is a *group invitation*. We have prepared a special App where you can easily RSVP and register your family group guests.\n\n👇 *Manage your family list here:*\n{link}\n\nWe hope to see you all!`,
-    ro: `*Salut {name}!* 👋\n\nVrem să sărbătorim această zi mare alături de tine și familia ta. 💍\n\nAceasta este o *invitație de grup*. Am pregătit o aplicație specială unde poți confirma prezența și înregistra însoțitorii grupului tău familial foarte ușor.\n\n👇 *Gestionează lista familiei tale aici:*\n{link}\n\nSperăm să fiți cu toții alături de noi!`
-  },
-  reminder: {
-    es: `*¡Hola de nuevo, {name}!* ⏳\n\nYa estamos en la recta final y afinando los últimos detalles para la boda.\n\nPara tener todo listo (y no dejar a nadie de tu grupo sin plato 🍽️), necesitamos que nos confirmes si podrán acompañarnos.\n\nPor favor, finaliza tu registro y el de tu familia hoy mismo aquí:\n👇\n{link}\n\n¡Gracias por ayudarnos a organizarnos!`,
-    en: `*Hi again, {name}!* ⏳\n\nWe are in the final stretch and finalizing the details for the wedding.\n\nTo have everything ready (and not leave anyone in your group without a meal 🍽️), we need you to confirm if you can join us.\n\nPlease finalize your and your family's registration today here:\n👇\n{link}\n\nThanks for helping us organize!`,
-    ro: `*Salut din nou, {name}!* ⏳\n\nSuntem pe ultima sută de metri și punem la punct ultimele detalii pentru nuntă.\n\nPentru a avea totul pregătit (și a nu lăsa pe nimeni din grupul tău fără meniu 🍽️), avem nevoie să ne confirmi dacă ne puteți fi alături.\n\nTe rugăm să finalizezi înregistrarea ta și a familiei tale chiar azi aici:\n👇\n{link}\n\nVă mulțumim pentru ajutor!`
-  },
-  rescue: {
-    es: `*¡Entendido, {name}!* No te preocupes. 😌\n\nA veces la tecnología se pone difícil. Si la App no te carga, hagámoslo de forma manual por aquí.\n\nPor favor, respóndeme este mensaje con:\n1️⃣ Cuántos adultos asistirán (contigo).\n2️⃣ Nombres de tus acompañantes.\n\nYo me encargo de subirlos al sistema personalmente. 📝`,
-    en: `*Understood, {name}!* Don't worry. 😌\n\nSometimes technology gets tricky. If the App doesn't load, let's do it manually here.\n\nPlease reply to this message with:\n1️⃣ How many adults will attend (including you).\n2️⃣ Names of your guests.\n\nI will personally upload them to the system. 📝`,
-    ro: `*Am înțeles, {name}!* Nu-ți face griji. 😌\n\nUneori tehnologia ne dă bătăi de cap. Dacă aplicația nu se încarcă, hai să rezolvăm manual aici.\n\nTe rog răspunde-mi la acest mesaj cu:\n1️⃣ Câți adulți vor participa (inclusiv tu).\n2️⃣ Numele însoțitorilor tăi.\n\nMă ocup eu personal să îi introduc în sistem. 📝`
-  },
-  success: {
-    es: `*¡Todo listo, {name}!* ✅\n\nHemos recibido correctamente tu confirmación y la de tus acompañantes. Sus lugares ya están asegurados en nuestra lista. 📝\n\n¡Ahora solo queda preparar el outfit y las ganas de celebrar! 💃🕺\n\nNos vemos muy pronto.`,
-    en: `*All set, {name}!* ✅\n\nWe have correctly received your confirmation and that of your guests. Your spots are secured on our list. 📝\n\nNow just get your outfit and party mood ready! 💃🕺\n\nSee you very soon.`,
-    ro: `*Totul este pregătit, {name}!* ✅\n\nAm primit confirmarea ta și a însoțitorilor tăi. Locurile voastre sunt asigurate în lista noastră. 📝\n\nAcum rămâne doar să vă pregătiți ținutele și cheful de petrecere! 💃🕺\n\nNe vedem foarte curând.`
-  }
+// Emojis generados en runtime para evitar problemas de encoding
+const E = {
+  wave: String.fromCodePoint(0x1F44B),    // 👋
+  ring: String.fromCodePoint(0x1F48D),    // 💍
+  point: String.fromCodePoint(0x1F447),   // 👇
+  clock: String.fromCodePoint(0x23F3),    // ⏳
+  plate: String.fromCodePoint(0x1F37D),   // 🍽
+  relief: String.fromCodePoint(0x1F60C),  // 😌
+  one: '1' + String.fromCodePoint(0xFE0F, 0x20E3), // 1️⃣
+  two: '2' + String.fromCodePoint(0xFE0F, 0x20E3), // 2️⃣
+  memo: String.fromCodePoint(0x1F4DD),    // 📝
+  check: String.fromCodePoint(0x2705),    // ✅
+  dance: String.fromCodePoint(0x1F483),   // 💃
+  man: String.fromCodePoint(0x1F57A),     // 🕺
 };
 
-
-
-
+const WHATSAPP_TEMPLATES = {
+  invite: {
+    es: `*¡Hola {name}!* ${E.wave}\n\nQueremos celebrar este gran día contigo y tu familia. ${E.ring}\n\nEsta es una *invitación grupal*. Hemos preparado una App especial donde podrás confirmar tu asistencia y registrar a los acompañantes de tu grupo familiar fácilmente.\n\n${E.point} *Gestiona la lista de tu familia aquí:*\n{link}\n\n¡Esperamos contar con todos!`,
+    en: `*Hi {name}!* ${E.wave}\n\nWe want to celebrate this big day with you and your family. ${E.ring}\n\nThis is a *group invitation*. We have prepared a special App where you can easily RSVP and register your family group guests.\n\n${E.point} *Manage your family list here:*\n{link}\n\nWe hope to see you all!`,
+    ro: `*Salut {name}!* ${E.wave}\n\nVrem să sărbătorim această zi mare alături de tine și familia ta. ${E.ring}\n\nAceasta este o *invitație de grup*. Am pregătit o aplicație specială unde poți confirma prezența și înregistra însoțitorii grupului tău familial foarte ușor.\n\n${E.point} *Gestionează lista familiei tale aici:*\n{link}\n\nSperăm să fiți cu toții alături de noi!`
+  },
+  reminder: {
+    es: `*¡Hola de nuevo, {name}!* ${E.clock}\n\nYa estamos en la recta final y afinando los últimos detalles para la boda.\n\nPara tener todo listo (y no dejar a nadie de tu grupo sin plato ${E.plate}), necesitamos que nos confirmes si podrán acompañarnos.\n\nPor favor, finaliza tu registro y el de tu familia hoy mismo aquí:\n${E.point}\n{link}\n\n¡Gracias por ayudarnos a organizarnos!`,
+    en: `*Hi again, {name}!* ${E.clock}\n\nWe are in the final stretch and finalizing the details for the wedding.\n\nTo have everything ready (and not leave anyone in your group without a meal ${E.plate}), we need you to confirm if you can join us.\n\nPlease finalize your and your family's registration today here:\n${E.point}\n{link}\n\nThanks for helping us organize!`,
+    ro: `*Salut din nou, {name}!* ${E.clock}\n\nSuntem pe ultima sută de metri și punem la punct ultimele detalii pentru nuntă.\n\nPentru a avea totul pregătit (și a nu lăsa pe nimeni din grupul tău fără meniu ${E.plate}), avem nevoie să ne confirmi dacă ne puteți fi alături.\n\nTe rugăm să finalizezi înregistrarea ta și a familiei tale chiar azi aici:\n${E.point}\n{link}\n\nVă mulțumim pentru ajutor!`
+  },
+  rescue: {
+    es: `*¡Entendido, {name}!* No te preocupes. ${E.relief}\n\nA veces la tecnología se pone difícil. Si la App no te carga, hagámoslo de forma manual por aquí.\n\nPor favor, respóndeme este mensaje con:\n${E.one} Cuántos adultos asistirán (contigo).\n${E.two} Nombres de tus acompañantes.\n\nYo me encargo de subirlos al sistema personalmente. ${E.memo}`,
+    en: `*Understood, {name}!* Don't worry. ${E.relief}\n\nSometimes technology gets tricky. If the App doesn't load, let's do it manually here.\n\nPlease reply to this message with:\n${E.one} How many adults will attend (including you).\n${E.two} Names of your guests.\n\nI will personally upload them to the system. ${E.memo}`,
+    ro: `*Am înțeles, {name}!* Nu-ți face griji. ${E.relief}\n\nUneori tehnologia ne dă bătăi de cap. Dacă aplicația nu se încarcă, hai să rezolvăm manual aici.\n\nTe rog răspunde-mi la acest mesaj cu:\n${E.one} Câți adulți vor participa (inclusiv tu).\n${E.two} Numele însoțitorilor tăi.\n\nMă ocup eu personal să îi introduc în sistem. ${E.memo}`
+  },
+  success: {
+    es: `*¡Todo listo, {name}!* ${E.check}\n\nHemos recibido correctamente tu confirmación y la de tus acompañantes. Sus lugares ya están asegurados en nuestra lista. ${E.memo}\n\n¡Ahora solo queda preparar el outfit y las ganas de celebrar! ${E.dance}${E.man}\n\nNos vemos muy pronto.`,
+    en: `*All set, {name}!* ${E.check}\n\nWe have correctly received your confirmation and that of your guests. Your spots are secured on our list. ${E.memo}\n\nNow just get your outfit and party mood ready! ${E.dance}${E.man}\n\nSee you very soon.`,
+    ro: `*Totul este pregătit, {name}!* ${E.check}\n\nAm primit confirmarea ta și a însoțitorilor tăi. Locurile voastre sunt asigurate în lista noastră. ${E.memo}\n\nAcum rămâne doar să vă pregătiți ținutele și cheful de petrecere! ${E.dance}${E.man}\n\nNe vedem foarte curând.`
+  }
+};
 
 type WhatsAppMsgType = 'invite' | 'reminder' | 'rescue' | 'success';
 
