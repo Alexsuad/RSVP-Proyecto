@@ -17,23 +17,24 @@ interface Guest extends ServiceGuest {}
 // WhatsApp Integration Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Emojis generados en runtime para evitar problemas de encoding
+// Emojis Pre-URL-Encoded (Solución Nuclear para evitar corrupción de encoding)
 const E = {
-  wave: String.fromCodePoint(0x1F44B),    // 👋
-  ring: String.fromCodePoint(0x1F48D),    // 💍
-  point: String.fromCodePoint(0x1F447),   // 👇
-  clock: String.fromCodePoint(0x23F3),    // ⏳
-  plate: String.fromCodePoint(0x1F37D),   // 🍽
-  relief: String.fromCodePoint(0x1F60C),  // 😌
-  one: '1' + String.fromCodePoint(0xFE0F, 0x20E3), // 1️⃣
-  two: '2' + String.fromCodePoint(0xFE0F, 0x20E3), // 2️⃣
-  memo: String.fromCodePoint(0x1F4DD),    // 📝
-  check: String.fromCodePoint(0x2705),    // ✅
-  dance: String.fromCodePoint(0x1F483),   // 💃
-  man: String.fromCodePoint(0x1F57A),     // 🕺
+  wave: '%F0%9F%91%8B',    // 👋
+  ring: '%F0%9F%92%8D',    // 💍
+  point: '%F0%9F%91%87',   // 👇
+  clock: '%E2%8F%B3',      // ⏳
+  plate: '%F0%9F%8D%BD',   // 🍽
+  relief: '%F0%9F%98%8C',  // 😌
+  one: '1%EF%B8%8F%E2%83%A3', // 1️⃣
+  two: '2%EF%B8%8F%E2%83%A3', // 2️⃣
+  memo: '%F0%9F%93%9D',    // 📝
+  check: '%E2%9C%85',      // ✅
+  dance: '%F0%9F%92%83',   // 💃
+  man: '%F0%9F%95%BA',     // 🕺
 };
 
 const WHATSAPP_TEMPLATES = {
+  // ... (Estructura idéntica, referencia E.wave, E.ring, etc.)
   invite: {
     es: `*¡Hola {name}!* ${E.wave}\n\nQueremos celebrar este gran día contigo y tu familia. ${E.ring}\n\nEsta es una *invitación grupal*. Hemos preparado una App especial donde podrás confirmar tu asistencia y registrar a los acompañantes de tu grupo familiar fácilmente.\n\n${E.point} *Gestiona la lista de tu familia aquí:*\n{link}\n\n¡Esperamos contar con todos!`,
     en: `*Hi {name}!* ${E.wave}\n\nWe want to celebrate this big day with you and your family. ${E.ring}\n\nThis is a *group invitation*. We have prepared a special App where you can easily RSVP and register your family group guests.\n\n${E.point} *Manage your family list here:*\n{link}\n\nWe hope to see you all!`,
@@ -63,12 +64,9 @@ const getWhatsAppUrl = (guest: Guest, type: WhatsAppMsgType = 'invite'): string 
     const baseUrl = (import.meta as any).env.VITE_APP_URL || 'https://rsvp.suarezsiicawedding.com';
     
     // 2. Language selection (default 'es')
-    // Moved up so we can use it in the link
     const lang = (guest.language || 'es') as 'es'|'en'|'ro';
     
     // 3. Magic Link construction
-    // FIXED: Point to /app/login.html and include lang param to match email links
-    // NEW: Include phone param for auto-fill (Epica F)
     const code = guest.guest_code || '';
     const phone = guest.phone || '';
     const phoneClean = phone.replace(/[\s\-\(\)]/g, '');
@@ -78,14 +76,31 @@ const getWhatsAppUrl = (guest: Guest, type: WhatsAppMsgType = 'invite'): string 
     const msgTypeTemplates = WHATSAPP_TEMPLATES[type] || WHATSAPP_TEMPLATES['invite'];
     const template = msgTypeTemplates[lang] || msgTypeTemplates['es'];
     
-    // 5. Text replacement
-    // Note: If {link} is not present in the template (e.g. rescue/success), this replace call does nothing, which is correct.
+    // 5. Text replacement and Encoding
     const name = guest.full_name || 'Invitado';
-    const message = template.replace('{name}', name).replace('{link}', link);
     
-    // 6. Encoding
-    const messageEncoded = encodeURIComponent(message);
+    // IMPORTANT: We construct the raw message first with placeholders
+    let messageRaw = template
+        .replace('{name}', name)
+        .replace('{link}', link);
+
+    // 6. Manual Encoding Strategy
+    // encodeURIComponent encodes everything, including our pre-encoded emojis (turning % into %25).
+    // We need to encode the dynamic parts (name, link, text) BUT preserve our custom emojis.
     
+    // Step A: Encode the full string standardly. This will encode our emojis incorrectly (e.g. %F0 becomes %25F0)
+    let messageEncoded = encodeURIComponent(messageRaw);
+
+    // Step B: Repair the double-encoded emojis. We replace %25 back to % for our specific emoji patterns.
+    // This is safe because normal text won't have these specific sequences unless user typed them explicitly.
+    Object.values(E).forEach(emojiCode => {
+        // emojiCode is like "%F0%9F..."
+        // encodeURIComponent(emojiCode) would be "%25F0%259F..."
+        // We want to revert that specific sequence back to the original emojiCode
+        const doubleEncoded = encodeURIComponent(emojiCode);
+        messageEncoded = messageEncoded.split(doubleEncoded).join(emojiCode);
+    });
+
     return `https://wa.me/${phoneClean}?text=${messageEncoded}`;
 };
 
