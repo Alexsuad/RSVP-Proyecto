@@ -354,7 +354,7 @@ def _send_html_via_gmail(
 def _send_html_via_brevo_api(
     to_email: str, subject: str, html_body: str, text_fallback: str, to_name: str = ""
 ) -> bool:
-    """Envía un correo usando la API HTTPS de Brevo, incluyendo nombre y Reply-To."""
+    """Envía un correo usando la API HTTPS de Brevo, incluyendo nombre, Reply-To y CC al admin."""
     api_key = os.getenv("BREVO_API_KEY")
     from_email = os.getenv("EMAIL_FROM")
     sender_name = os.getenv("EMAIL_SENDER_NAME")
@@ -370,6 +370,12 @@ def _send_html_via_brevo_api(
     reply_to = os.getenv("EMAIL_REPLY_TO", "").strip()
     if reply_to:
         payload["replyTo"] = {"email": reply_to, "name": sender_name}
+
+    # CC al administrador si está configurado
+    admin_email = os.getenv("ADMIN_NOTIFY_EMAIL", "").strip()
+    if admin_email:
+        payload["cc"] = [{"email": admin_email}]
+        logger.debug(f"Brevo API → CC agregado: {admin_email}")
 
     headers = {
         "api-key": api_key,
