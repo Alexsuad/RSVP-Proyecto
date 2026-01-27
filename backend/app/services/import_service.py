@@ -169,6 +169,7 @@ def _build_db_indexes(db: Session) -> Tuple[Dict[str, int], Dict[str, int], Dict
 
 def _validate_and_plan(
     rows: List[Dict[str, str]],
+    db_code_to_id: Dict[str, int],
     db_phone_to_id: Dict[str, int],
     db_email_to_id: Dict[str, int],
 ) -> Tuple[List[Dict[str, Any]], import_report]:
@@ -547,9 +548,9 @@ def import_guests_from_csv(
     rows = _read_csv_rows(csv_text)
 
     # Index actual de BD para validar
-    db_phone_to_id, db_email_to_id = _build_db_indexes(db)
+    db_code_to_id, db_phone_to_id, db_email_to_id = _build_db_indexes(db)
 
-    plan, base_report = _validate_and_plan(rows, db_phone_to_id, db_email_to_id)
+    plan, base_report = _validate_and_plan(rows, db_code_to_id, db_phone_to_id, db_email_to_id)
     base_report.mode = mode.value
     base_report.dry_run = dry_run
     
