@@ -465,6 +465,7 @@ def process_rsvp_submission(
 
     # 3b. Notificaciones (Telegram + Email Admin)
     # ---------------------------------------------------------------
+    logger.info(f"[RSVP_NOTIFY] Iniciando notificaciones para guest_id={guest.id}")
     try:
         # Preparamos datos comunes
         guest_name = updated_guest.full_name or "Desconocido"
@@ -481,9 +482,12 @@ def process_rsvp_submission(
             f"🍽️ *Grupo:* {count_pax} personas\n"
             f"📞 *Tel:* {phone_txt}"
         )
+        logger.info(f"[RSVP_NOTIFY] Enviando Telegram para guest_id={guest.id}")
         telegram.send_telegram_notification(tg_msg)
+        logger.info(f"[RSVP_NOTIFY] Telegram enviado para guest_id={guest.id}")
 
         # --- Email Admin ---
+        logger.info(f"[RSVP_NOTIFY] Enviando Admin Email para guest_id={guest.id}")
         mailer.send_admin_notification(
             guest_name=guest_name,
             attending=is_attending,
@@ -491,6 +495,7 @@ def process_rsvp_submission(
             guest_email=updated_guest.email,
             guest_phone=updated_guest.phone
         )
+        logger.info(f"[RSVP_NOTIFY] Admin Email enviado para guest_id={guest.id}")
     except Exception as e:
         logger.error(f"Error enviando notificaciones admin/telegram: {e}") 
 

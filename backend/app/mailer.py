@@ -937,9 +937,10 @@ def send_admin_notification(
     Envía una notificación por correo al administrador sobre un nuevo RSVP.
     """
     admin_email = os.getenv("ADMIN_NOTIFY_EMAIL")
+    logger.info(f"[ADMIN_NOTIFY] Llamado con guest_name={guest_name}, admin_email={admin_email}")
     if not admin_email:
         # Fallback a un log si no hay email configurado, o ignorar silenciosamente
-        logger.debug("No ADMIN_NOTIFY_EMAIL configured. Skipping admin alert.")
+        logger.warning("No ADMIN_NOTIFY_EMAIL configured. Skipping admin alert.")
         return
 
     status_icon = "✅" if attending else "❌"
