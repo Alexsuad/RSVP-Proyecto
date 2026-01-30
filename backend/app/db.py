@@ -65,7 +65,10 @@ else:
     logger.info("DB in use → PostgreSQL (o no-SQLite)")
     engine = create_engine(
         DATABASE_URL,
-        pool_pre_ping=True
+        pool_pre_ping=True,
+        pool_recycle=300,  # Reciclar conexiones cada 5 minutos para evitar timeouts del servidor
+        pool_size=5,       # Mantener 5 conexiones abiertas
+        max_overflow=10    # Permitir picos de hasta 15 conexiones totales
     )
 
 # --- Fábrica de Sesiones y Base Declarativa ---
