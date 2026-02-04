@@ -66,9 +66,15 @@ else:
     engine = create_engine(
         DATABASE_URL,
         pool_pre_ping=True,
-        pool_recycle=300,  # Reciclar conexiones cada 5 minutos para evitar timeouts del servidor
+        pool_recycle=120,  # Reducido de 300 a 120 para mayor frescura
         pool_size=5,       # Mantener 5 conexiones abiertas
-        max_overflow=10    # Permitir picos de hasta 15 conexiones totales
+        max_overflow=10,   # Permitir picos de hasta 15 conexiones totales
+        connect_args={
+            "keepalives": 1,
+            "keepalives_idle": 30,
+            "keepalives_interval": 10,
+            "keepalives_count": 5,
+        }
     )
 
 # --- Fábrica de Sesiones y Base Declarativa ---

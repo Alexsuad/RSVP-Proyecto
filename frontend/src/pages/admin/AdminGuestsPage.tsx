@@ -425,20 +425,24 @@ const AdminGuestsPage: React.FC = () => {
             }
             setIsEditorOpen(false);
             fetchGuests();
+            alert("Invitado guardado correctamente.");
         } catch (err: any) {
             console.error("Error guardando invitado:", err);
             
             // UX Mejorada: Mostrar mensaje específico del backend si existe
-            const backendMsg = err.response?.data?.detail;
-            const status = err.response?.status || err.status;
+            const detail = err.response?.data?.detail;
+            let msg = "No se pudo guardar. Revisa los datos o intenta de nuevo.";
             
-            if (backendMsg) {
-                alert(`Error: ${backendMsg}`);
-            } else if (status === 409) {
-                alert("Error: El email o teléfono ya está en uso por otro invitado.");
-            } else {
-                alert("No se pudo guardar. Revisa los datos o intenta de nuevo.");
+            if (Array.isArray(detail)) {
+                // Si es un array de erroes de validación Pydantic
+                msg = "Corrige los siguientes errores:\n" + detail.map((e: any) => `- ${e.msg}`).join('\n');
+            } else if (typeof detail === 'string') {
+                msg = `Error: ${detail}`;
+            } else if (err.response?.status === 409) {
+                msg = "Error: El email o teléfono ya está en uso por otro invitado.";
             }
+            
+            alert(msg);
         }
     };
 
@@ -661,19 +665,19 @@ const AdminGuestsPage: React.FC = () => {
                         
                         <div className="admin-modal-body">
                             <form id="editor-form" onSubmit={handleSubmitEditor} className="space-y-4">
-                                <FormField label="Nombre Completo" id="ed-name" value={editorData.full_name || ''} 
+                                <FormField label="Nombre Completo *" id="ed-name" value={editorData.full_name || ''} 
                                     onChange={(e) => setEditorData({...editorData, full_name: e.target.value})} required />
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                     <FormField label="Email" id="ed-email" type="email" value={editorData.email || ''} 
                                         onChange={(e) => setEditorData({...editorData, email: e.target.value})} />
-                                    <FormField label="Teléfono" id="ed-phone" type="tel" value={editorData.phone || ''} 
+                                    <FormField label="Teléfono *" id="ed-phone" type="tel" value={editorData.phone || ''} 
                                         onChange={(e) => setEditorData({...editorData, phone: e.target.value})} />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-bold mb-1">Idioma</label>
+                                        <label className="block text-sm font-bold mb-1">Idioma *</label>
                                         <select value={editorData.language || 'es'} onChange={(e) => setEditorData({...editorData, language: e.target.value})} className="w-full p-2 border rounded">
                                             <option value="es">Español</option>
                                             <option value="en">Inglés</option>
@@ -697,10 +701,11 @@ const AdminGuestsPage: React.FC = () => {
                                 </div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <FormField label="Máx. Acomp" id="ed-max" type="number" min={0} value={editorData.max_accomp || 0} 
+                                    <FormField label="Máx. Acomp *" id="ed-max" type="number" min={0} value={editorData.max_accomp || 0} 
                                         onChange={(e) => setEditorData({...editorData, max_accomp: parseInt(e.target.value) || 0})} />
                                     
                                     <div>
+                                        <label className="block text-sm font-bold mb-1">Tipo Invitación *</label>
                                         <select value={editorData.invite_type || 'full'} onChange={(e) => setEditorData({...editorData, invite_type: e.target.value})} className="w-full p-2 border rounded">
                                             <option value="full">Ceremonia y Recepción</option>
                                             <option value="party">Solo Recepción</option>
